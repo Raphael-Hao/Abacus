@@ -8,7 +8,7 @@
  * Author: raphael hao
  * Email: raphaelhao@outlook.com
  * --------
- * Last Modified: Monday, September 14th 2020, 2:07:59 pm
+ * Last Modified: Monday, September 14th 2020, 4:36:37 pm
  * Modified By: raphael hao
  */
 #pragma once
@@ -272,11 +272,11 @@ class CuDNNConvolutionOp {
           result.memory <= workspace_byte && !algo_exclusion) {
         // LOG(INFO) << "CUDNN Convolution Forward Algorithm Selected: "
         //  << CuDNNAlgo<AlgoType>::AlgoInfo(result.algo);
-        algo->Set(CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED, algo_is_tensor_core);
+        // algo->Set(CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED, algo_is_tensor_core);
         // algo->Set(CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD, algo_is_tensor_core);
         // algo->Set(CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM, algo_is_tensor_core);
         // algo->Set(, algo_is_tensor_core);
-        // algo->Set(result.algo, algo_is_tensor_core);
+        algo->Set(result.algo, algo_is_tensor_core);
         return;
       }
     }

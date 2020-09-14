@@ -8,7 +8,7 @@
  * Author: raphael hao
  * Email: raphaelhao@outlook.com
  * --------
- * Last Modified: Monday, September 14th 2020, 1:43:24 pm
+ * Last Modified: Monday, September 14th 2020, 5:11:59 pm
  * Modified By: raphael hao
  */
 
@@ -75,11 +75,6 @@ std::tuple<int, int, param_vec> LoadParamFile(std::string filename) {
      << " after Deduplication: " << conv_candi_nodup.size();
   kwargs["conv"] = conv_candi_nodup;
 
-  // delete fio;
-  std::unique_ptr<dmlc::Stream> fo(dmlc::Stream::Create(("nodup_" + filename).c_str(), "w"));
-  dmlc::ostream os(fo.get());
-  dmlc::JSONWriter writer(&os);
-  writer.Write(kwargs);
   return std::make_tuple(layer_cnt, max_bs, conv_candi_nodup);
 }
 
@@ -95,12 +90,10 @@ int main(int argc, char const *argv[]) {
     ConvolutionParam param;
     param.Init(*it);
     for (auto i = 2; i <= max_bs; i++) {
-      profiler.Init(i, param);
+      profiler.Init(i, param, true);
       profiler.Profile();
       profiler.Clear();
     }
   }
-  profiler.DumpResult();
-
   return 0;
 }
