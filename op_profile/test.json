@@ -1,0 +1,45 @@
+{
+  "layer_cnt": [
+    "Int",
+    50
+  ],
+  "max_batchsize": [
+    "Int",
+    128
+  ],
+  "conv": [
+    "ParamVec",
+    [
+      {
+        "input_shape": "(32, 208, 208)",
+        "kernel": "(3, 3)",
+        "output_shape": "(64, 208, 208)",
+        "pad": "(1, 1)",
+        "stride": "(1, 1)",
+        "dilate": "(1, 1)",
+        "num_group": "1",
+        "num_filter": "1"
+      },
+      {
+        "input_shape": "(256, 26, 26)",
+        "kernel": "(3, 3)",
+        "output_shape": "(512, 26, 26)",
+        "pad": "(1, 1)",
+        "stride": "(1, 1)",
+        "dilate": "(1, 1)",
+        "num_group": "1",
+        "num_filter": "1"
+      },
+      {
+        "input_shape": "(3, 224, 224)",
+        "kernel": "(7, 7)",
+        "output_shape": "(64, 112, 112)",
+        "pad": "(3, 3)",
+        "stride": "(2,2)",
+        "dilate": "(1, 1)",
+        "num_group": "1",
+        "num_filter": "1"
+      }
+    ]
+  ]
+}

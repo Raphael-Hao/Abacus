@@ -1,0 +1,39 @@
+{
+    BasedOnStyle: Google,
+    ColumnLimit: 100,
+
+    Language: Cpp,
+    Standard: Cpp11,
+
+    AccessModifierOffset: -1,
+
+    AlignAfterOpenBracket: Align,
+    AlignEscapedNewlines: Right,
+    AlignTrailingComments: true,
+
+    AllowAllArgumentsOnNextLine: false,
+    AllowAllParametersOfDeclarationOnNextLine: false,
+    AllowAllConstructorInitializersOnNextLine: false,
+    AllowShortBlocksOnASingleLine: Never,
+    AllowShortCaseLabelsOnASingleLine: false,
+    AllowShortLoopsOnASingleLine: false,
+    AllowShortFunctionsOnASingleLine: Empty,
+    AllowShortIfStatementsOnASingleLine: Never,
+    AllowShortLambdasOnASingleLine: Empty,
+
+    BreakBeforeTernaryOperators: false,
+    BinPackArguments: false,
+    BinPackParameters: false,
+    BreakConstructorInitializers: AfterColon,
+    BreakInheritanceList: AfterColon,
+
+    IncludeBlocks: Regroup,
+    BreakBeforeBraces: Custom,
+    BraceWrapping:
+        {
+            AfterEnum: false,
+            AfterStruct: false,
+            SplitEmptyFunction: false,
+            # BeforeLambdaBody: false,
+        },
+}
