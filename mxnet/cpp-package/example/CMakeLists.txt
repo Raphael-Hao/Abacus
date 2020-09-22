@@ -70,3 +70,7 @@ add_dependencies(mlp_gpu ${CPPEX_DEPS})
 add_executable(resnet resnet.cpp ${CPP_PACKAGE_HEADERS})
 target_link_libraries(resnet ${CPP_EXAMPLE_LIBS})
 add_dependencies(resnet ${CPPEX_DEPS})
+
+add_executable(imagenet_inference imagenet_inference.cpp ${CPP_PACKAGE_HEADERS})
+target_link_libraries(imagenet_inference ${CPP_EXAMPLE_LIBS})
+add_dependencies(imagenet_inference ${CPPEX_DEPS})
