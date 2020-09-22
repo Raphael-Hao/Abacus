@@ -140,6 +140,7 @@ staticdeps/
 tmp/
 build/
 lib/
+!3rdparty/openmp/runtime/tools/lib
 bin/
 model/
 
