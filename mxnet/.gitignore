@@ -84,7 +84,6 @@ R-package/R/mxnet_generated.R
 *.zip
 *ubyte
 *.bin
-*.txt
 !en_US.txt
 !CMakeLists.txt
 
