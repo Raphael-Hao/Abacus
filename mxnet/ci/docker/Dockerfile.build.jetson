@@ -1,0 +1,82 @@
+# -*- mode: dockerfile -*-
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+# Dockerfile to build libmxnet.so, and a python wheel for the Jetson TX1/TX2
+# This script assumes /work/mxnet exists and contains the mxnet code you wish to compile and
+# that /work/build exists and is the target for your output.
+
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04
+
+ENV ARCH=aarch64 \
+    HOSTCC=gcc \
+    TARGET=ARMV8
+
+WORKDIR /usr/local
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    build-essential \
+    ninja-build \
+    git \
+    curl \
+    zip \
+    unzip \
+    python3 \
+    python3-pip \
+    awscli \
+    crossbuild-essential-arm64 \
+ && rm -rf /var/lib/apt/lists/*
+
+# cmake on Ubuntu 18.04 is too old
+RUN python3 -m pip install cmake
+
+# ccache on Ubuntu 18.04 is too old to support Cuda correctly
+COPY install/deb_ubuntu_ccache.sh /work/
+RUN /work/deb_ubuntu_ccache.sh
+
+COPY toolchains/aarch64-linux-gnu-toolchain.cmake /usr
+ENV CMAKE_TOOLCHAIN_FILE=/usr/aarch64-linux-gnu-toolchain.cmake
+
+RUN git clone --recursive -b v0.3.9 https://github.com/xianyi/OpenBLAS.git && \
+    cd /usr/local/OpenBLAS && \
+    make NOFORTRAN=1 CC=aarch64-linux-gnu-gcc && \
+    make PREFIX=/usr/aarch64-linux-gnu install && \
+    cd /usr/local && \
+    rm -rf OpenBLAS
+
+# Install aarch64 cross depedencies based on Jetpack 4.3
+# Manually downloaded using SDK Manager tool and placed in a private S3 bucket.
+# We're not allowed to redistribute these files and there is no public version.
+RUN aws s3 cp s3://mxnet-ci-prod-private-slave-data/nvidia/sdkm_downloads/cuda-repo-ubuntu1804-10-0-local-10.0.326-410.108_1.0-1_amd64.deb . && \
+    dpkg -i cuda-repo-ubuntu1804-10-0-local-10.0.326-410.108_1.0-1_amd64.deb && \
+    rm cuda-repo-ubuntu1804-10-0-local-10.0.326-410.108_1.0-1_amd64.deb && \
+    apt-key add /var/cuda-repo-10-0-local-10.0.326-410.108/7fa2af80.pub && \
+    aws s3 cp s3://mxnet-ci-prod-private-slave-data/nvidia/sdkm_downloads/cuda-repo-cross-aarch64-10-0-local-10.0.326_1.0-1_all.deb . && \
+    dpkg -i cuda-repo-cross-aarch64-10-0-local-10.0.326_1.0-1_all.deb && \
+    rm cuda-repo-cross-aarch64-10-0-local-10.0.326_1.0-1_all.deb && \
+    apt-get update && \
+    apt-get install -y -f && \
+    apt-get install -y cuda-cross-aarch64 cuda-cross-aarch64-10-0 && \
+    rm -rf /var/lib/apt/lists/*
+
+ARG USER_ID=0
+ARG GROUP_ID=0
+COPY install/ubuntu_adduser.sh /work/
+RUN /work/ubuntu_adduser.sh
+
+COPY runtime_functions.sh /work/
+WORKDIR /work/mxnet
