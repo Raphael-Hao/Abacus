@@ -18,7 +18,6 @@ if(USE_CPP_PACKAGE)
 
   if(BUILD_CPP_EXAMPLES)
     add_subdirectory(example)
-    add_subdirectory(example/inference)
   endif()
 
   install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
