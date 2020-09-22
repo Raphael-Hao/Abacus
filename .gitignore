@@ -5,4 +5,3 @@ Archive.zip
 .mypy_cache
 core
 !core/
-merge-batch/results.json
