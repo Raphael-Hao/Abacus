@@ -64,7 +64,6 @@ __pycache__
 *.json
 *.d
 cmake-build*
-data
 model
 recommonmark
 
