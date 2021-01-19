@@ -5,7 +5,7 @@
 from torch.multiprocessing import Process
 import torch
 from torch.cuda.streams import Stream
-from lego.network.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from lego.network.resnet_splited import resnet18, resnet34, resnet50, resnet101, resnet152
 from lego.utils import timestamp
 
 model_list = {
