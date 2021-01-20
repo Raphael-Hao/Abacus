@@ -5,3 +5,5 @@ Archive.zip
 .mypy_cache
 core
 !core/
+__pycache__
+.pyc
