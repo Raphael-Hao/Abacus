@@ -9,6 +9,8 @@ import os
 from torch.cuda.streams import Stream
 
 from lego.network.resnet_splited import resnet50, resnet101, resnet152
+from lego.network.inception_splited import inception_v3
+from lego.network.vgg_splited import vgg16, vgg19
 
 # from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from lego.utils import timestamp
@@ -17,12 +19,18 @@ model_list = {
     "resnet50": resnet50,
     "resnet101": resnet101,
     "resnet152": resnet152,
+    "inception_v3": inception_v3,
+    "vgg16": vgg16,
+    "vgg19": vgg19,
 }
 
 model_len = {
     "resnet50": 18,
     "resnet101": 35,
     "resnet152": 52,
+    "inception_v3": 14,
+    "vgg16": 19,
+    "vgg19": 22,
 }
 
 
@@ -47,11 +55,17 @@ class ModelProc(Process):
         torch.device("cuda")
         torch.backends.cudnn.enabled = True
         # torch.backends.cudnn.benchmark = True
-        self._inputs = {
-            k: torch.rand(k, 3, 224, 224).half().cuda()
-            for k in self._supported_batchsize
-        }
-        self._model = self._model_func().half().cuda()
+        if self._model_name == "inception_v3":
+            self._inputs = {
+                k: torch.rand(k, 3, 299, 299).half().cuda()
+                for k in self._supported_batchsize
+            }
+        else:
+            self._inputs = {
+                k: torch.rand(k, 3, 224, 224).half().cuda()
+                for k in self._supported_batchsize
+            }
+        self._model = self._model_func().half().cuda().eval()
         self._submodules = self._model.get_submodules()
         self._total_module = len(self._submodules)
         self._stream = Stream(0)
@@ -62,7 +76,6 @@ class ModelProc(Process):
                 self._model(self._inputs[k])
         torch.cuda.synchronize()
         self._barrier.wait()
-        i = 0
 
         while True:
             model_name, action, start, end, bs = self._pipe.recv()
@@ -70,13 +83,12 @@ class ModelProc(Process):
             if action == "prepare":
                 submodel = nn.Sequential(*self._submodules[:start])
                 self._inter_input = submodel(self._inputs[bs])
+                torch.cuda.synchronize()
                 self._submodel = nn.Sequential(*self._submodules[start:end])
                 self._barrier.wait()
             elif action == "forward":
                 self._submodel(self._inter_input)
                 torch.cuda.synchronize()
-                # self.event_.record(self.stream_)
-                # self.event_.synchronize()
                 self._barrier.wait()
             elif action == "terminate":
                 break
