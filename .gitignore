@@ -7,3 +7,4 @@ core
 !core/
 __pycache__
 .pyc
+.csv

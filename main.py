@@ -33,16 +33,28 @@ def make_record(model_config, median, mean, var):
     return record
 
 
+def gen_model_combinations(models, combination_len):
+    id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
+    id_combinations = set(itertools.combinations(id_combinations, combination_len))
+    model_combinations = []
+    for id_comb in id_combinations:
+        model_comb = []
+        for id in id_comb:
+            model_comb.append(models[id])
+        model_combinations.append(model_comb)
+    return model_combinations
+
+
 if __name__ == "__main__":
     mp.set_start_method("spawn")
     total_models = 2
     supported_batchsize = [1, 2, 4, 8, 16]
-    total_test = 5000
+    total_test = 200
     test_loop = 100
 
     barrier = mp.Barrier(total_models + 1)
 
-    profiled_model_list = [
+    all_profiled_models = [
         "resnet50",
         "resnet101",
         "resnet152",
@@ -51,11 +63,9 @@ if __name__ == "__main__":
         "vgg19",
     ]
 
-    profiled_model_lists = [profiled_model_list for _ in range(total_models)]
-
-    for model_permutation in itertools.product(*profiled_model_lists):
-        profile_filename = model_permutation[0]
-        for model_name in model_permutation[1:]:
+    for model_combination in gen_model_combinations(all_profiled_models, total_models):
+        profile_filename = model_combination[0]
+        for model_name in model_combination[1:]:
             profile_filename = profile_filename + "_" + model_name
         profile_filename += ".csv"
         profile_file = open(profile_filename, "w")
@@ -68,7 +78,7 @@ if __name__ == "__main__":
         wr.writerow(profile_head)
 
         worker_list = []
-        for model_name in model_permutation:
+        for model_name in model_combination:
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ModelProc(
                 model_name, supported_batchsize, pipe_child, barrier
@@ -77,14 +87,14 @@ if __name__ == "__main__":
             worker_list.append((model_worker, pipe_parent))
         barrier.wait()
 
-        supported_batchsizes = [supported_batchsize for _ in range(total_models)]
-        for bs_it in itertools.product(*supported_batchsizes):
+        for bs_it in itertools.product(supported_batchsize,repeat=2):
             for test_i in range(total_test):
                 model_config = []
-
                 for i in range(total_models):
-                    start, end = gen_partition(model_len[model_permutation[i]])
-                    model_config.append([model_permutation[i], start, end, bs_it[i]])
+                    start, end = gen_partition(
+                        model_len[model_combination[i]]
+                    )
+                    model_config.append([model_combination[i], start, end, bs_it[i]])
                     model_worker, model_pipe = worker_list[i]
                     model_pipe.send(
                         (
