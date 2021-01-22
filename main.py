@@ -33,9 +33,11 @@ def make_record(model_config, median, mean, var):
     return record
 
 
-def gen_model_combinations(models, combination_len):
+def gen_model_combinations(models, combination_len, profiled_combinations=None):
     id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
     id_combinations = set(itertools.combinations(id_combinations, combination_len))
+    for profiled in profiled_combinations:
+        id_combinations.remove(profiled)
     model_combinations = []
     for id_comb in id_combinations:
         model_comb = []
@@ -55,20 +57,22 @@ if __name__ == "__main__":
     barrier = mp.Barrier(total_models + 1)
 
     all_profiled_models = [
-        "resnet50",
-        "resnet101",
-        "resnet152",
-        "inception_v3",
-        "vgg16",
-        "vgg19",
+        "resnet50",  # 0
+        "resnet101",  # 1
+        "resnet152",  # 2
+        "inception_v3",  # 3
+        "vgg16",  # 4
+        "vgg19",  # 5
     ]
-
-    for model_combination in gen_model_combinations(all_profiled_models, total_models):
+    profiled_combinations = [(3, 3), (0, 3), (0, 2), (1, 2), (2, 5), (0, 0)]
+    for model_combination in gen_model_combinations(
+        all_profiled_models, total_models, profiled_combinations
+    ):
         profile_filename = model_combination[0]
         for model_name in model_combination[1:]:
             profile_filename = profile_filename + "_" + model_name
         profile_filename += ".csv"
-        profile_file = open(profile_filename, "w")
+        profile_file = open(profile_filename, "a+")
         wr = csv.writer(profile_file, dialect="excel")
         profile_head = ["model", "start", "end", "bs"] * total_models + [
             "median",
@@ -87,13 +91,11 @@ if __name__ == "__main__":
             worker_list.append((model_worker, pipe_parent))
         barrier.wait()
 
-        for bs_it in itertools.product(supported_batchsize,repeat=2):
+        for bs_it in itertools.product(supported_batchsize, repeat=2):
             for test_i in range(total_test):
                 model_config = []
                 for i in range(total_models):
-                    start, end = gen_partition(
-                        model_len[model_combination[i]]
-                    )
+                    start, end = gen_partition(model_len[model_combination[i]])
                     model_config.append([model_combination[i], start, end, bs_it[i]])
                     model_worker, model_pipe = worker_list[i]
                     model_pipe.send(
