@@ -3,7 +3,7 @@
 # Author: raphael hao
 
 from lego.worker import ModelProc, model_list, model_len
-from lego.utils import timestamp
+from lego.utils import timestamp,gen_model_combinations
 
 import torch.multiprocessing as mp
 
@@ -31,20 +31,6 @@ def make_record(model_config, median, mean, var):
     record.append(mean)
     record.append(var)
     return record
-
-
-def gen_model_combinations(models, combination_len, profiled_combinations=None):
-    id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
-    id_combinations = set(itertools.combinations(id_combinations, combination_len))
-    for profiled in profiled_combinations:
-        id_combinations.remove(profiled)
-    model_combinations = []
-    for id_comb in id_combinations:
-        model_comb = []
-        for id in id_comb:
-            model_comb.append(models[id])
-        model_combinations.append(model_comb)
-    return model_combinations
 
 
 if __name__ == "__main__":
