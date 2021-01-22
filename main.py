@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
-from lego.worker import ModelProc, model_list, model_len
+from lego.worker import ModelProc, model_len
 from lego.utils import timestamp,gen_model_combinations
 
 import torch.multiprocessing as mp
