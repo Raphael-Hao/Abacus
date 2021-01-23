@@ -43,12 +43,13 @@ if __name__ == "__main__":
     barrier = mp.Barrier(total_models + 1)
 
     all_profiled_models = [
-        "resnet50",  # 0
-        "resnet101",  # 1
-        "resnet152",  # 2
-        "inception_v3",  # 3
-        "vgg16",  # 4
-        "vgg19",  # 5
+        "resnet50",
+        "resnet101",
+        "resnet152",
+        "inception_v3",
+        "vgg16",
+        "vgg19",
+        "bert"
     ]
     profiled_combinations = [(3, 3), (0, 3), (0, 2), (1, 2), (2, 5), (0, 0)]
     for model_combination in gen_model_combinations(
