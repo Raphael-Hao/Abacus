@@ -6,7 +6,8 @@ import argparse
 
 from lego.utils import gen_model_combinations
 
-from lego.train.predictor import MLPPredictor
+from lego.train.predictor import MLPPredictor, LRPredictor
+
 
 
 if __name__ == "__main__":
