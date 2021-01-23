@@ -6,11 +6,13 @@ from torch.multiprocessing import Process
 import torch
 import torch.nn as nn
 import os
+import numpy as np
 from torch.cuda.streams import Stream
 
 from lego.network.resnet_splited import resnet50, resnet101, resnet152
 from lego.network.inception_splited import inception_v3
 from lego.network.vgg_splited import vgg16, vgg19
+from lego.network.bert import BertModel
 
 # from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from lego.utils import timestamp
@@ -22,6 +24,7 @@ model_list = {
     "inception_v3": inception_v3,
     "vgg16": vgg16,
     "vgg19": vgg19,
+    "bert": BertModel,
 }
 
 model_len = {
@@ -31,6 +34,7 @@ model_len = {
     "inception_v3": 14,
     "vgg16": 19,
     "vgg19": 22,
+    "bert": 12,
 }
 
 
@@ -60,14 +64,20 @@ class ModelProc(Process):
                 k: torch.rand(k, 3, 299, 299).half().cuda()
                 for k in self._supported_batchsize
             }
+        elif self._model_name == "bert":
+            self._inputs = {
+                k: torch.LongTensor(np.zeros((k, 10))).cuda()
+                for k in self._supported_batchsize
+            }
         else:
             self._inputs = {
                 k: torch.rand(k, 3, 224, 224).half().cuda()
                 for k in self._supported_batchsize
             }
         self._model = self._model_func().half().cuda().eval()
-        self._submodules = self._model.get_submodules()
-        self._total_module = len(self._submodules)
+        if self._model_name != "bert":
+            self._submodules = self._model.get_submodules()
+            self._total_module = len(self._submodules)
         self._stream = Stream(0)
         self._event = torch.cuda.Event(enable_timing=False)
         timestamp("worker", "warming")
@@ -81,13 +91,19 @@ class ModelProc(Process):
             model_name, action, start, end, bs = self._pipe.recv()
 
             if action == "prepare":
-                submodel = nn.Sequential(*self._submodules[:start])
-                self._inter_input = submodel(self._inputs[bs])
+                if self._model_name == "bert":
+                    self._inter_input = self._model.prepare(self._inputs[bs], start)
+                else:
+                    submodel = nn.Sequential(*self._submodules[:start])
+                    self._inter_input = submodel(self._inputs[bs])
+                    self._submodel = nn.Sequential(*self._submodules[start:end])
                 torch.cuda.synchronize()
-                self._submodel = nn.Sequential(*self._submodules[start:end])
                 self._barrier.wait()
             elif action == "forward":
-                self._submodel(self._inter_input)
+                if self._model_name == "bert":
+                    self._model.run(self._inter_input, start, end)
+                else:
+                    self._submodel(self._inter_input)
                 torch.cuda.synchronize()
                 self._barrier.wait()
             elif action == "terminate":
