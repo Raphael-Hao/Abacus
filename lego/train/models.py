@@ -18,3 +18,12 @@ class MLPregression(nn.Module):
         x = F.relu(self.hidden3(x))
         output = self.predict(x)
         return output[:, 0]
+
+
+class LinearRegression(nn.Module):
+    def __init__(self):
+        super(LinearRegression, self).__init__()
+        self.layer = nn.Linear(14, 1)
+
+    def forward(self, x):
+        return self.layer(x)
