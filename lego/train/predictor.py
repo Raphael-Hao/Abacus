@@ -7,11 +7,18 @@ import torch.nn as nn
 from torch.optim import SGD
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from lego.train.dataloader import load_data
+from lego.train.dataloader import load_data, load_single_file, load_data_for_sklearn
 from lego.train.utils import AverageMeter
 from lego.train.models import MLPregression
+from lego.train.models import LinearRegression
 from tqdm import tqdm
 import math
+
+from sklearn.svm import LinearSVR
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_regression
+from sklearn import linear_model
 
 mpl.rcParams["font.family"] = "Times New Roman"
 
@@ -170,3 +177,29 @@ class MLPPredictor(MultiDNNPredictor):
         for param_group in self._optimizer.param_groups:
             param_group["lr"] = new_lr
         return new_lr
+
+
+class LRPredictor(MultiDNNPredictor):
+    def __init__(
+        self,
+        epoch=30,
+        batch_size=16,
+        lr=0.001,
+        lr_schedule_type="cosine",
+        data_fname=None,
+        split_ratio=0.8,
+    ):
+        super().__init__(epoch, batch_size, data_fname, split_ratio)
+        self._device = torch.device("cuda:1")
+        self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(data_fname, split_ratio)
+        
+    def train(self):
+        regr = linear_model.LinearRegression()
+        self._model = regr
+
+        self._model.fit(self.trainX, self.trainY)
+        pred = self._model.predict(self.testX)
+        print(pred.shape)
+        e = pred - self.testY
+        print(np.average(np.abs(e)))
+        print(np.average(np.abs(e)/self.testY))
