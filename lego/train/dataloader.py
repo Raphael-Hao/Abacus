@@ -55,7 +55,7 @@ def load_single_file(filepath):
 
 
 def load_data(model_combinatin, batch_size, train_ratio):
-    path = "/home/cwh/Lego/data"
+    path = "/home/cwh/Project/Lego/data"
     all_feature = None
     all_latency = None
     if model_combinatin == None:
