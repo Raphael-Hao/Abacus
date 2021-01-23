@@ -4,7 +4,7 @@
 
 from lego.utils import gen_model_combinations
 
-from lego.train.predictor import MLPPredictor, LRPredictor
+from lego.train.predictor import MLPPredictor, LRPredictor, SVMPredictor
 
 
 
