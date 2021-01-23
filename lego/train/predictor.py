@@ -56,7 +56,7 @@ class MLPPredictor(MultiDNNPredictor):
         super().__init__(epoch, batch_size, data_fname, split_ratio)
         self._init_lr = lr
         self._lr_schedule_type = lr_schedule_type
-        self._device = torch.device("cuda:1")
+        self._device = torch.device("cuda:0")
         self._model = MLPregression().to(self._device)
         print(self._model)
         self._optimizer = torch.optim.SGD(self._model.parameters(), lr=self._init_lr)
@@ -98,7 +98,10 @@ class MLPPredictor(MultiDNNPredictor):
         plt.grid()
         plt.xlabel("epoch")
         plt.ylabel("loss")
-        plt.savefig(self._data_fname + "_train.pdf", bbox_inches="tight")
+        if (self._data_fname is None):
+            plt.savefig("train.pdf", bbox_inches="tight")
+        else:
+            plt.savefig(self._data_fname + "_train.pdf", bbox_inches="tight")
         plt.show()
         self.validate()
 
@@ -157,7 +160,10 @@ class MLPPredictor(MultiDNNPredictor):
         plt.grid()
         plt.xlabel("index")
         plt.ylabel("y")
-        plt.savefig(self._data_fname + "_test.pdf", bbox_inches="tight")
+        if (self._data_fname is None):
+            plt.savefig("test.pdf", bbox_inches="tight")
+        else:
+            plt.savefig(self._data_fname + "_test.pdf", bbox_inches="tight")
         plt.show()
 
     def calc_learning_rate(self, epoch, batch=0):

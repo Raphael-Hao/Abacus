@@ -3,7 +3,7 @@
 # Author: raphael hao
 
 from lego.worker import ModelProc, model_len
-from lego.utils import timestamp,gen_model_combinations
+from lego.utils import timestamp, gen_model_combinations
 
 import torch.multiprocessing as mp
 
@@ -43,14 +43,37 @@ if __name__ == "__main__":
     barrier = mp.Barrier(total_models + 1)
 
     all_profiled_models = [
-        "resnet50",  # 0
-        "resnet101",  # 1
-        "resnet152",  # 2
-        "inception_v3",  # 3
-        "vgg16",  # 4
-        "vgg19",  # 5
+        "resnet50",
+        "resnet101",
+        "resnet152",
+        "inception_v3",
+        "vgg16",
+        "vgg19",
+        "bert",
     ]
-    profiled_combinations = [(3, 3), (0, 3), (0, 2), (1, 2), (2, 5), (0, 0)]
+    profiled_combinations = [
+        (1, 3),
+        (0, 2),
+        (2, 5),
+        (0, 3),
+        (1, 2),
+        (3, 3),
+        (5, 5),
+        (4, 4),
+        (1, 5),
+        (2, 2),
+        (0, 4),
+        (1, 1),
+        (0, 0),
+        (4, 5),
+        (1, 4),
+        (0, 5),
+        (2, 3),
+        (3, 5),
+        (0, 1),
+        (3, 4),
+        (2, 4),
+    ]
     for model_combination in gen_model_combinations(
         all_profiled_models, total_models, profiled_combinations
     ):
