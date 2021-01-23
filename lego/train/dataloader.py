@@ -94,6 +94,40 @@ def load_data(model_combinatin, batch_size, train_ratio):
     )
     return train_dataloader, test_dataloader
 
+def load_data_for_sklearn(model_combinatin, split_ratio):
+    path = "/home/cwh/Lego/data"
+    all_feature = None
+    all_latency = None
+    if model_combinatin == None:
+        for filename in glob.glob(os.path.join(path, "*.csv")):
+            feature_data, latency_data = load_single_file(os.path.join(path, filename))
+            if all_feature is None or all_latency is None:
+                all_feature = feature_data
+                all_latency = latency_data
+            else:
+                all_feature = np.concatenate((all_feature, feature_data), axis=0)
+                all_latency = np.concatenate((all_latency, latency_data), axis=0)
+
+    elif isinstance(model_combinatin, str):
+        filename = model_combinatin + ".csv"
+        all_feature, all_latency = load_single_file(os.path.join(path, filename))
+
+    else:
+        raise NotImplementedError
+    
+    X, y = (all_feature, all_latency)
+    y = y/1000
+    data = np.concatenate((X, np.reshape(y, (-1, 1))), axis=1)
+    np.random.shuffle(data)
+    n = data.shape[0]
+    split = int(split_ratio * n)
+    train = data[:split,:]
+    test = data[split:,:]
+    trainX = train[:,:14]
+    trainY = train[:,14:].reshape(-1)
+    testX = test[:,:14]
+    testY = test[:,14:].reshape(-1)
+    return trainX, trainY, testX, testY
 
 if __name__ == "__main__":
 
