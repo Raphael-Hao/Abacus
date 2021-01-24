@@ -207,7 +207,31 @@ class LRPredictor(MultiDNNPredictor):
 
         self._model.fit(self.trainX, self.trainY)
         pred = self._model.predict(self.testX)
-        print(pred.shape)
+        e = pred - self.testY
+        print(np.average(np.abs(e)))
+        print(np.average(np.abs(e)/self.testY))
+
+
+class SVMPredictor(MultiDNNPredictor):
+    def __init__(
+        self,
+        epoch=30,
+        batch_size=16,
+        lr=0.001,
+        lr_schedule_type="cosine",
+        data_fname=None,
+        split_ratio=0.8,
+    ):
+        super().__init__(epoch, batch_size, data_fname, split_ratio)
+        self._device = torch.device("cuda:1")
+        self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(data_fname, split_ratio)
+        
+    def train(self):
+        regr = make_pipeline(StandardScaler(),LinearSVR(random_state=0, tol=1e-5, max_iter=10000))
+        self._model = regr
+
+        self._model.fit(self.trainX, self.trainY)
+        pred = self._model.predict(self.testX)
         e = pred - self.testY
         print(np.average(np.abs(e)))
         print(np.average(np.abs(e) / self.testY))
