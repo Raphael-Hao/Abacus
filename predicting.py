@@ -15,10 +15,10 @@ if __name__ == "__main__":
             lr=0.001, epoch=60, batch_size=64, data_fname=None, split_ratio=0.8
         )
         predictor.train()
-        for model_combination in gen_model_combinations(
-            args.all_profiled_models, args.total_models, args.trained_combinations
-        ):
-            predictor.predict()
+        # for model_combination in gen_model_combinations(
+        #     args.all_profiled_models, args.total_models, args.trained_combinations
+        # ):
+
     else:
         for model_combination in gen_model_combinations(
             args.all_profiled_models, args.total_models, args.trained_combinations
@@ -26,11 +26,12 @@ if __name__ == "__main__":
             data_filename = model_combination[0]
             for model_name in model_combination[1:]:
                 data_filename = data_filename + "_" + model_name
-            predictor = MLPPredictor(
-                lr=0.001,
-                epoch=60,
-                batch_size=8,
-                data_fname=data_filename,
-                split_ratio=0.8,
-            )
-            predictor.train()
+            print(data_filename)
+            # predictor = MLPPredictor(
+            #     lr=0.001,
+            #     epoch=60,
+            #     batch_size=8,
+            #     data_fname=data_filename,
+            #     split_ratio=0.8,
+            # )
+            # predictor.train()

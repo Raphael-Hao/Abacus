@@ -67,5 +67,6 @@ args.test_loop = 100
 args.model_select = "mlp"  # linear, svm
 args.trained_combinations = []
 
-args.mode = None
+# args.mode = None
+args.mode = "single"
 args.hyper_params = {}
