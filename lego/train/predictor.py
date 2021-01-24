@@ -98,7 +98,7 @@ class MLPPredictor(MultiDNNPredictor):
         plt.grid()
         plt.xlabel("epoch")
         plt.ylabel("loss")
-        if (self._data_fname is None):
+        if self._data_fname is None:
             plt.savefig("train.pdf", bbox_inches="tight")
         else:
             plt.savefig(self._data_fname + "_train.pdf", bbox_inches="tight")
@@ -160,7 +160,7 @@ class MLPPredictor(MultiDNNPredictor):
         plt.grid()
         plt.xlabel("index")
         plt.ylabel("y")
-        if (self._data_fname is None):
+        if self._data_fname is None:
             plt.savefig("test.pdf", bbox_inches="tight")
         else:
             plt.savefig(self._data_fname + "_test.pdf", bbox_inches="tight")
@@ -197,8 +197,10 @@ class LRPredictor(MultiDNNPredictor):
     ):
         super().__init__(epoch, batch_size, data_fname, split_ratio)
         self._device = torch.device("cuda:1")
-        self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(data_fname, split_ratio)
-        
+        self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
+            data_fname, split_ratio
+        )
+
     def train(self):
         regr = linear_model.LinearRegression()
         self._model = regr
@@ -208,4 +210,4 @@ class LRPredictor(MultiDNNPredictor):
         print(pred.shape)
         e = pred - self.testY
         print(np.average(np.abs(e)))
-        print(np.average(np.abs(e)/self.testY))
+        print(np.average(np.abs(e) / self.testY))
