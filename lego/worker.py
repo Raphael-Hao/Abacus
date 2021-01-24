@@ -44,7 +44,9 @@ def scheduling():
 
 
 class ModelProc(Process):
-    def __init__(self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier):
+    def __init__(
+        self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier
+    ):
         super().__init__()
         self._model_name = model_name
         self._model_func = model_list[model_name]
@@ -68,7 +70,10 @@ class ModelProc(Process):
             }
         elif self._model_name == "bert":
             self._inputs = {
-                k: {seqlen: torch.LongTensor(np.zeros((k, seqlen))).cuda() for seqlen in self._supported_seqlen}
+                k: {
+                    seqlen: torch.LongTensor(np.random.rand(k, seqlen)).cuda()
+                    for seqlen in self._supported_seqlen
+                }
                 for k in self._supported_batchsize
             }
         else:
@@ -85,7 +90,12 @@ class ModelProc(Process):
         timestamp("worker", "warming")
         with torch.cuda.stream(self._stream):
             for k in self._supported_batchsize:
-                self._model(self._inputs[k])
+                if self._model_name == "bert":
+                    for seqlen in self._supported_seqlen:
+                        self._model(self._inputs[k][seqlen])
+                else:
+                    self._model(self._inputs[k])
+
         torch.cuda.synchronize()
         self._barrier.wait()
 
@@ -94,7 +104,9 @@ class ModelProc(Process):
 
             if action == "prepare":
                 if self._model_name == "bert":
-                    self._inter_input = self._model.prepare(self._inputs[bs][seq_len], start)
+                    self._inter_input = self._model.prepare(
+                        self._inputs[bs][seq_len], start
+                    )
                 else:
                     submodel = nn.Sequential(*self._submodules[:start])
                     self._inter_input = submodel(self._inputs[bs])
