@@ -7,6 +7,7 @@ import torch
 import torch.nn as nn
 import os
 import numpy as np
+import random
 from torch.cuda.streams import Stream
 
 from lego.network.resnet_splited import resnet50, resnet101, resnet152
@@ -43,13 +44,14 @@ def scheduling():
 
 
 class ModelProc(Process):
-    def __init__(self, model_name: str, supported_batchsize, recv_pipe, barrier):
+    def __init__(self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier):
         super().__init__()
         self._model_name = model_name
         self._model_func = model_list[model_name]
         self._pipe = recv_pipe
         self._barrier = barrier
         self._supported_batchsize = supported_batchsize
+        self._supported_seqlen = supported_seqlen
 
     def run(self) -> None:
         timestamp("worker", "starting")
@@ -66,7 +68,7 @@ class ModelProc(Process):
             }
         elif self._model_name == "bert":
             self._inputs = {
-                k: torch.LongTensor(np.zeros((k, 10))).cuda()
+                k: {seqlen: torch.LongTensor(np.zeros((k, seqlen))).cuda() for seqlen in self._supported_seqlen}
                 for k in self._supported_batchsize
             }
         else:
@@ -88,11 +90,11 @@ class ModelProc(Process):
         self._barrier.wait()
 
         while True:
-            model_name, action, start, end, bs = self._pipe.recv()
+            model_name, action, start, end, bs, seq_len = self._pipe.recv()
 
             if action == "prepare":
                 if self._model_name == "bert":
-                    self._inter_input = self._model.prepare(self._inputs[bs], start)
+                    self._inter_input = self._model.prepare(self._inputs[bs][seq_len], start)
                 else:
                     submodel = nn.Sequential(*self._submodules[:start])
                     self._inter_input = submodel(self._inputs[bs])
