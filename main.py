@@ -108,7 +108,7 @@ if __name__ == "__main__":
                 model_config = []
                 for i in range(total_models):
                     start, end = gen_partition(model_len[model_combination[i]])
-                    seq_len = random.choose(supported_seqlen) if model_combination[i] == "bert" else 0
+                    seq_len = random.choice(supported_seqlen) if model_combination[i] == "bert" else 0
                     model_config.append([model_combination[i], start, end, bs_it[i], seq_len])
                     model_worker, model_pipe = worker_list[i]
                     model_pipe.send(
