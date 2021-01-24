@@ -183,22 +183,19 @@ class MLPPredictor(MultiDNNPredictor):
         for param_group in self._optimizer.param_groups:
             param_group["lr"] = new_lr
         return new_lr
-    
-    def predict(model):
 
+    def predict(model_combination):
+        raise NotImplementedError
 
 class LRPredictor(MultiDNNPredictor):
     def __init__(
         self,
         epoch=30,
         batch_size=16,
-        lr=0.001,
-        lr_schedule_type="cosine",
         data_fname=None,
         split_ratio=0.8,
     ):
         super().__init__(epoch, batch_size, data_fname, split_ratio)
-        self._device = torch.device("cuda:1")
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
             data_fname, split_ratio
         )
@@ -219,13 +216,10 @@ class SVMPredictor(MultiDNNPredictor):
         self,
         epoch=30,
         batch_size=16,
-        lr=0.001,
-        lr_schedule_type="cosine",
         data_fname=None,
         split_ratio=0.8,
     ):
         super().__init__(epoch, batch_size, data_fname, split_ratio)
-        self._device = torch.device("cuda:1")
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
             data_fname, split_ratio
         )
