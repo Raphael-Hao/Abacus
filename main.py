@@ -37,6 +37,7 @@ if __name__ == "__main__":
     mp.set_start_method("spawn")
     total_models = 2
     supported_batchsize = [1, 2, 4, 8, 16]
+    supported_seqlen = [8, 16, 32, 64]
     total_test = 200
     test_loop = 100
 
@@ -77,13 +78,15 @@ if __name__ == "__main__":
     for model_combination in gen_model_combinations(
         all_profiled_models, total_models, profiled_combinations
     ):
+        if model_combination[0] != "bert" or model_combination[1] != "bert":
+            continue
         profile_filename = model_combination[0]
         for model_name in model_combination[1:]:
             profile_filename = profile_filename + "_" + model_name
         profile_filename += ".csv"
         profile_file = open(profile_filename, "a+")
         wr = csv.writer(profile_file, dialect="excel")
-        profile_head = ["model", "start", "end", "bs"] * total_models + [
+        profile_head = ["model", "start", "end", "bs", "seq_len"] * total_models + [
             "median",
             "mean",
             "var",
@@ -94,7 +97,7 @@ if __name__ == "__main__":
         for model_name in model_combination:
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ModelProc(
-                model_name, supported_batchsize, pipe_child, barrier
+                model_name, supported_batchsize, supported_seqlen, pipe_child, barrier
             )
             model_worker.start()
             worker_list.append((model_worker, pipe_parent))
@@ -105,7 +108,8 @@ if __name__ == "__main__":
                 model_config = []
                 for i in range(total_models):
                     start, end = gen_partition(model_len[model_combination[i]])
-                    model_config.append([model_combination[i], start, end, bs_it[i]])
+                    seq_len = random.choose(supported_seqlen) if model_combination[i] == "bert" else 0
+                    model_config.append([model_combination[i], start, end, bs_it[i], seq_len])
                     model_worker, model_pipe = worker_list[i]
                     model_pipe.send(
                         (
@@ -114,6 +118,7 @@ if __name__ == "__main__":
                             model_config[i][1],
                             model_config[i][2],
                             model_config[i][3],
+                            model_config[i][4],
                         )
                     )
 
@@ -131,6 +136,7 @@ if __name__ == "__main__":
                                     model_config[i][1],
                                     model_config[i][2],
                                     model_config[i][3],
+                                    model_config[i][4],
                                 )
                             )
                         barrier.wait()
