@@ -7,10 +7,9 @@ import torch.nn as nn
 from torch.optim import SGD
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from lego.train.dataloader import load_data, load_single_file, load_data_for_sklearn
+from lego.train.dataloader import load_data, load_data_for_sklearn
 from lego.train.utils import AverageMeter
 from lego.train.models import MLPregression
-from lego.train.models import LinearRegression
 from tqdm import tqdm
 import math
 
@@ -31,9 +30,7 @@ class MultiDNNPredictor:
         self._batch_size = batch_size
         self._data_fname = data_fname
         self._split_ratio = split_ratio
-        self._train_loader, self._test_loader = load_data(
-            self._data_fname, self._batch_size, self._split_ratio
-        )
+
         self._total_batches = len(self._train_loader)
 
     def train(self):
@@ -54,6 +51,9 @@ class MLPPredictor(MultiDNNPredictor):
         split_ratio=0.8,
     ):
         super().__init__(epoch, batch_size, data_fname, split_ratio)
+        self._train_loader, self._test_loader = load_data(
+            self._data_fname, self._batch_size, self._split_ratio
+        )
         self._init_lr = lr
         self._lr_schedule_type = lr_schedule_type
         self._device = torch.device("cuda:0")
@@ -183,6 +183,8 @@ class MLPPredictor(MultiDNNPredictor):
         for param_group in self._optimizer.param_groups:
             param_group["lr"] = new_lr
         return new_lr
+    
+    def predict(model):
 
 
 class LRPredictor(MultiDNNPredictor):

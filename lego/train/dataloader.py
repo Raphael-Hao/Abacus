@@ -8,30 +8,26 @@ import torch
 import torch.utils.data as Data
 import os
 import glob
+from lego.config import args
 
 
 def get_feature_latency(data):
-    assert data.shape[1] == 11
-    models_id = {
-        "vgg16": 0,
-        "vgg19": 1,
-        "resnet50": 2,
-        "resnet101": 3,
-        "resnet152": 4,
-        "inception_v3": 5,
-        "bert_base": 6,
-        "bert_large": 7,
-    }
+    assert data.shape[1] == 13
+
     n = data.shape[0]
     feature_data = []
     latency_data = []
     for i in range(n):
         line = data[i]
-        model1 = models_id[line[0]]
-        model1_record = np.array([int(line[1]), int(line[2]), int(line[3])])
-        model2 = models_id[line[4]]
-        model2_record = np.array([int(line[5]), int(line[6]), int(line[7])])
-        model_feature = np.zeros([len(models_id)])
+        model1 = args.models_id[line[0]]
+        model1_record = np.array(
+            [int(line[1]), int(line[2]), int(line[3]), int(line[4])]
+        )
+        model2 = args.models_id[line[5]]
+        model2_record = np.array(
+            [int(line[6]), int(line[7]), int(line[8]), int(line[9])]
+        )
+        model_feature = np.zeros([len(args.models_id)])
         model_feature[model1] += 1
         model_feature[model2] += 1
         if model1 <= model2:
@@ -39,7 +35,7 @@ def get_feature_latency(data):
         else:
             record = np.concatenate((model_feature, model2_record, model1_record))
         feature_data.append(record)
-        latency_data.append(float(line[8]))
+        latency_data.append(float(line[10]))
     feature_data = np.array(feature_data)
     latency_data = np.array(latency_data)
     return feature_data, latency_data
@@ -94,6 +90,7 @@ def load_data(model_combinatin, batch_size, train_ratio):
     )
     return train_dataloader, test_dataloader
 
+
 def load_data_for_sklearn(model_combinatin, split_ratio):
     path = "/home/cwh/Lego/data"
     all_feature = None
@@ -114,20 +111,21 @@ def load_data_for_sklearn(model_combinatin, split_ratio):
 
     else:
         raise NotImplementedError
-    
+
     X, y = (all_feature, all_latency)
-    y = y/1000
+    y = y / 1000
     data = np.concatenate((X, np.reshape(y, (-1, 1))), axis=1)
     np.random.shuffle(data)
     n = data.shape[0]
     split = int(split_ratio * n)
-    train = data[:split,:]
-    test = data[split:,:]
-    trainX = train[:,:14]
-    trainY = train[:,14:].reshape(-1)
-    testX = test[:,:14]
-    testY = test[:,14:].reshape(-1)
+    train = data[:split, :]
+    test = data[split:, :]
+    trainX = train[:, :16]
+    trainY = train[:, 16:].reshape(-1)
+    testX = test[:, :16]
+    testY = test[:, 16:].reshape(-1)
     return trainX, trainY, testX, testY
+
 
 if __name__ == "__main__":
 

@@ -5,6 +5,7 @@
 import sys
 import time
 import itertools
+import random
 
 def timestamp(name, stage):
     print("TIMESTAMP, %s, %s, %f" % (name, stage, time.time()), file=sys.stderr)
@@ -21,3 +22,19 @@ def gen_model_combinations(models, combination_len, done_combinations=None):
             model_comb.append(models[id])
         model_combinations.append(model_comb)
     return model_combinations
+
+def gen_partition(model_len):
+    start = random.randrange(0, model_len - 4)
+    end = start + 4 + random.randrange(0, model_len - start - 4)
+    if start < end:
+        return start, end
+    else:
+        return end, start
+
+
+def make_record(model_config, median, mean, var):
+    record = [j for sub in model_config for j in sub]
+    record.append(median)
+    record.append(mean)
+    record.append(var)
+    return record

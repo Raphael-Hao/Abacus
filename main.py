@@ -2,12 +2,7 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
-from lego.worker import ModelProc, model_len
-from lego.utils import timestamp, gen_model_combinations
-
 import torch.multiprocessing as mp
-
-import torch
 import datetime
 import numpy as np
 import itertools
@@ -15,78 +10,33 @@ import random
 from tqdm import tqdm
 import csv
 
-
-def gen_partition(model_len):
-    start = random.randrange(0, model_len - 4)
-    end = start + 4 + random.randrange(0, model_len - start - 4)
-    if start < end:
-        return start, end
-    else:
-        return end, start
-
-
-def make_record(model_config, median, mean, var):
-    record = [j for sub in model_config for j in sub]
-    record.append(median)
-    record.append(mean)
-    record.append(var)
-    return record
-
+from lego.worker import ModelProc, model_len
+from lego.utils import timestamp, gen_model_combinations, gen_partition, make_record
+from lego.config import args
 
 if __name__ == "__main__":
+    print(args)
     mp.set_start_method("spawn")
-    total_models = 2
-    supported_batchsize = [1, 2, 4, 8, 16]
-    supported_seqlen = [8, 16, 32, 64]
-    total_test = 200
-    test_loop = 100
 
-    barrier = mp.Barrier(total_models + 1)
+    barrier = mp.Barrier(args.total_models + 1)
 
-    all_profiled_models = [
-        "resnet50",
-        "resnet101",
-        "resnet152",
-        "inception_v3",
-        "vgg16",
-        "vgg19",
-        "bert",
-    ]
-    profiled_combinations = [
-        (1, 3),
-        (0, 2),
-        (2, 5),
-        (0, 3),
-        (1, 2),
-        (3, 3),
-        (5, 5),
-        (4, 4),
-        (1, 5),
-        (2, 2),
-        (0, 4),
-        (1, 1),
-        (0, 0),
-        (4, 5),
-        (1, 4),
-        (0, 5),
-        (2, 3),
-        (3, 5),
-        (0, 1),
-        (3, 4),
-        (2, 4),
-    ]
     for model_combination in gen_model_combinations(
-        all_profiled_models, total_models, profiled_combinations
+        args.all_profiled_models, args.total_models, args.profiled_combinations
     ):
-        if model_combination[0] != "bert" or model_combination[1] != "bert":
-            continue
+        print(model_combination)
         profile_filename = model_combination[0]
         for model_name in model_combination[1:]:
             profile_filename = profile_filename + "_" + model_name
         profile_filename += ".csv"
         profile_file = open(profile_filename, "a+")
         wr = csv.writer(profile_file, dialect="excel")
-        profile_head = ["model", "start", "end", "bs", "seq_len"] * total_models + [
+        profile_head = [
+            "model",
+            "start",
+            "end",
+            "bs",
+            "seq_len",
+        ] * args.total_models + [
             "median",
             "mean",
             "var",
@@ -97,19 +47,29 @@ if __name__ == "__main__":
         for model_name in model_combination:
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ModelProc(
-                model_name, supported_batchsize, supported_seqlen, pipe_child, barrier
+                model_name,
+                args.supported_batchsize,
+                args.supported_seqlen,
+                pipe_child,
+                barrier,
             )
             model_worker.start()
             worker_list.append((model_worker, pipe_parent))
         barrier.wait()
 
-        for bs_it in itertools.product(supported_batchsize, repeat=2):
-            for test_i in range(total_test):
+        for bs_it in itertools.product(args.supported_batchsize, repeat=2):
+            for test_i in range(args.total_test):
                 model_config = []
-                for i in range(total_models):
+                for i in range(args.total_models):
                     start, end = gen_partition(model_len[model_combination[i]])
-                    seq_len = random.choice(supported_seqlen) if model_combination[i] == "bert" else 0
-                    model_config.append([model_combination[i], start, end, bs_it[i], seq_len])
+                    seq_len = (
+                        random.choice(args.supported_seqlen)
+                        if model_combination[i] == "bert"
+                        else 0
+                    )
+                    model_config.append(
+                        [model_combination[i], start, end, bs_it[i], seq_len]
+                    )
                     model_worker, model_pipe = worker_list[i]
                     model_pipe.send(
                         (
@@ -124,10 +84,10 @@ if __name__ == "__main__":
 
                 barrier.wait()
                 record = []
-                with tqdm(range(test_loop)) as t:
+                with tqdm(range(args.test_loop)) as t:
                     for loop_i in t:
                         start_time = datetime.datetime.now()
-                        for i in range(total_models):
+                        for i in range(args.total_models):
                             _, model_pipe = worker_list[i]
                             model_pipe.send(
                                 (
@@ -152,9 +112,9 @@ if __name__ == "__main__":
                 )
                 wr.writerow(profile_record)
                 profile_file.flush()
-        for i in range(total_models):
+        for i in range(args.total_models):
             _, model_pipe = worker_list[i]
-            model_pipe.send(("none", "terminate", -1, -1, -1))
+            model_pipe.send(("none", "terminate", -1, -1, -1, -1))
 
         for worker, _ in worker_list:
             worker.join()
