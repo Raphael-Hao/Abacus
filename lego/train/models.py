@@ -7,7 +7,7 @@ import torch.nn.functional as F
 class MLPregression(nn.Module):
     def __init__(self):
         super(MLPregression, self).__init__()
-        self.hidden1 = nn.Linear(in_features=16, out_features=128, bias=True)
+        self.hidden1 = nn.Linear(in_features=15, out_features=128, bias=True)
         self.hidden2 = nn.Linear(128, 128)
         self.hidden3 = nn.Linear(128, 64)
         self.predict = nn.Linear(64, 1)

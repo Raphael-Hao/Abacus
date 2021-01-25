@@ -2,12 +2,14 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 import numpy as np
+import os
+import csv
 import torch
 import torch.nn as nn
 from torch.optim import SGD
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from lego.train.dataloader import load_data, load_data_for_sklearn
+from lego.train.dataloader import load_torch_data, load_data_for_sklearn
 from lego.train.utils import AverageMeter
 from lego.train.models import MLPregression
 from tqdm import tqdm
@@ -24,20 +26,45 @@ mpl.rcParams["font.family"] = "Times New Roman"
 
 class MultiDNNPredictor:
     def __init__(
-        self, total_epochs=30, batch_size=16, data_fname=None, split_ratio=0.8
+        self,
+        model_select,
+        total_epochs=30,
+        batch_size=16,
+        data_fname=None,
+        split_ratio=0.8,
+        path="/home/cwh/Lego",
     ):
+        self._model_select = model_select
         self._total_epochs = total_epochs
         self._batch_size = batch_size
         self._data_fname = data_fname
         self._split_ratio = split_ratio
-
-        self._total_batches = len(self._train_loader)
+        self._path = path
+        self._data_path = os.path.join(self._path, "data")
+        self._save_path = os.path.join(self._path, "model")
+        if not os.path.exists(self._save_path):
+            os.mkdir(self._save_path)
+        self._result_path = os.path.join(self._path, "result")
+        if not os.path.exists(self._result_path):
+            os.mkdir(self._result_path)
+        self._result_fname = os.path.join(self._path, "results.csv")
+        if not os.path.exists(self._result_fname):
+            result_file = open(self._result_fname, "w+")
+            wr = csv.writer(result_file, dialect="excel")
+            wr.writerow(["predictor", "combinations", "mae", "mape"])
 
     def train(self):
         raise NotImplementedError
 
     def validate(self):
         raise NotImplementedError
+
+    def save_result(self, combination, mae, mape):
+        result_file = open(self._result_fname, "a+")
+        wr = csv.writer(result_file, dialect="excel")
+        if combination is None:
+            combination = "all"
+        wr.writerow([self._model_select, combination, mae, mape])
 
 
 class MLPPredictor(MultiDNNPredictor):
@@ -47,16 +74,18 @@ class MLPPredictor(MultiDNNPredictor):
         batch_size=16,
         lr=0.001,
         lr_schedule_type="cosine",
-        data_fname=None,
+        data_fname="all",
         split_ratio=0.8,
+        path="/home/cwh/Lego",
     ):
-        super().__init__(epoch, batch_size, data_fname, split_ratio)
-        self._train_loader, self._test_loader = load_data(
-            self._data_fname, self._batch_size, self._split_ratio
+        super().__init__("mlp", epoch, batch_size, data_fname, split_ratio, path)
+        self._train_loader, self._test_loader = load_torch_data(
+            self._data_fname, self._batch_size, self._split_ratio, self._data_path
         )
+        self._total_batches = len(self._train_loader)
         self._init_lr = lr
         self._lr_schedule_type = lr_schedule_type
-        self._device = torch.device("cuda:0")
+        self._device = torch.device("cuda:1")
         self._model = MLPregression().to(self._device)
         print(self._model)
         self._optimizer = torch.optim.SGD(self._model.parameters(), lr=self._init_lr)
@@ -98,10 +127,10 @@ class MLPPredictor(MultiDNNPredictor):
         plt.grid()
         plt.xlabel("epoch")
         plt.ylabel("loss")
-        if self._data_fname is None:
-            plt.savefig("train.pdf", bbox_inches="tight")
-        else:
-            plt.savefig(self._data_fname + "_train.pdf", bbox_inches="tight")
+        plt.savefig(
+            os.path.join(self._result_path, self._data_fname + "_train.pdf"),
+            bbox_inches="tight",
+        )
         plt.show()
         self.validate()
 
@@ -141,6 +170,7 @@ class MLPPredictor(MultiDNNPredictor):
         print(mae)
         mape = np.average(np.abs(predict_latency - origin_latency) / origin_latency)
         print(mape)
+        self.save_result(self._data_fname, mae, mape)
         index = np.argsort(origin_latency)
         plt.figure(figsize=(12, 5))
         plt.plot(
@@ -160,11 +190,12 @@ class MLPPredictor(MultiDNNPredictor):
         plt.grid()
         plt.xlabel("index")
         plt.ylabel("y")
-        if self._data_fname is None:
-            plt.savefig("test.pdf", bbox_inches="tight")
-        else:
-            plt.savefig(self._data_fname + "_test.pdf", bbox_inches="tight")
+        plt.savefig(
+            os.path.join(self._result_path, self._data_fname + "_test.pdf"),
+            bbox_inches="tight",
+        )
         plt.show()
+        self.save_model()
 
     def calc_learning_rate(self, epoch, batch=0):
         if self._lr_schedule_type == "cosine":
@@ -184,8 +215,13 @@ class MLPPredictor(MultiDNNPredictor):
             param_group["lr"] = new_lr
         return new_lr
 
-    def predict(model_combination):
-        raise NotImplementedError
+    def save_model(self):
+        print("saving model......")
+        torch.save(
+            self._model.state_dict(),
+            os.path.join(self._save_path, self._data_fname + ".ckpt"),
+        )
+
 
 class LRPredictor(MultiDNNPredictor):
     def __init__(
@@ -194,10 +230,11 @@ class LRPredictor(MultiDNNPredictor):
         batch_size=16,
         data_fname=None,
         split_ratio=0.8,
+        path="/home/cwh/Lego",
     ):
-        super().__init__(epoch, batch_size, data_fname, split_ratio)
+        super().__init__("lr", epoch, batch_size, data_fname, split_ratio, path)
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
-            data_fname, split_ratio
+            data_fname, split_ratio, self._data_path
         )
 
     def train(self):
@@ -218,10 +255,11 @@ class SVMPredictor(MultiDNNPredictor):
         batch_size=16,
         data_fname=None,
         split_ratio=0.8,
+        path="/home/cwh/Lego",
     ):
-        super().__init__(epoch, batch_size, data_fname, split_ratio)
+        super().__init__("svm", epoch, batch_size, data_fname, split_ratio, path)
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
-            data_fname, split_ratio
+            data_fname, split_ratio, self._data_path
         )
 
     def train(self):

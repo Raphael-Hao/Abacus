@@ -7,12 +7,15 @@ import time
 import itertools
 import random
 
+
 def timestamp(name, stage):
     print("TIMESTAMP, %s, %s, %f" % (name, stage, time.time()), file=sys.stderr)
+
 
 def gen_model_combinations(models, combination_len, done_combinations=None):
     id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
     id_combinations = set(itertools.combinations(id_combinations, combination_len))
+    print(id_combinations)
     for profiled in done_combinations:
         id_combinations.remove(profiled)
     model_combinations = []
@@ -22,6 +25,7 @@ def gen_model_combinations(models, combination_len, done_combinations=None):
             model_comb.append(models[id])
         model_combinations.append(model_comb)
     return model_combinations
+
 
 def gen_partition(model_len):
     start = random.randrange(0, model_len - 4)
