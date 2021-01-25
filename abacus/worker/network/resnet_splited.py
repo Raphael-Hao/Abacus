@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
-from lego.network.submod import *
+from abacus.worker.network.submod import *
 
 __all__ = [
     "ResNet",

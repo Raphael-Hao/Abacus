@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # Author: raphael hao
+
 import numpy as np
 import os
 import csv
@@ -9,16 +10,17 @@ import torch.nn as nn
 from torch.optim import SGD
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from lego.train.dataloader import load_torch_data, load_data_for_sklearn
-from lego.train.utils import AverageMeter
-from lego.train.models import MLPregression
+from abacus.modeling.dataloader import load_torch_data, load_data_for_sklearn
+from abacus.modeling.utils import AverageMeter
+from abacus.modeling.models import MLPregression
 from tqdm import tqdm
 import math
+import datetime
 
 from sklearn.svm import LinearSVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.datasets import make_regression
+# from sklearn.datasets import make_regression
 from sklearn import linear_model
 
 mpl.rcParams["font.family"] = "Times New Roman"
@@ -77,6 +79,7 @@ class MLPPredictor(MultiDNNPredictor):
         data_fname="all",
         split_ratio=0.8,
         path="/home/cwh/Lego",
+        device=0,
     ):
         super().__init__("mlp", epoch, batch_size, data_fname, split_ratio, path)
         self._train_loader, self._test_loader = load_torch_data(
@@ -85,7 +88,7 @@ class MLPPredictor(MultiDNNPredictor):
         self._total_batches = len(self._train_loader)
         self._init_lr = lr
         self._lr_schedule_type = lr_schedule_type
-        self._device = torch.device("cuda:1")
+        self._device = torch.device("cuda:{}".format(device))
         self._model = MLPregression().to(self._device)
         print(self._model)
         self._optimizer = torch.optim.SGD(self._model.parameters(), lr=self._init_lr)
@@ -196,6 +199,13 @@ class MLPPredictor(MultiDNNPredictor):
         )
         plt.show()
         self.save_model()
+        self._model.cpu().eval()
+        test_input = torch.rand((1, 15))
+        start_time = datetime.datetime.now()
+        for i in range(1000):
+            test_output = self._model(test_input)
+        end_time = datetime.datetime.now() - start_time
+        print("Inference time: {}".format(end_time.microseconds / 1e6))
 
     def calc_learning_rate(self, epoch, batch=0):
         if self._lr_schedule_type == "cosine":
