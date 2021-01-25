@@ -10,16 +10,24 @@ from lego.train.predictor import MLPPredictor, LRPredictor, SVMPredictor
 
 if __name__ == "__main__":
 
-    if args.mode == None:
+    if args.mode == "all":
         predictor = MLPPredictor(
-            lr=0.001, epoch=60, batch_size=64, data_fname=None, split_ratio=0.8
+            lr=0.001, epoch=60, batch_size=64, data_fname=args.mode, split_ratio=0.8
         )
         predictor.train()
         # for model_combination in gen_model_combinations(
         #     args.all_profiled_models, args.total_models, args.trained_combinations
         # ):
-
-    else:
+    elif args.mode == "single":
+        predictor = MLPPredictor(
+            epoch=args.hyper_params[args.model_combination][1],
+            batch_size=8,
+            lr=args.hyper_params[args.model_combination][0],
+            data_fname=args.model_combination,
+            split_ratio=0.8,
+        )
+        predictor.train()
+    elif args.mode == "onebyone":
         for model_combination in gen_model_combinations(
             args.all_profiled_models, args.total_models, args.trained_combinations
         ):
@@ -27,11 +35,13 @@ if __name__ == "__main__":
             for model_name in model_combination[1:]:
                 data_filename = data_filename + "_" + model_name
             print(data_filename)
-            # predictor = MLPPredictor(
-            #     lr=0.001,
-            #     epoch=60,
-            #     batch_size=8,
-            #     data_fname=data_filename,
-            #     split_ratio=0.8,
-            # )
-            # predictor.train()
+            predictor = MLPPredictor(
+                lr=args.hyper_params[data_filename][0],
+                epoch=args.hyper_params[data_filename][1],
+                batch_size=8,
+                data_fname=data_filename,
+                split_ratio=0.8,
+            )
+            predictor.train()
+    else:
+        raise NotImplementedError

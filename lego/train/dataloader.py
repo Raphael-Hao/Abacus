@@ -50,13 +50,16 @@ def load_single_file(filepath):
     return get_feature_latency(data)
 
 
-def load_data(model_combinatin, batch_size, train_ratio):
-    path = "/home/cwh/Project/Lego/data"
+def load_torch_data(
+    model_combinatin, batch_size, train_ratio, data_path="/home/cwh/Lego/data"
+):
     all_feature = None
     all_latency = None
-    if model_combinatin == None:
-        for filename in glob.glob(os.path.join(path, "*.csv")):
-            feature_data, latency_data = load_single_file(os.path.join(path, filename))
+    if model_combinatin == "all":
+        for filename in glob.glob(os.path.join(data_path, "*.csv")):
+            feature_data, latency_data = load_single_file(
+                os.path.join(data_path, filename)
+            )
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
                 all_latency = latency_data
@@ -64,12 +67,9 @@ def load_data(model_combinatin, batch_size, train_ratio):
                 all_feature = np.concatenate((all_feature, feature_data), axis=0)
                 all_latency = np.concatenate((all_latency, latency_data), axis=0)
 
-    elif isinstance(model_combinatin, str):
-        filename = model_combinatin + ".csv"
-        all_feature, all_latency = load_single_file(os.path.join(path, filename))
-
     else:
-        raise NotImplementedError
+        filename = model_combinatin + ".csv"
+        all_feature, all_latency = load_single_file(os.path.join(data_path, filename))
 
     feature_len = len(all_feature)
     latency_len = len(all_latency)
@@ -91,13 +91,16 @@ def load_data(model_combinatin, batch_size, train_ratio):
     return train_dataloader, test_dataloader
 
 
-def load_data_for_sklearn(model_combinatin, split_ratio):
-    path = "/home/cwh/Lego/data"
+def load_data_for_sklearn(
+    model_combinatin, split_ratio, data_path="/home/cwh/Lego/data"
+):
     all_feature = None
     all_latency = None
-    if model_combinatin == None:
-        for filename in glob.glob(os.path.join(path, "*.csv")):
-            feature_data, latency_data = load_single_file(os.path.join(path, filename))
+    if model_combinatin == "all":
+        for filename in glob.glob(os.path.join(data_path, "*.csv")):
+            feature_data, latency_data = load_single_file(
+                os.path.join(data_path, filename)
+            )
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
                 all_latency = latency_data
@@ -105,12 +108,9 @@ def load_data_for_sklearn(model_combinatin, split_ratio):
                 all_feature = np.concatenate((all_feature, feature_data), axis=0)
                 all_latency = np.concatenate((all_latency, latency_data), axis=0)
 
-    elif isinstance(model_combinatin, str):
-        filename = model_combinatin + ".csv"
-        all_feature, all_latency = load_single_file(os.path.join(path, filename))
-
     else:
-        raise NotImplementedError
+        filename = model_combinatin + ".csv"
+        all_feature, all_latency = load_single_file(os.path.join(data_path, filename))
 
     X, y = (all_feature, all_latency)
     y = y / 1000
@@ -129,4 +129,4 @@ def load_data_for_sklearn(model_combinatin, split_ratio):
 
 if __name__ == "__main__":
 
-    train_dataloader, test_dataloader = load_data(None, 0.8)
+    train_dataloader, test_dataloader = load_torch_data(None, 0.8)

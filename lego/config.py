@@ -65,8 +65,48 @@ args.test_loop = 100
 
 # prediction model configurations
 args.model_select = "mlp"  # linear, svm
-args.trained_combinations = []
+args.trained_combinations = [
+    (6, 6),
+    (0, 6),
+    (1, 6),
+    (2, 6),
+    (3, 6),
+    (4, 6),
+    (5, 6),
+]
 
-# args.mode = None
-args.mode = "single"
-args.hyper_params = {}
+args.mode = "onebyone"
+# args.mode = "single"
+# args.mode = "all"
+args.model_combination = "resnet152_resnet152"
+args.hyper_params = {
+    "all": [0.001, 80],
+    "resnet101_inception_v3": [0.001, 80],
+    "bert_bert": [0.001, 80],
+    "vgg19_bert": [0.001, 80],
+    "resnet50_resnet152": [0.001, 80],
+    "resnet101_bert": [0.001, 80],
+    "resnet152_vgg19": [0.001, 80],
+    "resnet50_inception_v3": [0.001, 80],
+    "resnet101_resnet152": [0.001, 80],
+    "inception_v3_inception_v3": [0.001, 80],
+    "vgg19_vgg19": [0.001, 80],
+    "vgg16_vgg16": [0.001, 80],
+    "resnet101_vgg19": [0.001, 80],
+    "inception_v3_bert": [0.001, 80],
+    "resnet152_resnet152": [0.001, 80],
+    "resnet50_vgg16": [0.001, 80],
+    "resnet101_resnet101": [0.001, 80],
+    "resnet50_resnet50": [0.001, 80],
+    "resnet152_bert": [0.001, 80],
+    "vgg16_vgg19": [0.001, 80],
+    "resnet101_vgg16": [0.001, 80],
+    "resnet50_vgg19": [0.001, 80],
+    "resnet152_inception_v3": [0.001, 80],
+    "inception_v3_vgg19": [0.001, 80],
+    "resnet50_resnet101": [0.001, 80],
+    "vgg16_bert": [0.001, 80],
+    "resnet50_bert": [0.001, 80],
+    "inception_v3_vgg16": [0.001, 80],
+    "resnet152_vgg16": [0.001, 80],
+}
