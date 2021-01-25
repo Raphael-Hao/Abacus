@@ -8,7 +8,7 @@ import torch
 import torch.utils.data as Data
 import os
 import glob
-from lego.config import args
+from abacus.config import args
 
 
 def get_feature_latency(data):

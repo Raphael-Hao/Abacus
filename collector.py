@@ -2,12 +2,12 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
-from lego.network.resnet import resnet101
+from abacus.network.resnet import resnet101
 from torch.cuda.streams import Stream
 import torch.nn as nn
 import torch
 import torch.multiprocessing as mp
-from lego.network.resnet import BasicBlock, Bottleneck
+from abacus.network.resnet import BasicBlock, Bottleneck
 import datetime
 
 cuda = torch.device("cuda")

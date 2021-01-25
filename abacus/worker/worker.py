@@ -7,18 +7,16 @@ import torch
 import torch.nn as nn
 import os
 import numpy as np
-import random
 from torch.cuda.streams import Stream
 
-from lego.network.resnet_splited import resnet50, resnet101, resnet152
-from lego.network.inception_splited import inception_v3
-from lego.network.vgg_splited import vgg16, vgg19
-from lego.network.bert import BertModel
+from abacus.worker.network.resnet_splited import resnet50, resnet101, resnet152
+from abacus.worker.network.inception_splited import inception_v3
+from abacus.worker.network.vgg_splited import vgg16, vgg19
+from abacus.worker.network.bert import BertModel
 
-# from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from lego.utils import timestamp
+from abacus.utils import timestamp
 
-model_list = {
+models_list = {
     "resnet50": resnet50,
     "resnet101": resnet101,
     "resnet152": resnet152,
@@ -28,7 +26,7 @@ model_list = {
     "bert": BertModel,
 }
 
-model_len = {
+models_len = {
     "resnet50": 18,
     "resnet101": 35,
     "resnet152": 52,
@@ -39,17 +37,29 @@ model_len = {
 }
 
 
-def scheduling():
-    raise NotImplementedError
+class Worker(Process):
+    def __init__(
+        self,
+        model_name: str,
+        supported_batchsize,
+        supported_seqlen,
+        recv_pipe,
+    ):
+        super().__init__()
+        self._model_name = model_name
+        self._model_func = models_list[model_name]
+        self._pipe = recv_pipe
+        self._supported_batchsize = supported_batchsize
+        self._supported_seqlen = supported_seqlen
 
 
-class ModelProc(Process):
+class ProfilerWorker(Process):
     def __init__(
         self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier
     ):
         super().__init__()
         self._model_name = model_name
-        self._model_func = model_list[model_name]
+        self._model_func = models_list[model_name]
         self._pipe = recv_pipe
         self._barrier = barrier
         self._supported_batchsize = supported_batchsize
@@ -124,3 +134,13 @@ class ModelProc(Process):
                 break
             else:
                 raise NotImplementedError
+
+
+class ServerWorker(Process):
+    def __ini__(
+        self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier
+    ):
+        pass
+
+    def run(self) -> None:
+        return super().run()
