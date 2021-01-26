@@ -975,34 +975,11 @@ class BertModel(BertPreTrainedModel):
             cross_attentions=encoder_outputs.cross_attentions,
         )
 
-    def prepare(self, input_ids, start):
-        input_shape = input_ids.size()
-        batch_size, seq_length = input_shape
-        device = input_ids.device
-        past_key_values_length = 0
-        attention_mask = torch.ones(
-            ((batch_size, seq_length + past_key_values_length)), device=device
-        )
-        token_type_ids = torch.zeros(input_shape, dtype=torch.long, device=device)
-        self.extended_attention_mask: torch.Tensor = self.get_extended_attention_mask(
-            attention_mask, input_shape, device
-        )
-        embedding_output = self.embeddings(
-            input_ids=input_ids,
-            token_type_ids=token_type_ids,
-        )
-        encoder_outputs = self.encoder.prepare(
-            start,
-            embedding_output,
-            attention_mask=self.extended_attention_mask,
-        )
-        return encoder_outputs
-
-    def run(self, hidden_states, start, end):
+    def run(self, hidden_states, mask, start, end):
         encoder_outputs = self.encoder.run(
             start,
             end,
             hidden_states,
-            attention_mask=self.extended_attention_mask,
+            attention_mask=mask,
         )
         return encoder_outputs
