@@ -60,7 +60,14 @@ class ProfilerWorker(AbacusWorker):
         elif self._model_name == "bert":
             self._inputs = {
                 k: {
-                    seqlen: torch.LongTensor(np.random.rand(k, seqlen)).cuda()
+                    seqlen: torch.LongTensor(np.random.rand(k, seqlen, 768)).half().cuda()
+                    for seqlen in self._supported_seqlen
+                }
+                for k in self._supported_batchsize
+            }
+            self._masks = {
+                k: {
+                    seqlen: torch.LongTensor(np.zeros((k, 1, 1, seqlen))).half().cuda()
                     for seqlen in self._supported_seqlen
                 }
                 for k in self._supported_batchsize
@@ -81,7 +88,7 @@ class ProfilerWorker(AbacusWorker):
             for k in self._supported_batchsize:
                 if self._model_name == "bert":
                     for seqlen in self._supported_seqlen:
-                        self._model(self._inputs[k][seqlen])
+                        self._model.run(self._inputs[k][seqlen], self._masks[k][seqlen], 0, 12)
                 else:
                     self._model(self._inputs[k])
 
@@ -93,8 +100,8 @@ class ProfilerWorker(AbacusWorker):
 
             if action == "prepare":
                 if self._model_name == "bert":
-                    self._inter_input = self._model.prepare(
-                        self._inputs[bs][seq_len], start
+                    self._inter_input = self._model.run(
+                        self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, start
                     )
                 else:
                     submodel = nn.Sequential(*self._submodules[:start])
@@ -104,7 +111,7 @@ class ProfilerWorker(AbacusWorker):
                 self._barrier.wait()
             elif action == "forward":
                 if self._model_name == "bert":
-                    self._model.run(self._inter_input, start, end)
+                    self._model.run(self._inter_input, self._masks[bs][seq_len], start, end)
                 else:
                     self._submodel(self._inter_input)
                 torch.cuda.synchronize()
