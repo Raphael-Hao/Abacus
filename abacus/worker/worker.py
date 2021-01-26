@@ -9,37 +9,13 @@ import os
 import numpy as np
 from torch.cuda.streams import Stream
 
-from abacus.worker.network.resnet_splited import resnet50, resnet101, resnet152
-from abacus.worker.network.inception_splited import inception_v3
-from abacus.worker.network.vgg_splited import vgg16, vgg19
-from abacus.worker.network.bert import BertModel
-
 from abacus.utils import timestamp
 
-models_list = {
-    "resnet50": resnet50,
-    "resnet101": resnet101,
-    "resnet152": resnet152,
-    "inception_v3": inception_v3,
-    "vgg16": vgg16,
-    "vgg19": vgg19,
-    "bert": BertModel,
-}
 
-models_len = {
-    "resnet50": 18,
-    "resnet101": 35,
-    "resnet152": 52,
-    "inception_v3": 14,
-    "vgg16": 19,
-    "vgg19": 22,
-    "bert": 12,
-}
-
-
-class Worker(Process):
+class AbacusWorker(Process):
     def __init__(
         self,
+        args,
         model_name: str,
         supported_batchsize,
         supported_seqlen,
@@ -47,23 +23,26 @@ class Worker(Process):
     ):
         super().__init__()
         self._model_name = model_name
-        self._model_func = models_list[model_name]
+        self._model_func = args.models_list[model_name]
         self._pipe = recv_pipe
         self._supported_batchsize = supported_batchsize
         self._supported_seqlen = supported_seqlen
 
 
-class ProfilerWorker(Process):
+class ProfilerWorker(AbacusWorker):
     def __init__(
-        self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier
+        self,
+        args,
+        model_name: str,
+        supported_batchsize,
+        supported_seqlen,
+        recv_pipe,
+        barrier,
     ):
-        super().__init__()
-        self._model_name = model_name
-        self._model_func = models_list[model_name]
-        self._pipe = recv_pipe
+        super().__init__(
+            args, model_name, supported_batchsize, supported_seqlen, recv_pipe
+        )
         self._barrier = barrier
-        self._supported_batchsize = supported_batchsize
-        self._supported_seqlen = supported_seqlen
 
     def run(self) -> None:
         timestamp("worker", "starting")
@@ -136,11 +115,20 @@ class ProfilerWorker(Process):
                 raise NotImplementedError
 
 
-class ServerWorker(Process):
+class ServerWorker(AbacusWorker):
     def __ini__(
-        self, model_name: str, supported_batchsize, supported_seqlen, recv_pipe, barrier
+        self,
+        args,
+        model_name: str,
+        supported_batchsize,
+        supported_seqlen,
+        recv_pipe,
+        barrier,
     ):
-        pass
+        super().__init__(
+            args, model_name, supported_batchsize, supported_seqlen, recv_pipe
+        )
+        self._barrier = barrier
 
     def run(self) -> None:
         return super().run()

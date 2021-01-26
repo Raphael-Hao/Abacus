@@ -5,7 +5,8 @@
 import torch.multiprocessing as mp
 from abacus.profiler import profile
 from abacus.server import AbacusServer
-from abacus.config import parse_options
+from abacus.trainer import train_predictor
+from abacus.option import parse_options
 
 if __name__ == "__main__":
     args = parse_options()
@@ -16,3 +17,5 @@ if __name__ == "__main__":
     elif args.task == "serve":
         abacus_server = AbacusServer()
         abacus_server.send_query()
+    elif args.task == "train":
+        train_predictor(args)

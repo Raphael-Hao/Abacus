@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
-from abacus.worker.network.submod import *
+from abacus.network.submod import *
 
 __all__ = [
     'VGG', 'vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn',

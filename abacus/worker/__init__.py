@@ -2,4 +2,4 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
-from abacus.worker.worker import ProfilerWorker, ServerWorker, models_len
+from abacus.worker.worker import ProfilerWorker, ServerWorker

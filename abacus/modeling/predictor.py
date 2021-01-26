@@ -20,6 +20,7 @@ import datetime
 from sklearn.svm import LinearSVR
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+
 # from sklearn.datasets import make_regression
 from sklearn import linear_model
 
@@ -30,6 +31,7 @@ class MultiDNNPredictor:
     def __init__(
         self,
         model_select,
+        models_id,
         total_epochs=30,
         batch_size=16,
         data_fname=None,
@@ -41,6 +43,7 @@ class MultiDNNPredictor:
         self._batch_size = batch_size
         self._data_fname = data_fname
         self._split_ratio = split_ratio
+        self._models_id = models_id
         self._path = path
         self._data_path = os.path.join(self._path, "data")
         self._save_path = os.path.join(self._path, "model")
@@ -72,6 +75,7 @@ class MultiDNNPredictor:
 class MLPPredictor(MultiDNNPredictor):
     def __init__(
         self,
+        models_id,
         epoch=30,
         batch_size=16,
         lr=0.001,
@@ -81,9 +85,15 @@ class MLPPredictor(MultiDNNPredictor):
         path="/home/cwh/Lego",
         device=0,
     ):
-        super().__init__("mlp", epoch, batch_size, data_fname, split_ratio, path)
+        super().__init__(
+            "mlp", models_id, epoch, batch_size, data_fname, split_ratio, path
+        )
         self._train_loader, self._test_loader = load_torch_data(
-            self._data_fname, self._batch_size, self._split_ratio, self._data_path
+            self._data_fname,
+            self._batch_size,
+            self._split_ratio,
+            self._models_id,
+            self._data_path,
         )
         self._total_batches = len(self._train_loader)
         self._init_lr = lr
@@ -236,15 +246,18 @@ class MLPPredictor(MultiDNNPredictor):
 class LRPredictor(MultiDNNPredictor):
     def __init__(
         self,
+        models_id,
         epoch=30,
         batch_size=16,
         data_fname=None,
         split_ratio=0.8,
         path="/home/cwh/Lego",
     ):
-        super().__init__("lr", epoch, batch_size, data_fname, split_ratio, path)
+        super().__init__(
+            "lr", models_id, epoch, batch_size, data_fname, split_ratio, path
+        )
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
-            data_fname, split_ratio, self._data_path
+            self._data_fname, self._split_ratio, self._models_id, self._data_path
         )
 
     def train(self):
@@ -261,15 +274,18 @@ class LRPredictor(MultiDNNPredictor):
 class SVMPredictor(MultiDNNPredictor):
     def __init__(
         self,
+        models_id,
         epoch=30,
         batch_size=16,
         data_fname=None,
         split_ratio=0.8,
         path="/home/cwh/Lego",
     ):
-        super().__init__("svm", epoch, batch_size, data_fname, split_ratio, path)
+        super().__init__(
+            "svm", models_id, epoch, batch_size, data_fname, split_ratio, path
+        )
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
-            data_fname, split_ratio, self._data_path
+            self._data_fname, self._split_ratio, self._models_id, self._data_path
         )
 
     def train(self):
@@ -277,7 +293,6 @@ class SVMPredictor(MultiDNNPredictor):
             StandardScaler(), LinearSVR(random_state=0, tol=1e-5, max_iter=10000)
         )
         self._model = regr
-
         self._model.fit(self.trainX, self.trainY)
         pred = self._model.predict(self.testX)
         e = pred - self.testY

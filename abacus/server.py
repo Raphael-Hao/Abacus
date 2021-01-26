@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
-from abacus.worker import ServerWorker, models_len
+from abacus.worker import ServerWorker
 
 class AbacusServer():
     def __init__(self) -> None:

@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.jit.annotations import Optional
 from torch import Tensor
 from torchvision.models.utils import load_state_dict_from_url
-from abacus.worker.network.submod import *
+from abacus.network.submod import *
 
 __all__ = ["Inception3", "inception_v3", "InceptionOutputs", "_InceptionOutputs"]
 

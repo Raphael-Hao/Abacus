@@ -10,7 +10,7 @@ import random
 from tqdm import tqdm
 import csv
 
-from abacus.worker import ProfilerWorker, models_len
+from abacus.worker import ProfilerWorker
 from abacus.utils import gen_model_combinations, gen_partition, make_record
 
 
@@ -19,7 +19,7 @@ def profile(args):
     barrier = mp.Barrier(args.total_models + 1)
 
     for model_combination in gen_model_combinations(
-        args.all_profiled_models, args.total_models, args.profiled_combinations
+        args.models_name, args.total_models, args.profiled_combinations
     ):
         print(model_combination)
         profile_filename = model_combination[0]
@@ -45,6 +45,7 @@ def profile(args):
         for model_name in model_combination:
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ProfilerWorker(
+                args,
                 model_name,
                 args.supported_batchsize,
                 args.supported_seqlen,
@@ -59,7 +60,7 @@ def profile(args):
             for test_i in range(args.total_test):
                 model_config = []
                 for i in range(args.total_models):
-                    start, end = gen_partition(models_len[model_combination[i]])
+                    start, end = gen_partition(args.models_len[model_combination[i]])
                     seq_len = (
                         random.choice(args.supported_seqlen)
                         if model_combination[i] == "bert"
