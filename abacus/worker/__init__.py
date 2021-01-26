@@ -2,4 +2,5 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
-from abacus.worker.worker import ProfilerWorker, ServerWorker
+from abacus.worker.profiler_worker import ProfilerWorker
+from abacus.worker.server_worker import ServerWorker
