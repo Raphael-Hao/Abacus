@@ -8,10 +8,9 @@ import torch
 import torch.utils.data as Data
 import os
 import glob
-from abacus.config import args
 
 
-def get_feature_latency(data):
+def get_feature_latency(data, models_id):
     assert data.shape[1] == 13
 
     n = data.shape[0]
@@ -19,15 +18,15 @@ def get_feature_latency(data):
     latency_data = []
     for i in range(n):
         line = data[i]
-        model1 = args.models_id[line[0]]
+        model1 = models_id[line[0]]
         model1_record = np.array(
             [int(line[1]), int(line[2]), int(line[3]), int(line[4])]
         )
-        model2 = args.models_id[line[5]]
+        model2 = models_id[line[5]]
         model2_record = np.array(
             [int(line[6]), int(line[7]), int(line[8]), int(line[9])]
         )
-        model_feature = np.zeros([len(args.models_id)])
+        model_feature = np.zeros([len(models_id)])
         model_feature[model1] += 1
         model_feature[model2] += 1
         if model1 <= model2:
@@ -41,24 +40,28 @@ def get_feature_latency(data):
     return feature_data, latency_data
 
 
-def load_single_file(filepath):
+def load_single_file(filepath, models_id):
     data = pd.read_csv(filepath, header=0)
     data = data.values.tolist()
     total_data_num = len(data)
     print("{} samples loaded from {}".format(total_data_num, filepath))
     data = np.array(data)
-    return get_feature_latency(data)
+    return get_feature_latency(data, models_id)
 
 
 def load_torch_data(
-    model_combinatin, batch_size, train_ratio, data_path="/home/cwh/Lego/data"
+    model_combinatin,
+    batch_size,
+    train_ratio,
+    models_id,
+    data_path="/home/cwh/Lego/data",
 ):
     all_feature = None
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
             feature_data, latency_data = load_single_file(
-                os.path.join(data_path, filename)
+                os.path.join(data_path, filename), models_id
             )
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
@@ -69,7 +72,9 @@ def load_torch_data(
 
     else:
         filename = model_combinatin + ".csv"
-        all_feature, all_latency = load_single_file(os.path.join(data_path, filename))
+        all_feature, all_latency = load_single_file(
+            os.path.join(data_path, filename), models_id
+        )
 
     feature_len = len(all_feature)
     latency_len = len(all_latency)
@@ -92,14 +97,14 @@ def load_torch_data(
 
 
 def load_data_for_sklearn(
-    model_combinatin, split_ratio, data_path="/home/cwh/Lego/data"
+    model_combinatin, split_ratio, models_id, data_path="/home/cwh/Lego/data"
 ):
     all_feature = None
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
             feature_data, latency_data = load_single_file(
-                os.path.join(data_path, filename)
+                os.path.join(data_path, filename), models_id
             )
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
@@ -110,7 +115,9 @@ def load_data_for_sklearn(
 
     else:
         filename = model_combinatin + ".csv"
-        all_feature, all_latency = load_single_file(os.path.join(data_path, filename))
+        all_feature, all_latency = load_single_file(
+            os.path.join(data_path, filename), models_id
+        )
 
     X, y = (all_feature, all_latency)
     y = y / 1000

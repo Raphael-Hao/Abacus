@@ -3,14 +3,13 @@
 # Author: raphael hao
 
 from abacus.utils import gen_model_combinations
-from abacus.config import args
 from abacus.modeling.predictor import MLPPredictor, LRPredictor, SVMPredictor
 
 
-if __name__ == "__main__":
-
+def train_predictor(args):
     if args.mode == "all":
         predictor = MLPPredictor(
+            models_id = args.models_id,
             lr=args.hyper_params[args.mode][0],
             epoch=args.hyper_params[args.mode][1],
             batch_size=64,
