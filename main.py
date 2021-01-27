@@ -12,9 +12,8 @@ from abacus.background import background
 if __name__ == "__main__":
     args = parse_options()
     print(args)
-
     if args.task == "profile":
-        profile(args=args)
+        profile(run_config=args)
     elif args.task == "serve":
         abacus_server = AbacusServer()
         abacus_server.send_query()

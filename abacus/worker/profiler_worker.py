@@ -35,7 +35,7 @@ class ProfilerWorker(AbacusWorker):
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
         torch.device("cuda")
         torch.backends.cudnn.enabled = True
-        # torch.backends.cudnn.benchmark = True
+        torch.backends.cudnn.benchmark = True
         if self._model_name == "inception_v3":
             self._inputs = {
                 k: torch.rand(k, 3, 299, 299).half().cuda()

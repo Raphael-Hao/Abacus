@@ -9,24 +9,30 @@ import itertools
 import random
 from tqdm import tqdm
 import csv
+import os
 
+from abacus.option import RunConfig
 from abacus.worker import ProfilerWorker
 from abacus.utils import gen_model_combinations, gen_partition, make_record
 
 
-def profile(args):
+def profile(run_config: RunConfig):
     mp.set_start_method("spawn")
-    barrier = mp.Barrier(args.total_models + 1)
-
+    barrier = mp.Barrier(run_config.total_models + 1)
+    profile_data_path = os.path.join(run_config.data_path, "profile")
+    if not os.path.exists(profile_data_path):
+        os.mkdir(profile_data_path)
     for model_combination in gen_model_combinations(
-        args.models_name, args.total_models, args.profiled_combinations
+        run_config.models_name,
+        run_config.total_models,
+        run_config.profiled_combinations,
     ):
         print(model_combination)
         profile_filename = model_combination[0]
         for model_name in model_combination[1:]:
             profile_filename = profile_filename + "_" + model_name
         profile_filename += ".csv"
-        profile_file = open(profile_filename, "a+")
+        profile_file = open(os.path.join(profile_data_path, profile_filename), "w+")
         wr = csv.writer(profile_file, dialect="excel")
         profile_head = [
             "model",
@@ -34,7 +40,7 @@ def profile(args):
             "end",
             "bs",
             "seq_len",
-        ] * args.total_models + [
+        ] * run_config.total_models + [
             "median",
             "mean",
             "var",
@@ -45,10 +51,10 @@ def profile(args):
         for model_name in model_combination:
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ProfilerWorker(
-                args,
+                run_config,
                 model_name,
-                args.supported_batchsize,
-                args.supported_seqlen,
+                run_config.supported_batchsize,
+                run_config.supported_seqlen,
                 pipe_child,
                 barrier,
             )
@@ -56,13 +62,15 @@ def profile(args):
             worker_list.append((model_worker, pipe_parent))
         barrier.wait()
 
-        for bs_it in itertools.product(args.supported_batchsize, repeat=2):
-            for test_i in range(args.total_test):
+        for bs_it in itertools.product(run_config.supported_batchsize, repeat=2):
+            for test_i in range(run_config.total_test):
                 model_config = []
-                for i in range(args.total_models):
-                    start, end = gen_partition(args.models_len[model_combination[i]])
+                for i in range(run_config.total_models):
+                    start, end = gen_partition(
+                        run_config.models_len[model_combination[i]]
+                    )
                     seq_len = (
-                        random.choice(args.supported_seqlen)
+                        random.choice(run_config.supported_seqlen)
                         if model_combination[i] == "bert"
                         else 0
                     )
@@ -82,10 +90,10 @@ def profile(args):
                     )
                 barrier.wait()
                 record = []
-                with tqdm(range(args.test_loop)) as t:
+                with tqdm(range(run_config.test_loop)) as t:
                     for loop_i in t:
                         start_time = datetime.datetime.now()
-                        for i in range(args.total_models):
+                        for i in range(run_config.total_models):
                             _, model_pipe = worker_list[i]
                             model_pipe.send(
                                 (
@@ -105,12 +113,10 @@ def profile(args):
                         t.update(1)
                         record.append(elapsed_time_us)
 
-                profile_record = make_record(
-                    model_config, np.median(record), np.average(record), np.std(record)
-                )
+                profile_record = make_record(model_config, record)
                 wr.writerow(profile_record)
                 profile_file.flush()
-        for i in range(args.total_models):
+        for i in range(run_config.total_models):
             _, model_pipe = worker_list[i]
             model_pipe.send(("none", "terminate", -1, -1, -1, -1))
 
