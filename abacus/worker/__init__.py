@@ -4,3 +4,4 @@
 
 from abacus.worker.profiler_worker import ProfilerWorker
 from abacus.worker.server_worker import ServerWorker
+from abacus.worker.background_worker import BackgroundWorker
