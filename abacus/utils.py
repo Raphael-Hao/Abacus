@@ -11,6 +11,11 @@ import random
 def timestamp(name, stage):
     print("TIMESTAMP, %s, %s, %f" % (name, stage, time.time()), file=sys.stderr)
 
+def gen_background_combinations(models, background_combinations):
+    model_combinations = []
+    for pair in background_combinations:
+        model_combinations.append((models[pair[0]], models[pair[1]]))
+    return model_combinations
 
 def gen_model_combinations(models, combination_len, done_combinations=None):
     id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
