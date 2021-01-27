@@ -42,7 +42,7 @@ class BackgroundWorker(AbacusWorker):
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
         torch.device("cuda")
         torch.backends.cudnn.enabled = True
-        # torch.backends.cudnn.benchmark = True
+        torch.backends.cudnn.benchmark = True
         if self._model_name == "inception_v3":
             self._inputs = {
                 k: torch.rand(k, 3, 299, 299).half().cuda()
@@ -95,15 +95,15 @@ class BackgroundWorker(AbacusWorker):
                 while self.shared_flag.value == 1:
                     bs = random.choice(self._supported_batchsize)
                     seq_len = random.choice(self._supported_seqlen)
-                    self._model.run(
-                        self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
-                    )
+                    # self._model.run(
+                    #     self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
+                    # )
                 print("background terminated!")
                 return
             else:
                 while self.shared_flag.value == 1:
                     bs = random.choice(self._supported_batchsize)
-                    self._model(self._inputs[bs])
+                    # self._model(self._inputs[bs])
                 print("background terminated!")
                 return
             return

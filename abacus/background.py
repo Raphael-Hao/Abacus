@@ -60,6 +60,7 @@ def background(args):
 
         model_name = model_combination[0]
         bs = args.supported_batchsize[4]
+        print("batch size : {} sent to server".format(bs))
         seq_len = 0
         _, model_pipe = worker_list[0]
         with tqdm(range(args.total_test)) as t:
@@ -81,7 +82,7 @@ def background(args):
                 t.update(1)
                 wr.writerow((model_name, bs, seq_len, elapsed_time_us))
                 profile_file.flush()
-        
+
         model_pipe.send((None, "terminate", -1, -1))
 
         shared_flag.value = 0

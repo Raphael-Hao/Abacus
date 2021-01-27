@@ -3,6 +3,7 @@
 # Author: raphael hao
 
 import argparse
+import os
 from abacus.network.resnet_splited import resnet50, resnet101, resnet152
 from abacus.network.inception_splited import inception_v3
 from abacus.network.vgg_splited import vgg16, vgg19
@@ -14,6 +15,9 @@ class RunConfig:
         self.task = args.task
         # general configurations
         self.path = "/home/cwh/Project/Lego"
+        self.data_path = os.path.join(self.path, "data")
+        if not os.path.exists(self.data_path):
+            os.mkdir(self.data_path)
 
         self.models_name = [
             "resnet50",  # 0
@@ -46,9 +50,14 @@ class RunConfig:
         }
 
         self.total_models = 2
-        self.supported_batchsize = [1, 2, 4, 8, 16]
+        self.supported_batchsize = [
+            1,
+            2,
+            4,
+            8,
+            16,
+        ]
         self.supported_seqlen = [8, 16, 32, 64]
-
 
         if self.task != "train":
             self.models_list = {
@@ -75,33 +84,33 @@ class RunConfig:
             [profiled configurations]
             """
             self.profiled_combinations = [
-                (1, 3),
-                (0, 2),
-                (2, 5),
-                (0, 3),
-                (1, 2),
-                (3, 3),
-                (5, 5),
-                (4, 4),
-                (1, 5),
-                (2, 2),
-                (0, 4),
-                (1, 1),
-                (0, 0),
-                (4, 5),
-                (1, 4),
-                (0, 5),
-                (2, 3),
-                (3, 5),
-                (0, 1),
-                (3, 4),
-                (2, 4),
-                (6, 6),
-                (5, 6),
-                (4, 6),
-                (3, 6),
-                (2, 6),
-                (1, 6),
+                # (1, 3),
+                # (0, 2),
+                # (2, 5),
+                # (0, 3),
+                # (1, 2),
+                # (3, 3),
+                # (5, 5),
+                # (4, 4),
+                # (1, 5),
+                # (2, 2),
+                # (0, 4),
+                # (1, 1),
+                # (0, 0),
+                # (4, 5),
+                # (1, 4),
+                # (0, 5),
+                # (2, 3),
+                # (3, 5),
+                # (0, 1),
+                # (3, 4),
+                # (2, 4),
+                # (6, 6),
+                # (5, 6),
+                # (4, 6),
+                # (3, 6),
+                # (2, 6),
+                # (1, 6),
                 # (0, 6),
             ]
             self.total_test = 200
@@ -160,13 +169,13 @@ class RunConfig:
             }
         elif args.task == "background":
             self.background_combinations = [
-                (2, 0),
-                (2, 1),
-                (2, 2),
-                (2, 3),
-                (2, 4),
-                (2, 5),
-                (2, 6),
+                (0, 0),
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (0, 4),
+                (0, 5),
+                (0, 6),
             ]
             self.total_test = 1000
         else:
@@ -178,7 +187,10 @@ def parse_options():
     parser = argparse.ArgumentParser(description="Abacus")
 
     parser.add_argument(
-        "--task", type=str, default="profile", choices=["profile", "train", "serve", "background"]
+        "--task",
+        type=str,
+        default="profile",
+        choices=["profile", "train", "serve", "background"],
     )
 
     args = parser.parse_args()
