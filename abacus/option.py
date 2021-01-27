@@ -48,8 +48,9 @@ class RunConfig:
         self.total_models = 2
         self.supported_batchsize = [1, 2, 4, 8, 16]
         self.supported_seqlen = [8, 16, 32, 64]
-        if self.task != "train":
 
+
+        if self.task != "train":
             self.models_list = {
                 "resnet50": resnet50,
                 "resnet101": resnet101,
@@ -59,14 +60,20 @@ class RunConfig:
                 "vgg19": vgg19,
                 "bert": BertModel,
             }
-            """[server configuration]
-            """
+
         if self.task == "server":
+            """
+            [server configuration]
+            """
             self.serve_combination = (0, 1)
+            self.policy = "abacus"
+            self.policy = "FCFS"
+            self.policy = "SJF"
+
+        elif self.task == "profile":
             """
             [profiled configurations]
             """
-        elif self.task == "profile":
             self.profiled_combinations = [
                 (1, 3),
                 (0, 2),
@@ -99,6 +106,7 @@ class RunConfig:
             ]
             self.total_test = 200
             self.test_loop = 100
+
         elif args.task == "train":
             """
             [prediction model configurations]

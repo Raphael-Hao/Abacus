@@ -80,7 +80,6 @@ def profile(args):
                             model_config[i][4],
                         )
                     )
-
                 barrier.wait()
                 record = []
                 with tqdm(range(args.test_loop)) as t:
