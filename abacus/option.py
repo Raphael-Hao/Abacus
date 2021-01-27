@@ -9,7 +9,7 @@ def parse_options():
     parser = argparse.ArgumentParser(description="Abacus")
 
     parser.add_argument(
-        "--task", type=str, default="profile", choices=["profile", "train", "serve"]
+        "--task", type=str, default="profile", choices=["profile", "train", "serve", "background"]
     )
 
     args = parser.parse_args()
@@ -156,6 +156,17 @@ def parse_options():
             "inception_v3_vgg16": [0.001, 80],
             "resnet152_vgg16": [0.001, 80],
         }
+    elif args.task == "background":
+        args.background_combinations = [
+            (2, 0),
+            (2, 1),
+            (2, 2),
+            (2, 3),
+            (2, 4),
+            (2, 5),
+            (2, 6),
+        ]
+        args.total_test = 1000
     else:
         print("Not supported task, supported: server, profile, train")
         raise NotImplementedError
