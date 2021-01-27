@@ -14,9 +14,12 @@ from abacus.modeling.models import MLPregression
 
 
 class Scheduler(Process):
-    def __init__(self, models, predictor_path, barrier, queues, pipes) -> None:
+    def __init__(
+        self, policy, serve_combinations, predictor_path, barrier, queues, pipes
+    ) -> None:
+        self._policy = policy
         self._predictor = MLPregression()
-        self._predictor.load_state_dict(torch.load(predictor_path))
+        self._predictor.load_state_dict(torch.load(predictor_path, map_location="cpu"))
         self._barrier = barrier
         self._queues = queues
         self._pipes = pipes
@@ -26,6 +29,16 @@ class Scheduler(Process):
         self._scheduling_queries = {}
         while True:
             pass
+
+    def FCFS_schedule(self):
+        pass
+
+    def Abacus_schedule(self):
+        pass
+
+    def SJF_schedule(self):
+        pass
+
 
 class AbacusServer:
     def __init__(self, run_config: RunConfig) -> None:
@@ -59,5 +72,14 @@ class AbacusServer:
         self._barrier.wait()
         timestamp("All Server Workers", "Initialized")
         timestamp("Scheduler", "Initializing")
-
+        predictor_path = os.path.join(self._run_config.path, "model/predictor.ckpt")
+        self._scheduler = Scheduler(
+            policy=self._run_config.policy,
+            serve_combinations=self._run_config.serve_combination,
+            predictor_path=predictor_path,
+            barrier=self._barrier,
+            queues=self._queues,
+            pipes=self._pipes,
+        )
+        self._scheduler.start()
         timestamp("Scheduler", "Initialized")
