@@ -75,8 +75,8 @@ class RunConfig:
             [server configuration]
             """
             self.serve_combination = (0, 1)
-            self.policy = "abacus"
-            self.policy = "FCFS"
+            # self.policy = "Abacus"
+            # self.policy = "FCFS"
             self.policy = "SJF"
 
         elif self.task == "profile":
