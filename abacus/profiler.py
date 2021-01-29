@@ -62,7 +62,7 @@ def profile(run_config: RunConfig):
             worker_list.append((model_worker, pipe_parent))
         barrier.wait()
 
-        for bs_it in itertools.product(run_config.supported_batchsize, repeat=2):
+        for bs_it in itertools.product(run_config.supported_batchsize, repeat=run_config.total_models):
             for test_i in range(run_config.total_test):
                 model_config = []
                 for i in range(run_config.total_models):

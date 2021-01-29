@@ -33,6 +33,7 @@ def gen_model_combinations(models, combination_len, done_combinations=None):
         for id in id_comb:
             model_comb.append(models[id])
         model_combinations.append(model_comb)
+    print(model_combinations)
     return model_combinations
 
 
