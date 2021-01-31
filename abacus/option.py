@@ -14,7 +14,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.device = 1
+        self.device = 0
         self.path = "/home/cwh/Project/Lego"
         # self.path = "/home/cwh/Lego"
         self.data_path = os.path.join(self.path, "data")
