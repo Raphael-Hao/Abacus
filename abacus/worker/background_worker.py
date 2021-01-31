@@ -89,38 +89,37 @@ class BackgroundWorker(AbacusWorker):
 
         torch.cuda.synchronize()
         self._barrier.wait()
-
-        if self.isBackground:
-            if self._model_name == "bert":
-                while self.shared_flag.value == 1:
-                    bs = random.choice(self._supported_batchsize)
-                    seq_len = random.choice(self._supported_seqlen)
-                    # self._model.run(
-                    #     self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
-                    # )
-                print("background terminated!")
-                return
-            else:
-                while self.shared_flag.value == 1:
-                    bs = random.choice(self._supported_batchsize)
-                    # self._model(self._inputs[bs])
-                print("background terminated!")
-                return
-            return
-
-        while True:
-            model_name, action, bs, seq_len = self._pipe.recv()
-
-            if action == "forward":
+        with torch.no_grad():
+            if self.isBackground:
                 if self._model_name == "bert":
-                    self._model.run(
-                        self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
-                    )
+                    while self.shared_flag.value == 1:
+                        bs = random.choice(self._supported_batchsize)
+                        seq_len = random.choice(self._supported_seqlen)
+                        self._model.run(
+                            self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
+                        )
+                    print("background terminated!")
+                    return
                 else:
-                    self._model(self._inputs[bs])
-                torch.cuda.synchronize()
-                self._barrier2.wait()
-            elif action == "terminate":
-                break
-            else:
-                raise NotImplementedError
+                    while self.shared_flag.value == 1:
+                        bs = random.choice(self._supported_batchsize)
+                        self._model(self._inputs[bs])
+                    print("background terminated!")
+                    return
+
+            while True:
+                model_name, action, bs, seq_len = self._pipe.recv()
+
+                if action == "forward":
+                    if self._model_name == "bert":
+                        self._model.run(
+                            self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
+                        )
+                    else:
+                        self._model(self._inputs[bs])
+                    torch.cuda.synchronize()
+                    self._barrier2.wait()
+                elif action == "terminate":
+                    return
+                else:
+                    raise NotImplementedError

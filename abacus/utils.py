@@ -38,8 +38,8 @@ def gen_model_combinations(models, combination_len, done_combinations=None):
 
 
 def gen_partition(model_len):
-    start = random.randrange(0, model_len - 4)
-    end = start + 4 + random.randrange(0, model_len - start - 4)
+    start = random.randrange(0, model_len - 3)
+    end = start + 4 + random.randrange(0, model_len - start - 3)
     if start < end:
         return start, end
     else:
