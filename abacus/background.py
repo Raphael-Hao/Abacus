@@ -4,17 +4,15 @@
 
 import torch.multiprocessing as mp
 import datetime
-import numpy as np
-import itertools
-import random
 from tqdm import tqdm
 import csv
 
 from abacus.worker import BackgroundWorker
+from abacus.option import RunConfig
 from abacus.utils import gen_background_combinations, gen_partition, make_record
 
 
-def background(args):
+def background(args:RunConfig):
     mp.set_start_method("spawn")
     barrier = mp.Barrier(args.total_models + 1)
     barrier2 = mp.Barrier(2)

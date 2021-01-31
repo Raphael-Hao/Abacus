@@ -93,8 +93,8 @@ class BackgroundWorker(AbacusWorker):
             if self.isBackground:
                 if self._model_name == "bert":
                     while self.shared_flag.value == 1:
-                        bs = random.choice(self._supported_batchsize)
-                        seq_len = random.choice(self._supported_seqlen)
+                        bs = random.choice([1, 16])
+                        seq_len = random.choice([8, 64])
                         self._model.run(
                             self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
                         )
@@ -102,7 +102,7 @@ class BackgroundWorker(AbacusWorker):
                     return
                 else:
                     while self.shared_flag.value == 1:
-                        bs = random.choice(self._supported_batchsize)
+                        bs = random.choice([1, 16])
                         self._model(self._inputs[bs])
                     print("background terminated!")
                     return
