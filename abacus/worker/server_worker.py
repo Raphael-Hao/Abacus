@@ -16,28 +16,30 @@ from abacus.worker.worker import AbacusWorker
 class ServerWorker(AbacusWorker):
     def __init__(
         self,
-        args,
+        run_config,
         model_name: str,
         supported_batchsize,
         supported_seqlen,
         recv_pipe,
         barrier,
+        warmup_barrier,
     ):
         super().__init__(
-            args, model_name, supported_batchsize, supported_seqlen, recv_pipe
+            run_config, model_name, supported_batchsize, supported_seqlen, recv_pipe
         )
         self._barrier = barrier
+        self._warmup_barrier = warmup_barrier
 
     def run(self) -> None:
         timestamp("Server Woker for {}".format(self._model_name), "Starting")
         os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
         os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
-        torch.device("cuda")
+        torch.device("cuda:{}".format(self._device))
         torch.backends.cudnn.enabled = True
         if self._model_name == "inception_v3":
             self._inputs = {
-                k: torch.rand(k, 3, 299, 299).half().cuda()
+                k: torch.rand(k, 3, 299, 299).half().cuda(self._device)
                 for k in self._supported_batchsize
             }
         elif self._model_name == "bert":
@@ -45,24 +47,24 @@ class ServerWorker(AbacusWorker):
                 k: {
                     seqlen: torch.LongTensor(np.random.rand(k, seqlen, 768))
                     .half()
-                    .cuda()
+                    .cuda(self._device)
                     for seqlen in self._supported_seqlen
                 }
                 for k in self._supported_batchsize
             }
             self._masks = {
                 k: {
-                    seqlen: torch.LongTensor(np.zeros((k, 1, 1, seqlen))).half().cuda()
+                    seqlen: torch.LongTensor(np.zeros((k, 1, 1, seqlen))).half().cuda(self._device)
                     for seqlen in self._supported_seqlen
                 }
                 for k in self._supported_batchsize
             }
         else:
             self._inputs = {
-                k: torch.rand(k, 3, 224, 224).half().cuda()
+                k: torch.rand(k, 3, 224, 224).half().cuda(self._device)
                 for k in self._supported_batchsize
             }
-        self._model = self._model_func().half().cuda().eval()
+        self._model = self._model_func().half().cuda(self._device).eval()
         if self._model_name != "bert":
             self._submodules = self._model.get_submodules()
             self._total_module = len(self._submodules)
@@ -80,35 +82,36 @@ class ServerWorker(AbacusWorker):
                     self._model(self._inputs[k])
 
         torch.cuda.synchronize()
-        self._barrier.wait()
-        while True:
-            action, start, end, bs, seq_len = self._pipe.recv()
-            if action == "new":
-                if self._model_name == "bert":
-                    self._inter_input = self._model.run(
-                        self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, end
-                    )
+        self._warmup_barrier.wait()
+        with torch.no_grad():
+            while True:
+                action, start, end, bs, seq_len = self._pipe.recv()
+                if action == "new":
+                    if self._model_name == "bert":
+                        self._inter_input = self._model.run(
+                            self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, end
+                        )
+                    else:
+                        submodel = nn.Sequential(*self._submodules[:end])
+                        self._inter_input = submodel(self._inputs[bs])
+                    torch.cuda.synchronize()
+                    self._barrier.wait()
+                elif action == "inter":
+                    if self._model_name == "bert":
+                        self._inter_input = self._model.run(
+                            self._inter_input, self._masks[bs][seq_len], start, end
+                        )
+                    else:
+                        submodel = nn.Sequential(*self._submodules[start:end])
+                        self._inter_input = self._submodel(self._inter_input)
+                    torch.cuda.synchronize()
+                    self._barrier.wait()
+                elif action == "terminate":
+                    break
                 else:
-                    submodel = nn.Sequential(*self._submodules[:end])
-                    self._inter_input = submodel(self._inputs[bs])
-                torch.cuda.synchronize()
-                self._barrier.wait()
-            elif action == "inter":
-                if self._model_name == "bert":
-                    self._inter_input = self._model.run(
-                        self._inter_input, self._masks[bs][seq_len], start, end
+                    print(
+                        "Not supported action {} for worker{}".format(
+                            action, self._model_name
+                        )
                     )
-                else:
-                    submodel = nn.Sequential(*self._submodules[start:end])
-                    self._inter_input = self._submodel(self._inter_input)
-                torch.cuda.synchronize()
-                self._barrier.wait()
-            elif action == "terminate":
-                break
-            else:
-                print(
-                    "Not supported action {} for worker{}".format(
-                        action, self._model_name
-                    )
-                )
-                raise NotImplementedError
+                    raise NotImplementedError

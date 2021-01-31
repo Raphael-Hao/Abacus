@@ -10,15 +10,17 @@ from abacus.option import parse_options
 from abacus.background import background
 
 if __name__ == "__main__":
-    args = parse_options()
-    print(args)
-    if args.task == "profile":
-        profile(run_config=args)
-    elif args.task == "serve":
-        abacus_server = AbacusServer()
-        abacus_server.send_query()
-    elif args.task == "train":
-        train_predictor(args)
-    elif args.task == "background":
-        background(args=args)
+    run_config = parse_options()
+    print(run_config)
+    if run_config.task == "profile":
+        profile(run_config=run_config)
+    elif run_config.task == "serve":
+        abacus_server = AbacusServer(run_config=run_config)
+        abacus_server.start_up()
+        abacus_server.start_test()
+        abacus_server.stop_test()
+    elif run_config.task == "train":
+        train_predictor(run_config)
+    elif run_config.task == "background":
+        background(args=run_config)
 
