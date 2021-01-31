@@ -9,7 +9,6 @@ from abacus.network.inception_splited import inception_v3
 from abacus.network.vgg_splited import vgg16, vgg19
 from abacus.network.bert import BertModel
 
-
 class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
