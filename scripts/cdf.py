@@ -44,7 +44,10 @@ def load_all_std_deviation(
 
 all_std_deviation = load_all_std_deviation()
 #%%
-
+print(np.percentile(all_std_deviation, 80))
+print(np.percentile(all_std_deviation, 90))
+print(np.percentile(all_std_deviation, 99))
+print(np.mean(all_std_deviation))
 print(np.max(all_std_deviation))
 print(np.min(all_std_deviation))
 

@@ -271,7 +271,7 @@ class Scheduler(Process):
                             start_pos = op_poses[i]
             ##FIXME check if append the qos query to abandoned one
         elif total_colocated == 3:
-            pass
+            raise NotImplementedError
 
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
