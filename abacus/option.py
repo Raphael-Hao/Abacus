@@ -80,9 +80,10 @@ class RunConfig:
             # self.policy = "SJF"
             # self.policy = "FCFS"
             self.threshold = 1
-            self.search_ways = 1
-            self.total_queries = 10
+            self.search_ways = 8
+            self.total_queries = 1000
             self.average_duration = 100
+            self.abandon = False
 
         elif self.task == "profile":
             """
