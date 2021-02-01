@@ -105,7 +105,7 @@ class ServerWorker(AbacusWorker):
                         )
                     else:
                         submodel = nn.Sequential(*self._submodules[start:end])
-                        self._inter_input = self._submodel(self._inter_input)
+                        self._inter_input = submodel(self._inter_input)
                     torch.cuda.synchronize()
                     self._barrier[barrier_id].wait()
                 elif action == "terminate":
