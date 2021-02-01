@@ -36,11 +36,14 @@ class Query:
         self.op_len = self.MODELS_LEN[model_id]
         self.start_stamp = time.time()
         self.qos_targt = qos_target
+        self.state = "new"
 
     def remain_ops(self):
         return self.op_len - self.end_pos
 
     def set_op_pos(self, new_pos):
+        if self.end_pos != 0:
+            self.state = "inter"
         self.start_pos = self.end_pos
         if new_pos == -1:
             self.end_pos = self.op_len
@@ -54,6 +57,9 @@ class Query:
     def get_headromm(self):
         return self.qos_targt - (time.time() - self.start_stamp) * 1000
 
+    def if_processed(self):
+        return self.end_pos == self.op_len
+
     @property
     def latency_ms(self):
         return (time.time() - self.start_stamp).microseconds * 1000
@@ -64,9 +70,11 @@ class AbacusServer:
         self._run_config = run_config
         self._warmup_barrier = mp.Barrier(run_config.total_models + 1)
         if self._run_config.policy == "Abacus":
-            self._barrier = mp.Barrier(run_config.total_models + 1)
+            self._barrier = []
+            for i in range(run_config.total_models):
+                self._barrier.append(mp.Barrier(i + 2))
         else:
-            self._barrier = mp.Barrier(2)
+            self._barrier = [mp.Barrier(2)]
         self._stop_flag = mp.RawValue("i", 1)
         self._workers = {}
         self._queues = {}
@@ -198,9 +206,12 @@ class Scheduler(Process):
         self._predictor.eval()
         timestamp("Scheduler", "Ready")
         self._scheduling_queries = {key: None for key in self._serve_combination}
+        self._scheduled_queries = {key: None for key in self._serve_combination}
+
         if self._policy == "Abacus":
             self._schedule_func = self.Abacus_schedule
-            self._schedule_flag = False
+            self._schedule_flag = -1
+
         elif self._policy == "SJF":
             self._schedule_func = self.SJF_schedule
         elif self._policy == "FCFS":
@@ -224,8 +235,6 @@ class Scheduler(Process):
                 self._scheduling_queries[model_id] = self._queues[model_id].get()
 
     def Abacus_schedule(self):
-        if self._schedule_flag:
-            self._barrier.wait()
         waiting_scheduling, abandoned_scheduling = self.urgent_sort()
         qos_id = waiting_scheduling[0][0]
         qos = waiting_scheduling[0][1]
@@ -237,19 +246,33 @@ class Scheduler(Process):
                 latency = self._predictor(
                     self.get_layer_feature(0, 0, 1, query_l=qos_query)[1]
                 )[0]
+            self.Abacus_reset()
             if qos < latency:
                 abandoned_scheduling.append(qos_id)
+            else:
+                self.Abacus_reset()
+                self._pipes[qos_id].send(
+                    qos_query.state,
+                    0,
+                    qos_query.start_pos,
+                    qos_query.end_pos,
+                    qos_query.batch_size,
+                    qos_query.seq_len,
+                )
+                self._scheduled_queries[qos_id] = qos_query
+                self._schedule_flag = 0
         elif total_colocated == 2:
             bg_id = waiting_scheduling[1][0]
             bg_query: Query = self._scheduling_queries[bg_id]
             start_pos = bg_query.end_pos
             end_pos = bg_query.op_len
-            search_ways = (
-                self._search_ways
-                if (bg_query.end_pos - bg_query.start_pos + 1) > self._search_ways
-                else (bg_query.end_pos - bg_query.start_pos + 1)
-            )
+            searched_pos = None
             while start_pos < end_pos:
+                search_ways = (
+                    self._search_ways
+                    if (bg_query.end_pos - bg_query.start_pos) > self._search_ways
+                    else (bg_query.end_pos - bg_query.start_pos)
+                )
                 op_poses, features = self.get_layer_feature(
                     start_pos=bg_query.start_pos,
                     end_pos=bg_query.end_pos,
@@ -265,12 +288,57 @@ class Scheduler(Process):
                         end_pos = op_poses[i]
                     else:
                         if headroom < self._threashold:
-                            bg_query.set_op_pos(op_poses[i])
+                            searched_pos = op_poses[i]
                             break
                         else:
                             start_pos = op_poses[i]
-            ##FIXME check if append the qos query to abandoned one
+            self.Abacus_reset()
+            if searched_pos is None:
+                abandoned_scheduling.append(qos_id)
+            else:
+                bg_query.set_op_pos(searched_pos)
+
+                if searched_pos > 0:
+                    self._pipes[qos_id].send(
+                        (
+                            qos_query.state,
+                            1,
+                            qos_query.start_pos,
+                            qos_query.end_pos,
+                            qos_query.batch_size,
+                            qos_query.seq_len,
+                        )
+                    )
+                    self._scheduled_queries[qos_id] = qos_query
+                    self._pipes[bg_id].send(
+                        (
+                            bg_query.state,
+                            1,
+                            bg_query.start_pos,
+                            bg_query.end_pos,
+                            bg_query.batch_size,
+                            bg_query.seq_len,
+                        )
+                    )
+                    if bg_query.if_processed():
+                        self._scheduled_queries[bg_id] = bg_query
+                    self._schedule_flag = 1
+                elif searched_pos == 0:
+                    self._pipes[qos_id].send(
+                        (
+                            qos_query.state,
+                            0,
+                            qos_query.start_pos,
+                            qos_query.end_pos,
+                            qos_query.batch_size,
+                            qos_query.seq_len,
+                        )
+                    )
+                    self._scheduled_queries[qos_id] = qos_query
+                    self._schedule_flag = 0
         elif total_colocated == 3:
+            raise NotImplementedError
+        else:
             raise NotImplementedError
 
         for model_id in abandoned_scheduling:
@@ -280,6 +348,18 @@ class Scheduler(Process):
             )
             self.clean_scheduled_queries(model_id=model_id)
         self._result_file.flush()
+
+    def Abacus_reset(self):
+        if self._schedule_flag >= 0:
+            self._barrier[self._schedule_flag].wait()
+            self._schedule_flag = -1
+        for model_id, query in self._scheduled_queries:
+            if query is not None:
+                self._wr.writerow(
+                    [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
+                )
+                self._scheduled_queries[model_id] = None
+                self.clean_scheduled_queries(model_id=model_id)
 
     def FCFS_schedule(self):
         waiting_scheduling = {}
@@ -299,9 +379,16 @@ class Scheduler(Process):
         for model_id, _ in waiting_scheduling:
             query: Query = self._scheduling_queries[model_id]
             self._pipes[model_id].send(
-                ("new", query.start_pos, query.end_pos, query.batch_size, query.seq_len)
+                (
+                    "new",
+                    0,
+                    query.start_pos,
+                    query.end_pos,
+                    query.batch_size,
+                    query.seq_len,
+                )
             )
-            self._barrier.wait()
+            self._barrier[0].wait()
             self.clean_scheduled_queries(model_id=model_id)
             self._wr.writerow(
                 np.array(
@@ -340,9 +427,16 @@ class Scheduler(Process):
         for model_id, _ in waiting_scheduling:
             query: Query = self._scheduling_queries[model_id]
             self._pipes[model_id].send(
-                ("new", query.start_pos, query.end_pos, query.batch_size, query.seq_len)
+                (
+                    "new",
+                    0,
+                    query.start_pos,
+                    query.end_pos,
+                    query.batch_size,
+                    query.seq_len,
+                )
             )
-            self._barrier.wait()
+            self._barrier[0].wait()
             self._wr.writerow(
                 np.array(
                     [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
@@ -411,7 +505,7 @@ class Scheduler(Process):
         query_m: Query = None,
         query_r: Query = None,
     ):
-        step = (end_pos - start_pos + 1) // search_ways
+        step = (end_pos - start_pos) // (search_ways + 1)
         poses = []
         input_feature = torch.zeros(search_ways, self._models_feature)
         input_feature[0:search_ways, query_l.model_id] += 1
