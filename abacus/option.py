@@ -14,7 +14,7 @@ class RunConfig:
         self.task = args.task
         # general configurations
         self.device = 0
-        self.path = "/home/cwh/Project/Lego"
+        self.path = "/home/cwh/Lego"
         # self.path = "/home/cwh/Lego"
         self.data_path = os.path.join(self.path, "data")
         if not os.path.exists(self.data_path):
@@ -76,13 +76,14 @@ class RunConfig:
             [server configuration]
             """
             self.serve_combination = (0, 1)
-            # self.policy = "Abacus"
-            self.policy = "SJF"
+            self.policy = "Abacus"
+            # self.policy = "SJF"
             # self.policy = "FCFS"
             self.threshold = 1
-            self.search_ways = 2
-            self.total_queries = 10
+            self.search_ways = 8
+            self.total_queries = 1000
             self.average_duration = 100
+            self.abandon = False
 
         elif self.task == "profile":
             """
