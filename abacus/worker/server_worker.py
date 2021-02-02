@@ -54,7 +54,9 @@ class ServerWorker(AbacusWorker):
             }
             self._masks = {
                 k: {
-                    seqlen: torch.LongTensor(np.zeros((k, 1, 1, seqlen))).half().cuda(self._device)
+                    seqlen: torch.LongTensor(np.zeros((k, 1, 1, seqlen)))
+                    .half()
+                    .cuda(self._device)
                     for seqlen in self._supported_seqlen
                 }
                 for k in self._supported_batchsize
@@ -85,7 +87,7 @@ class ServerWorker(AbacusWorker):
         self._warmup_barrier.wait()
         with torch.no_grad():
             while True:
-                action, start, end, bs, seq_len = self._pipe.recv()
+                action, barrier_id, start, end, bs, seq_len = self._pipe.recv()
                 if action == "new":
                     if self._model_name == "bert":
                         self._inter_input = self._model.run(
@@ -95,7 +97,7 @@ class ServerWorker(AbacusWorker):
                         submodel = nn.Sequential(*self._submodules[:end])
                         self._inter_input = submodel(self._inputs[bs])
                     torch.cuda.synchronize()
-                    self._barrier.wait()
+                    self._barrier[barrier_id].wait()
                 elif action == "inter":
                     if self._model_name == "bert":
                         self._inter_input = self._model.run(
@@ -103,9 +105,9 @@ class ServerWorker(AbacusWorker):
                         )
                     else:
                         submodel = nn.Sequential(*self._submodules[start:end])
-                        self._inter_input = self._submodel(self._inter_input)
+                        self._inter_input = submodel(self._inter_input)
                     torch.cuda.synchronize()
-                    self._barrier.wait()
+                    self._barrier[barrier_id].wait()
                 elif action == "terminate":
                     break
                 else:
