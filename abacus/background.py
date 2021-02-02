@@ -75,7 +75,7 @@ def background(args:RunConfig):
                 barrier2.wait()
                 elapsed_time_us = (
                     datetime.datetime.now() - start_time
-                ).microseconds
+                ).total_seconds() * 1e6
                 t.set_postfix(elapsed=elapsed_time_us)
                 t.update(1)
                 wr.writerow((model_name, bs, seq_len, elapsed_time_us))

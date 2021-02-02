@@ -13,7 +13,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.device = 0
+        self.device = 1
         self.path = "/home/cwh/Lego"
         # self.path = "/home/cwh/Lego"
         self.data_path = os.path.join(self.path, "data")
@@ -80,10 +80,11 @@ class RunConfig:
             # self.policy = "SJF"
             # self.policy = "FCFS"
             self.threshold = 1
+            self.qos_target = 50
             self.search_ways = 8
             self.total_queries = 1000
             self.average_duration = 100
-            self.abandon = False
+            self.abandon = True
 
         elif self.task == "profile":
             """
@@ -225,39 +226,39 @@ class RunConfig:
             ]
 
             # self.mode = "onebyone"
-            # self.mode = "single"
-            self.mode = "all"
-            self.model_combination = "resnet152_resnet152"
+            self.mode = "single"
+            # self.mode = "all"
+            self.model_combination = "vgg16_vgg16"
             self.hyper_params = {
-                "all": [0.0016, 200],
-                "resnet101_inception_v3": [0.001, 80],
-                "bert_bert": [0.001, 80],
-                "vgg19_bert": [0.001, 80],
-                "resnet50_resnet152": [0.001, 80],
-                "resnet101_bert": [0.001, 80],
-                "resnet152_vgg19": [0.001, 80],
-                "resnet50_inception_v3": [0.001, 80],
-                "resnet101_resnet152": [0.001, 80],
-                "inception_v3_inception_v3": [0.001, 80],
-                "vgg19_vgg19": [0.001, 80],
-                "vgg16_vgg16": [0.001, 80],
-                "resnet101_vgg19": [0.001, 80],
-                "inception_v3_bert": [0.001, 80],
-                "resnet152_resnet152": [0.001, 80],
-                "resnet50_vgg16": [0.001, 80],
-                "resnet101_resnet101": [0.001, 80],
-                "resnet50_resnet50": [0.001, 80],
-                "resnet152_bert": [0.001, 80],
-                "vgg16_vgg19": [0.001, 80],
-                "resnet101_vgg16": [0.001, 80],
-                "resnet50_vgg19": [0.001, 80],
-                "resnet152_inception_v3": [0.001, 80],
-                "inception_v3_vgg19": [0.001, 80],
-                "resnet50_resnet101": [0.001, 80],
-                "vgg16_bert": [0.001, 80],
-                "resnet50_bert": [0.001, 80],
-                "inception_v3_vgg16": [0.001, 80],
-                "resnet152_vgg16": [0.001, 80],
+                "all": [0.002, 300],
+                "resnet101_inception_v3": [0.001, 100],
+                "bert_bert": [0.001, 100],
+                "vgg19_bert": [0.001, 100],
+                "resnet50_resnet152": [0.001, 100],
+                "resnet101_bert": [0.001, 100],
+                "resnet152_vgg19": [0.001, 100],
+                "resnet50_inception_v3": [0.001, 100],
+                "resnet101_resnet152": [0.001, 100],
+                "inception_v3_inception_v3": [0.001, 100],
+                "vgg19_vgg19": [0.001, 100],
+                "vgg16_vgg16": [0.001, 150],
+                "resnet101_vgg19": [0.001, 100],
+                "inception_v3_bert": [0.001, 100],
+                "resnet152_resnet152": [0.001, 200],
+                "resnet50_vgg16": [0.001, 100],
+                "resnet101_resnet101": [0.001, 100],
+                "resnet50_resnet50": [0.001, 100],
+                "resnet152_bert": [0.001, 100],
+                "vgg16_vgg19": [0.001, 100],
+                "resnet101_vgg16": [0.001, 100],
+                "resnet50_vgg19": [0.001, 100],
+                "resnet152_inception_v3": [0.001, 100],
+                "inception_v3_vgg19": [0.001, 100],
+                "resnet50_resnet101": [0.001, 100],
+                "vgg16_bert": [0.001, 100],
+                "resnet50_bert": [0.001, 100],
+                "inception_v3_vgg16": [0.001, 100],
+                "resnet152_vgg16": [0.001, 100],
             }
         elif args.task == "background":
             self.background_combinations = [
