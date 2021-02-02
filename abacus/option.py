@@ -227,9 +227,10 @@ class RunConfig:
 
             # self.mode = "onebyone"
             # self.mode = "single"
-            # self.mode = "all"
-            self.mode = "lr"
-            # self.mode = "svm"
+            self.mode = "all"
+            self.modeling = "lr"
+            # self.modeling = "svm"
+            # self.modeling = "mlp"
             self.model_combination = "vgg16_vgg19"
             self.hyper_params = {
                 "all": [0.002, 300],
@@ -251,7 +252,7 @@ class RunConfig:
                 "resnet101_resnet101": [0.001, 100],
                 "resnet50_resnet50": [0.001, 100],
                 "resnet152_bert": [0.001, 100],
-                "vgg16_vgg19": [0.001, 150],
+                "vgg16_vgg19": [0.001, 200],
                 "resnet101_vgg16": [0.001, 100],
                 "resnet50_vgg19": [0.001, 100],
                 "resnet152_inception_v3": [0.001, 100],
