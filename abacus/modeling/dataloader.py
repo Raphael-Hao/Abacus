@@ -114,7 +114,6 @@ def load_data_for_sklearn(
         all_feature, all_latency = load_single_file(
             os.path.join(data_path, filename), models_id
         )
-
     X, y = (all_feature, all_latency)
     y = y / 1000
     data = np.concatenate((X, np.reshape(y, (-1, 1))), axis=1)
@@ -123,10 +122,18 @@ def load_data_for_sklearn(
     split = int(split_ratio * n)
     train = data[:split, :]
     test = data[split:, :]
-    trainX = train[:, :16]
-    trainY = train[:, 16:].reshape(-1)
-    testX = test[:, :16]
-    testY = test[:, 16:].reshape(-1)
+    trainX = train[:, :15]
+    trainY = train[:, 15:].reshape(-1)
+    testX = test[:, :15]
+    testY = test[:, 15:].reshape(-1)
+    print("trainx:")
+    print(trainX)
+    print("trainy:")
+    print(trainY)
+    print("testx:")
+    print(testX)
+    print("testy:")
+    print(testY)
     return trainX, trainY, testX, testY
 
 

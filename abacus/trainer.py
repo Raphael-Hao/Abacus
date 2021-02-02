@@ -6,10 +6,11 @@ from abacus.utils import gen_model_combinations
 from abacus.modeling.predictor import MLPPredictor, LRPredictor, SVMPredictor
 from abacus.option import RunConfig
 
-def train_predictor(args:RunConfig):
+
+def train_predictor(args: RunConfig):
     if args.mode == "all":
         predictor = MLPPredictor(
-            models_id = args.models_id,
+            models_id=args.models_id,
             lr=args.hyper_params[args.mode][0],
             epoch=args.hyper_params[args.mode][1],
             batch_size=128,
@@ -21,7 +22,7 @@ def train_predictor(args:RunConfig):
         predictor.train()
     elif args.mode == "single":
         predictor = MLPPredictor(
-            models_id= args.models_id,
+            models_id=args.models_id,
             epoch=args.hyper_params[args.model_combination][1],
             batch_size=8,
             lr=args.hyper_params[args.model_combination][0],
@@ -40,7 +41,7 @@ def train_predictor(args:RunConfig):
                 data_filename = data_filename + "_" + model_name
             print(data_filename)
             predictor = MLPPredictor(
-                models_id= args.models_id,
+                models_id=args.models_id,
                 lr=args.hyper_params[data_filename][0],
                 epoch=args.hyper_params[data_filename][1],
                 batch_size=8,
@@ -50,5 +51,23 @@ def train_predictor(args:RunConfig):
                 device=args.device,
             )
             predictor.train()
+    elif args.mode == "lr":
+        predictor = LRPredictor(
+            models_id=args.models_id,
+            epoch=200,
+            batch_size=16,
+            data_fname="all",
+            path=args.path,
+        )
+        predictor.train()
+    elif args.mode == "svm":
+        predictor = SVMPredictor(
+            models_id=args.models_id,
+            epoch=200,
+            batch_size=16,
+            data_fname="all",
+            path=args.path,
+        )
+        predictor.train()
     else:
         raise NotImplementedError

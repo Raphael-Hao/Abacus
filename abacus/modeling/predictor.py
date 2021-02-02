@@ -210,12 +210,16 @@ class MLPPredictor(MultiDNNPredictor):
         plt.show()
         self.save_model()
         self._model.cpu().eval()
-        test_input = torch.rand((1, 15))
-        start_time = time.time()
-        for i in range(1000):
-            test_output = self._model(test_input)
-        end_time = time.time() - start_time
-        print("Inference time: {}".format(end_time * 1000))
+        with torch.no_grad():
+            for bs in range(16):
+                test_input = torch.rand((bs + 1, 15))
+                start_time = time.time()
+                print("start time:".format(start_time))
+                for i in range(1000):
+                    test_output = self._model(test_input)
+                    # print(test_output[0])
+                end_time = time.time() - start_time
+                print("batch size: {} Inference time: {} ms".format(bs, end_time))
 
     def calc_learning_rate(self, epoch, batch=0):
         if self._lr_schedule_type == "cosine":
