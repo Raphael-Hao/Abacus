@@ -29,7 +29,7 @@ def load_single_file(filepath):
 
 
 def load_all_std_deviation(
-    data_path="/home/cwh/Lego/data/profile/2in7",
+    data_path="/home/cwh/Lego/data/profile/3in4",
 ):
     all_std_deviation = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
