@@ -33,11 +33,13 @@ def load_all_std_deviation(
 ):
     all_std_deviation = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
-        filepath = os.path.join(data_path, filename)
-        data = pd.read_csv(filepath, header=0)
+        print(filename)
+        # filepath = os.path.join(data_path, filename)
+        # print(filepath)
+        data = pd.read_csv(filename, header=0)
         data = data.values.tolist()
         total_data_num = len(data)
-        print("{} samples loaded from {}".format(total_data_num, filepath))
+        # print("{} samples loaded from {}".format(total_data_num, filepath))
         data = np.array(data)
         n = data.shape[0]
         std_deviation = []

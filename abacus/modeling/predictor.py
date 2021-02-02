@@ -15,7 +15,7 @@ from abacus.modeling.utils import AverageMeter
 from abacus.modeling.models import MLPregression
 from tqdm import tqdm
 import math
-import datetime
+import time
 
 from sklearn.svm import LinearSVR
 from sklearn.pipeline import make_pipeline
@@ -45,7 +45,7 @@ class MultiDNNPredictor:
         self._split_ratio = split_ratio
         self._models_id = models_id
         self._path = path
-        self._data_path = os.path.join(self._path, "data")
+        self._data_path = os.path.join(self._path, "data/profile/2in7")
         self._save_path = os.path.join(self._path, "model")
         if not os.path.exists(self._save_path):
             os.mkdir(self._save_path)
@@ -211,11 +211,11 @@ class MLPPredictor(MultiDNNPredictor):
         self.save_model()
         self._model.cpu().eval()
         test_input = torch.rand((1, 15))
-        start_time = datetime.datetime.now()
+        start_time = time.time()
         for i in range(1000):
             test_output = self._model(test_input)
-        end_time = datetime.datetime.now() - start_time
-        print("Inference time: {}".format(end_time.microseconds / 1e6))
+        end_time = time.time() - start_time
+        print("Inference time: {}".format(end_time * 1000))
 
     def calc_learning_rate(self, epoch, batch=0):
         if self._lr_schedule_type == "cosine":

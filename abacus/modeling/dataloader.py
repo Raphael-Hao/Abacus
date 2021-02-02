@@ -60,9 +60,7 @@ def load_torch_data(
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
-            feature_data, latency_data = load_single_file(
-                os.path.join(data_path, filename), models_id
-            )
+            feature_data, latency_data = load_single_file(filename, models_id)
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
                 all_latency = latency_data
@@ -103,9 +101,7 @@ def load_data_for_sklearn(
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
-            feature_data, latency_data = load_single_file(
-                os.path.join(data_path, filename), models_id
-            )
+            feature_data, latency_data = load_single_file(filename, models_id)
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
                 all_latency = latency_data

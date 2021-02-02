@@ -15,7 +15,6 @@ from abacus.utils import timestamp
 from abacus.worker import ServerWorker
 from abacus.modeling.models import MLPregression
 
-
 class Query:
     MODELS_LEN = {
         0: 18,
@@ -79,11 +78,12 @@ class AbacusServer:
         self._workers = {}
         self._queues = {}
         self._pipes = {}
+        self._qos_target = run_config.qos_target
         random.seed(0)
 
     def send_query(self, model_id, batch_size, seq_len):
         self._queues[model_id].put(
-            Query(model_id=model_id, batch_size=batch_size, seq_len=seq_len)
+            Query(model_id=model_id, batch_size=batch_size, seq_len=seq_len,qos_target=self._qos_target)
         )
 
     def start_up(self):
@@ -195,6 +195,8 @@ class Scheduler(Process):
         self._result_file = open(self._result_path, "w+")
         self._wr = csv.writer(self._result_file, dialect="excel")
         result_header = ["model_id", "bs", "seq_len", "latency"]
+        print(torch.get_num_threads())
+        torch.set_num_threads(56)
         self._wr.writerow(result_header)
         self._result_file.flush()
         self._predictor = MLPregression()
@@ -294,7 +296,6 @@ class Scheduler(Process):
                         if (end_pos - start_pos) > self._search_ways
                         else (end_pos - start_pos)
                     )
-                    # print("search ways used : {}".format(search_ways))
                     op_poses, features = self.get_layer_feature(
                         start_pos=start_pos,
                         end_pos=end_pos,
@@ -304,11 +305,11 @@ class Scheduler(Process):
                     )
                     with torch.no_grad():
                         latencies = self._predictor(features).numpy()
-                    print(
-                        "searching for qos target: {} form start pos: {}, end pos: {}, search po: {}, predicted: {}".format(
-                            qos, start_pos, end_pos, op_poses[0], latencies
-                        )
-                    )
+                    # print(
+                    #     "searching for qos target: {} form start pos: {}, end pos: {}, search po: {}, predicted: {}".format(
+                    #         qos, start_pos, end_pos, op_poses[0], latencies
+                    #     )
+                    # )
                     for i in range(search_ways):
                         headroom = qos - latencies[i]
                         if headroom < 0:
@@ -386,6 +387,8 @@ class Scheduler(Process):
                 raise NotImplementedError
             else:
                 raise NotImplementedError
+        else:
+            self.Abacus_reset()
 
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
@@ -399,13 +402,13 @@ class Scheduler(Process):
         if self._schedule_flag >= 0:
             self._barrier[self._schedule_flag].wait()
             self._schedule_flag = -1
-        for model_id in self._serve_combination:
-            query = self._scheduled_queries[model_id]
-            if query is not None:
-                self._wr.writerow(
-                    [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
-                )
-                self._scheduled_queries[model_id] = None
+            for model_id in self._serve_combination:
+                query = self._scheduled_queries[model_id]
+                if query is not None:
+                    self._wr.writerow(
+                        [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
+                    )
+                    self._scheduled_queries[model_id] = None
 
     def FCFS_schedule(self, abandon=False):
         waiting_scheduling = {}
