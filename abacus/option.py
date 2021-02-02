@@ -227,10 +227,12 @@ class RunConfig:
 
             # self.mode = "onebyone"
             # self.mode = "single"
-            self.mode = "all"
+            # self.mode = "all"
+            self.mode = "lr"
+            # self.mode = "svm"
             self.model_combination = "vgg16_vgg19"
             self.hyper_params = {
-                "all": [0.002, 200],
+                "all": [0.002, 300],
                 "resnet101_inception_v3": [0.001, 100],
                 "bert_bert": [0.001, 100],
                 "vgg19_bert": [0.001, 100],
