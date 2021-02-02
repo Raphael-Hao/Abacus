@@ -271,9 +271,11 @@ class LRPredictor(MultiDNNPredictor):
         self._model.fit(self.trainX, self.trainY)
         pred = self._model.predict(self.testX)
         e = pred - self.testY
-        print(np.average(np.abs(e)))
-        print(np.average(np.abs(e) / self.testY))
-
+        mae = np.average(np.abs(e))
+        mape = np.average(np.abs(e) / self.testY)
+        print(mae)
+        print(mape)
+        self.save_result(combination=self._data_fname, mae=mae, mape=mape)
 
 class SVMPredictor(MultiDNNPredictor):
     def __init__(
@@ -300,5 +302,8 @@ class SVMPredictor(MultiDNNPredictor):
         self._model.fit(self.trainX, self.trainY)
         pred = self._model.predict(self.testX)
         e = pred - self.testY
-        print(np.average(np.abs(e)))
-        print(np.average(np.abs(e) / self.testY))
+        mae = np.average(np.abs(e))
+        mape = np.average(np.abs(e) / self.testY)
+        print(mae)
+        print(mape)
+        self.save_result(combination=self._data_fname,mae=mae, mape=mape)
