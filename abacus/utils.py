@@ -28,6 +28,8 @@ def gen_model_combinations(models, combination_len, done_combinations=None):
     for profiled in done_combinations:
         id_combinations.remove(profiled)
     model_combinations = []
+    id_combinations = list(id_combinations)
+    id_combinations = sorted(id_combinations, key=lambda x: (x[0], x[1]))
     for id_comb in id_combinations:
         model_comb = []
         for id in id_comb:
