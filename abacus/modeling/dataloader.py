@@ -126,14 +126,14 @@ def load_data_for_sklearn(
     trainY = train[:, 15:].reshape(-1)
     testX = test[:, :15]
     testY = test[:, 15:].reshape(-1)
-    print("trainx:")
-    print(trainX)
-    print("trainy:")
-    print(trainY)
-    print("testx:")
-    print(testX)
-    print("testy:")
-    print(testY)
+    # print("trainx:")
+    # print(trainX)
+    # print("trainy:")
+    # print(trainY)
+    # print("testx:")
+    # print(testX)
+    # print("testy:")
+    # print(testY)
     return trainX, trainY, testX, testY
 
 
