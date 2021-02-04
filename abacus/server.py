@@ -181,7 +181,8 @@ class Scheduler(Process):
         result_fname += ".csv"
         self._result_path = os.path.join(result_dir, result_fname)
         self._predictor_ckpt_path = os.path.join(
-            run_config.path, "model/predictor.ckpt"
+            run_config.path, "model/2in7/predictor.ckpt"
+            # run_config.path, "model/2in4/predictor.ckpt"
         )
         self._abandon = run_config.abandon
         self._barrier = barrier
@@ -213,6 +214,7 @@ class Scheduler(Process):
         if self._policy == "Abacus":
             self._schedule_func = self.Abacus_schedule
             self._schedule_flag = -1
+            self._predicted_latency = 0
 
         elif self._policy == "SJF":
             self._schedule_func = self.SJF_schedule
@@ -317,6 +319,7 @@ class Scheduler(Process):
                         else:
                             if headroom < self._threashold:
                                 searched_pos = op_poses[i]
+                                self._predicted_latency = latencies[i]
                                 break
                             else:
                                 start_pos = op_poses[i] + 1
