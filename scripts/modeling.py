@@ -36,3 +36,26 @@ ax.bar(x_3, all_mlp_error, 0.3)
 ax.set_xlim(-1, 29)
 plt.savefig("prediction_error.pdf", bbox_inches="tight")
 # %%
+
+
+import numpy as np
+import glob
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+mpl.rcParams["font.family"] = "Times New Roman"
+
+fname = "../data/modeling/core_latency.csv"
+data = np.array(pd.read_csv(fname, header=None).values.tolist())
+
+x = data[:,0]
+y = data[:,1]
+fig = plt.figure(figsize=(6, 3))
+ax = fig.add_subplot(111)
+ax.plot(x, y)
+ax.set_xlim(1, 28)
+ax.set_ylim(0.15,0.2)
+
+# %%

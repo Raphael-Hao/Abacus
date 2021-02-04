@@ -18,14 +18,8 @@ if __name__ == "__main__":
     elif run_config.task == "serve":
         abacus_server = AbacusServer(run_config=run_config)
         abacus_server.start_up()
-        start_stamp = time.time()
         abacus_server.start_test()
         abacus_server.stop_test()
-        print(
-            "total used time: {}".format(
-                (time.time() - start_stamp)
-            )
-        )
     elif run_config.task == "train":
         train_predictor(run_config)
     elif run_config.task == "background":
