@@ -20,6 +20,7 @@ def train_predictor(args: RunConfig):
                 split_ratio=0.8,
                 device=args.device,
                 path=args.path,
+                total_models=args.total_models,
             )
         elif args.modeling == "lr":
             predictor = LRPredictor(
@@ -28,6 +29,7 @@ def train_predictor(args: RunConfig):
                 batch_size=16,
                 data_fname="all",
                 path=args.path,
+                total_models=args.total_models,
             )
         elif args.modeling == "svm":
             predictor = SVMPredictor(
@@ -36,6 +38,7 @@ def train_predictor(args: RunConfig):
                 batch_size=16,
                 data_fname="all",
                 path=args.path,
+                total_models=args.total_models,
             )
         else:
             raise NotImplementedError
@@ -51,6 +54,7 @@ def train_predictor(args: RunConfig):
                 split_ratio=0.8,
                 device=args.device,
                 path=args.path,
+                total_models=args.total_models,
             )
         elif args.modeling == "lr":
             predictor = LRPredictor(
@@ -59,6 +63,7 @@ def train_predictor(args: RunConfig):
                 batch_size=16,
                 data_fname=args.model_combination,
                 path=args.path,
+                total_models=args.total_models,
             )
         elif args.modeling == "svm":
             predictor = SVMPredictor(
@@ -67,11 +72,11 @@ def train_predictor(args: RunConfig):
                 batch_size=16,
                 data_fname=args.model_combination,
                 path=args.path,
+                total_models=args.total_models,
             )
         else:
             raise NotImplementedError
         predictor.train()
-
 
     elif args.mode == "onebyone":
         for model_combination in gen_model_combinations(
@@ -92,6 +97,7 @@ def train_predictor(args: RunConfig):
                     split_ratio=0.8,
                     path=args.path,
                     device=args.device,
+                    total_models=args.total_models,
                 )
             elif args.modeling == "lr":
                 predictor = LRPredictor(
@@ -100,6 +106,7 @@ def train_predictor(args: RunConfig):
                     batch_size=16,
                     data_fname=data_filename,
                     path=args.path,
+                    total_models=args.total_models,
                 )
             elif args.modeling == "svm":
                 predictor = SVMPredictor(
@@ -108,6 +115,7 @@ def train_predictor(args: RunConfig):
                     batch_size=16,
                     data_fname=data_filename,
                     path=args.path,
+                    total_models=args.total_models,
                 )
             else:
                 raise NotImplementedError

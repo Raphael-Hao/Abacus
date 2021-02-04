@@ -1,52 +1,60 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # Author: raphael hao
-
+# %%
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 import torch
 import torch.utils.data as Data
 import os
 import glob
 
 
-def get_feature_latency(data, models_id):
-    assert data.shape[1] == 13
+def get_feature_latency(data, models_id, total_models=2):
 
     n = data.shape[0]
     feature_data = []
     latency_data = []
     for i in range(n):
         line = data[i]
-        model1 = models_id[line[0]]
-        model1_record = np.array(
-            [int(line[1]), int(line[2]), int(line[3]), int(line[4])]
-        )
-        model2 = models_id[line[5]]
-        model2_record = np.array(
-            [int(line[6]), int(line[7]), int(line[8]), int(line[9])]
-        )
+        # print(line)
+        model_records = {}
         model_feature = np.zeros([len(models_id)])
-        model_feature[model1] += 1
-        model_feature[model2] += 1
-        if model1 <= model2:
-            record = np.concatenate((model_feature, model1_record, model2_record))
-        else:
-            record = np.concatenate((model_feature, model2_record, model1_record))
-        feature_data.append(record)
-        latency_data.append(float(line[10]))
+        for i in range(total_models):
+            model_id = models_id[line[i * 5]]
+            model_feature[model_id] += 1
+            model_record = np.array(
+                [
+                    int(line[1 + i * 5]),
+                    int(line[2 + i * 5]),
+                    int(line[3 + i * 5]),
+                    int(line[4 + i * 5]),
+                ]
+            )
+            model_records[model_id] = model_record
+
+        model_records = dict(sorted(model_records.items()))
+        # print(model_records)
+        for key in model_records:
+            model_feature = np.concatenate((model_feature, model_records[key]))
+
+        feature_data.append(model_feature)
+        # print(model_feature)
+        # print(line[-3])
+        latency_data.append(float(line[-3]))
     feature_data = np.array(feature_data)
     latency_data = np.array(latency_data)
     return feature_data, latency_data
 
 
-def load_single_file(filepath, models_id):
+def load_single_file(filepath, models_id, total_models=2):
     data = pd.read_csv(filepath, header=0)
     data = data.values.tolist()
     total_data_num = len(data)
     print("{} samples loaded from {}".format(total_data_num, filepath))
     data = np.array(data)
-    return get_feature_latency(data, models_id)
+    return get_feature_latency(data, models_id, total_models)
 
 
 def load_torch_data(
@@ -55,12 +63,15 @@ def load_torch_data(
     train_ratio,
     models_id,
     data_path="/home/cwh/Lego/data",
+    total_models=2,
 ):
     all_feature = None
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
-            feature_data, latency_data = load_single_file(filename, models_id)
+            feature_data, latency_data = load_single_file(
+                filename, models_id, total_models
+            )
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
                 all_latency = latency_data
@@ -71,7 +82,7 @@ def load_torch_data(
     else:
         filename = model_combinatin + ".csv"
         all_feature, all_latency = load_single_file(
-            os.path.join(data_path, filename), models_id
+            os.path.join(data_path, filename), models_id, total_models
         )
 
     feature_len = len(all_feature)
@@ -95,13 +106,19 @@ def load_torch_data(
 
 
 def load_data_for_sklearn(
-    model_combinatin, split_ratio, models_id, data_path="/home/cwh/Lego/data"
+    model_combinatin,
+    split_ratio,
+    models_id,
+    data_path="/home/cwh/Lego/data",
+    total_models=2,
 ):
     all_feature = None
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
-            feature_data, latency_data = load_single_file(filename, models_id)
+            feature_data, latency_data = load_single_file(
+                filename, models_id, total_models
+            )
             if all_feature is None or all_latency is None:
                 all_feature = feature_data
                 all_latency = latency_data
@@ -112,7 +129,7 @@ def load_data_for_sklearn(
     else:
         filename = model_combinatin + ".csv"
         all_feature, all_latency = load_single_file(
-            os.path.join(data_path, filename), models_id
+            os.path.join(data_path, filename), models_id, total_models
         )
     X, y = (all_feature, all_latency)
     y = y / 1000
@@ -122,21 +139,43 @@ def load_data_for_sklearn(
     split = int(split_ratio * n)
     train = data[:split, :]
     test = data[split:, :]
-    trainX = train[:, :15]
-    trainY = train[:, 15:].reshape(-1)
-    testX = test[:, :15]
-    testY = test[:, 15:].reshape(-1)
-    # print("trainx:")
-    # print(trainX)
-    # print("trainy:")
-    # print(trainY)
-    # print("testx:")
-    # print(testX)
-    # print("testy:")
-    # print(testY)
+    trainX = train[:, :-1]
+    trainY = train[:, -1:].reshape(-1)
+    testX = test[:, :-1]
+    testY = test[:, -1:].reshape(-1)
+
     return trainX, trainY, testX, testY
 
 
+# %%
 if __name__ == "__main__":
+    models_id = {
+        "resnet50": 0,
+        "resnet101": 1,
+        "resnet152": 2,
+        "inception_v3": 3,
+        "vgg16": 4,
+        "vgg19": 5,
+        "bert": 6,
+    }
+    train_dataloader, test_dataloader = load_torch_data(
+        "inception_v3_vgg19_bert",
+        128,
+        0.8,
+        models_id,
+        data_path="/home/cwh/Lego/data/profile/3in4/",
+        total_models=3,
+    )
+    trainX, trainY, testX, testY = load_data_for_sklearn(
+        "inception_v3_vgg19_bert",
+        0.8,
+        models_id,
+        data_path="/home/cwh/Lego/data/profile/3in4/",
+        total_models=3,
+    )
+    print(trainX.shape)
+    print(trainY)
+    print(testX)
+    print(testY)
 
-    train_dataloader, test_dataloader = load_torch_data(None, 0.8)
+# %%

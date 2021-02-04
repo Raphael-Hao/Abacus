@@ -5,9 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class MLPregression(nn.Module):
-    def __init__(self):
+    def __init__(self, first_layer=15):
         super(MLPregression, self).__init__()
-        self.hidden1 = nn.Linear(in_features=15, out_features=32, bias=True)
+        self.hidden1 = nn.Linear(in_features=first_layer, out_features=32, bias=True)
         self.hidden2 = nn.Linear(32, 32)
         self.hidden3 = nn.Linear(32, 32)
         self.predict = nn.Linear(32, 1)
@@ -19,11 +19,3 @@ class MLPregression(nn.Module):
         output = self.predict(x)
         return output[:, 0]
 
-
-class LinearRegression(nn.Module):
-    def __init__(self):
-        super(LinearRegression, self).__init__()
-        self.layer = nn.Linear(16, 1)
-
-    def forward(self, x):
-        return self.layer(x)

@@ -37,6 +37,7 @@ class MultiDNNPredictor:
         data_fname=None,
         split_ratio=0.8,
         path="/home/cwh/Lego",
+        total_models=2,
     ):
         self._model_select = model_select
         self._total_epochs = total_epochs
@@ -45,7 +46,8 @@ class MultiDNNPredictor:
         self._split_ratio = split_ratio
         self._models_id = models_id
         self._path = path
-        self._data_path = os.path.join(self._path, "data/profile/2in7")
+        self._total_models = total_models
+        self._data_path = os.path.join(self._path, "data/profile/3in4")
         self._save_path = os.path.join(self._path, "model")
         if not os.path.exists(self._save_path):
             os.mkdir(self._save_path)
@@ -84,9 +86,17 @@ class MLPPredictor(MultiDNNPredictor):
         split_ratio=0.8,
         path="/home/cwh/Lego",
         device=0,
+        total_models=2,
     ):
         super().__init__(
-            "mlp", models_id, epoch, batch_size, data_fname, split_ratio, path
+            "mlp",
+            models_id,
+            epoch,
+            batch_size,
+            data_fname,
+            split_ratio,
+            path,
+            total_models,
         )
         self._train_loader, self._test_loader = load_torch_data(
             self._data_fname,
@@ -94,12 +104,14 @@ class MLPPredictor(MultiDNNPredictor):
             self._split_ratio,
             self._models_id,
             self._data_path,
+            self._total_models,
         )
         self._total_batches = len(self._train_loader)
         self._init_lr = lr
         self._lr_schedule_type = lr_schedule_type
         self._device = torch.device("cuda:{}".format(device))
-        self._model = MLPregression().to(self._device)
+        self._firt_layer = self._total_models * 4 + 7
+        self._model = MLPregression(self._firt_layer).to(self._device)
         print(self._model)
         self._optimizer = torch.optim.SGD(self._model.parameters(), lr=self._init_lr)
         self._loss_func = nn.MSELoss()
@@ -210,16 +222,22 @@ class MLPPredictor(MultiDNNPredictor):
         plt.show()
         self.save_model()
         self._model.cpu().eval()
-        with torch.no_grad():
-            for bs in range(16):
-                test_input = torch.rand((bs + 1, 15))
-                start_time = time.time()
-                print("start time:".format(start_time))
-                for i in range(1000):
-                    test_output = self._model(test_input)
-                    # print(test_output[0])
-                end_time = time.time() - start_time
-                print("batch size: {} Inference time: {} ms".format(bs, end_time))
+        for cores in range(1, 29):
+            torch.set_num_threads(cores)
+            # torch.set_num_interop_threads(cores)
+            with torch.no_grad():
+                for bs in range(1, 17):
+                    test_input = torch.rand((bs, self._firt_layer))
+                    start_time = time.time()
+                    for i in range(1000):
+                        test_output = self._model(test_input)
+                        # print(test_output[0])
+                    end_time = time.time() - start_time
+                    print(
+                        "cores: {}, batch size: {}, Inference time: {} ms".format(
+                            cores, bs, end_time
+                        )
+                    )
 
     def calc_learning_rate(self, epoch, batch=0):
         if self._lr_schedule_type == "cosine":
@@ -256,9 +274,17 @@ class LRPredictor(MultiDNNPredictor):
         data_fname=None,
         split_ratio=0.8,
         path="/home/cwh/Lego",
+        total_models=2,
     ):
         super().__init__(
-            "lr", models_id, epoch, batch_size, data_fname, split_ratio, path
+            "lr",
+            models_id,
+            epoch,
+            batch_size,
+            data_fname,
+            split_ratio,
+            path,
+            total_models,
         )
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
             self._data_fname, self._split_ratio, self._models_id, self._data_path
@@ -277,6 +303,7 @@ class LRPredictor(MultiDNNPredictor):
         print(mape)
         self.save_result(combination=self._data_fname, mae=mae, mape=mape)
 
+
 class SVMPredictor(MultiDNNPredictor):
     def __init__(
         self,
@@ -286,9 +313,17 @@ class SVMPredictor(MultiDNNPredictor):
         data_fname=None,
         split_ratio=0.8,
         path="/home/cwh/Lego",
+        total_models=2,
     ):
         super().__init__(
-            "svm", models_id, epoch, batch_size, data_fname, split_ratio, path
+            "svm",
+            models_id,
+            epoch,
+            batch_size,
+            data_fname,
+            split_ratio,
+            path,
+            total_models,
         )
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
             self._data_fname, self._split_ratio, self._models_id, self._data_path
@@ -306,4 +341,4 @@ class SVMPredictor(MultiDNNPredictor):
         mape = np.average(np.abs(e) / self.testY)
         print(mae)
         print(mape)
-        self.save_result(combination=self._data_fname,mae=mae, mape=mape)
+        self.save_result(combination=self._data_fname, mae=mae, mape=mape)

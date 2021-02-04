@@ -53,8 +53,33 @@ def load_all_std_deviation(
             all_std_deviation = np.concatenate((all_std_deviation, std_deviation_data))
     return all_std_deviation.astype(np.float)
 
-
+def load_all_lantency(
+    data_path="/home/cwh/Lego/data/profile/3in4",
+):
+    all_std_deviation = None
+    for filename in glob.glob(os.path.join(data_path, "*.csv")):
+        print(filename)
+        # filepath = os.path.join(data_path, filename)
+        # print(filepath)
+        data = pd.read_csv(filename, header=0)
+        data = data.values.tolist()
+        total_data_num = len(data)
+        # print("{} samples loaded from {}".format(total_data_num, filepath))
+        data = np.array(data)
+        n = data.shape[0]
+        std_deviation = []
+        for i in range(n):
+            line = data[i]
+            std_deviation.append(line[-2])
+        std_deviation_data = np.array(std_deviation)
+        if all_std_deviation is None:
+            all_std_deviation = std_deviation_data
+        else:
+            all_std_deviation = np.concatenate((all_std_deviation, std_deviation_data))
+    return all_std_deviation.astype(np.float)
+all_latency = load_all_lantency()
 all_std_deviation = load_all_std_deviation()
+
 #%%
 print(np.percentile(all_std_deviation, 80))
 print(np.percentile(all_std_deviation, 90))
@@ -63,11 +88,22 @@ print(np.mean(all_std_deviation))
 print(np.max(all_std_deviation))
 print(np.min(all_std_deviation))
 
+#%%
+print(np.percentile(all_latency, 80))
+print(np.percentile(all_latency, 90))
+print(np.percentile(all_latency, 99))
+print(np.mean(all_latency))
+print(np.max(all_latency))
+print(np.min(all_latency))
+
+
+
 # %%
 
 import seaborn as sns
 
 sns.ecdfplot(all_std_deviation)
+sns.ecdfplot(all_latency)
 plt.savefig("std_deviation.pdf", bbox_inches="tight")
 # %%
 
