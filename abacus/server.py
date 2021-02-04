@@ -15,6 +15,7 @@ from abacus.utils import timestamp
 from abacus.worker import ServerWorker
 from abacus.modeling.models import MLPregression
 
+
 class Query:
     MODELS_LEN = {
         0: 18,
@@ -26,7 +27,7 @@ class Query:
         6: 12,
     }
 
-    def __init__(self, model_id, batch_size, seq_len, qos_target=30) -> None:
+    def __init__(self, model_id, batch_size, seq_len, qos_target=60) -> None:
         self.model_id = model_id
         self.batch_size = batch_size
         self.seq_len = seq_len
@@ -83,7 +84,12 @@ class AbacusServer:
 
     def send_query(self, model_id, batch_size, seq_len):
         self._queues[model_id].put(
-            Query(model_id=model_id, batch_size=batch_size, seq_len=seq_len,qos_target=self._qos_target)
+            Query(
+                model_id=model_id,
+                batch_size=batch_size,
+                seq_len=seq_len,
+                qos_target=self._qos_target,
+            )
         )
 
     def start_up(self):
@@ -181,8 +187,9 @@ class Scheduler(Process):
         result_fname += ".csv"
         self._result_path = os.path.join(result_dir, result_fname)
         self._predictor_ckpt_path = os.path.join(
-            run_config.path, "model/2in7/predictor.ckpt"
-            # run_config.path, "model/2in4/predictor.ckpt"
+            run_config.path,
+            "model/2in7/predictor.ckpt"
+            # run_config.path, "model/3in4/predictor.ckpt"
         )
         self._abandon = run_config.abandon
         self._barrier = barrier
@@ -195,12 +202,11 @@ class Scheduler(Process):
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
         self._result_file = open(self._result_path, "w+")
         self._wr = csv.writer(self._result_file, dialect="excel")
-        result_header = ["model_id", "bs", "seq_len", "latency"]
-        print(torch.get_num_threads())
-        torch.set_num_threads(56)
-        self._wr.writerow(result_header)
-        self._result_file.flush()
-        self._predictor = MLPregression()
+
+        # print(torch.get_num_threads())
+        # torch.set_num_threads(56)
+
+        self._predictor = MLPregression(self._models_feature)
 
         timestamp("Scheduler", "loading predictor")
         self._predictor.load_state_dict(
@@ -211,17 +217,22 @@ class Scheduler(Process):
         self._scheduling_queries = {key: None for key in self._serve_combination}
         self._scheduled_queries = {key: None for key in self._serve_combination}
 
+        result_header = ["model_id", "bs", "seq_len", "latency"]
         if self._policy == "Abacus":
             self._schedule_func = self.Abacus_schedule
             self._schedule_flag = -1
             self._predicted_latency = 0
-
+            self._search_times = 0
+            result_header = ["model_id", "bs", "seq_len", "search_times", "latency"]
         elif self._policy == "SJF":
             self._schedule_func = self.SJF_schedule
         elif self._policy == "FCFS":
             self._schedule_func = self.FCFS_schedule
         else:
             raise NotImplementedError
+        self._wr.writerow(result_header)
+        self._result_file.flush()
+
         if self._policy == "FCFS" or self._policy == "SJF":
             while self._stop_flag.value == 1:
                 self.pop_queries()
@@ -242,19 +253,22 @@ class Scheduler(Process):
         waiting_scheduling, abandoned_scheduling = self.urgent_sort(True)
         if len(waiting_scheduling) > 0:
             qos_id = waiting_scheduling[0][0]
-            qos = waiting_scheduling[0][1]
+            qos = waiting_scheduling[0][1] - self._predicted_latency -10
+            # print(qos)
+            # qos = waiting_scheduling[0][1]
             qos_query: Query = self._scheduling_queries[qos_id]
             qos_query.set_op_pos(-1)
             total_colocated = len(waiting_scheduling)
             if total_colocated == 1:
                 if self._abandon:
                     with torch.no_grad():
-                        latency = self._predictor(
+                        self._predicted_latency = self._predictor(
                             self.get_layer_feature(0, 0, 1, query_l=qos_query)[1]
                         )[0]
                     self.Abacus_reset()
-                    if qos < latency:
+                    if qos < self._predicted_latency:
                         abandoned_scheduling.append(qos_id)
+                        self._predicted_latency = 0
                     else:
                         self._pipes[qos_id].send(
                             (
@@ -272,15 +286,15 @@ class Scheduler(Process):
                 else:
                     self.Abacus_reset()
                     self._pipes[qos_id].send(
-                            (
-                                qos_query.state,
-                                0,
-                                qos_query.start_pos,
-                                qos_query.end_pos,
-                                qos_query.batch_size,
-                                qos_query.seq_len,
-                            )
+                        (
+                            qos_query.state,
+                            0,
+                            qos_query.start_pos,
+                            qos_query.end_pos,
+                            qos_query.batch_size,
+                            qos_query.seq_len,
                         )
+                    )
                     self._scheduled_queries[qos_id] = qos_query
                     self.clean_scheduled_queries(model_id=qos_id)
                     self._schedule_flag = 0
@@ -291,8 +305,9 @@ class Scheduler(Process):
                 end_pos = bg_query.op_len
                 searched_pos = None
                 latencies = None
+                search_times = 0
                 while start_pos < end_pos:
-
+                    search_times += 1
                     search_ways = (
                         self._search_ways
                         if (end_pos - start_pos) > self._search_ways
@@ -325,7 +340,7 @@ class Scheduler(Process):
                                 start_pos = op_poses[i] + 1
                     if searched_pos is not None:
                         break
-                self.Abacus_reset()
+                self.Abacus_reset(search_times=search_times)
                 if searched_pos is None:
                     if self._abandon:
                         abandoned_scheduling.append(qos_id)
@@ -387,7 +402,11 @@ class Scheduler(Process):
                         self.clean_scheduled_queries(model_id=qos_id)
                         self._schedule_flag = 0
             elif total_colocated == 3:
-                raise NotImplementedError
+                m_id = waiting_scheduling[1][0]
+                m_query: Query = self._scheduling_queries[m_id]
+                r_id = waiting_scheduling[2][0]
+                r_query: Query = self._scheduling_queries[r_id]
+
             else:
                 raise NotImplementedError
         else:
@@ -395,13 +414,14 @@ class Scheduler(Process):
 
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
+            # print(model_id)
             self._wr.writerow(
-                np.array([query.model_id, query.batch_size, query.seq_len, -1])
+                np.array([query.model_id, query.batch_size, query.seq_len, 0, -1])
             )
             self.clean_scheduled_queries(model_id=model_id)
         self._result_file.flush()
 
-    def Abacus_reset(self):
+    def Abacus_reset(self, search_times=0):
         if self._schedule_flag >= 0:
             self._barrier[self._schedule_flag].wait()
             self._schedule_flag = -1
@@ -409,9 +429,16 @@ class Scheduler(Process):
                 query = self._scheduled_queries[model_id]
                 if query is not None:
                     self._wr.writerow(
-                        [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
+                        [
+                            query.model_id,
+                            query.batch_size,
+                            query.seq_len,
+                            self._search_times,
+                            query.latency_ms,
+                        ]
                     )
                     self._scheduled_queries[model_id] = None
+            self._search_times = search_times
 
     def FCFS_schedule(self, abandon=False):
         waiting_scheduling = {}

@@ -9,11 +9,13 @@ from abacus.network.inception_splited import inception_v3
 from abacus.network.vgg_splited import vgg16, vgg19
 from abacus.network.bert import BertModel
 
+
 class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.device = 1
+        self.total_models = 2
+        self.device = 0
         self.path = "/home/cwh/Lego"
         # self.path = "/home/cwh/Lego"
         self.data_path = os.path.join(self.path, "data")
@@ -50,7 +52,6 @@ class RunConfig:
             "bert": 12,
         }
 
-        self.total_models = 3
         self.supported_batchsize = [
             1,
             2,
@@ -75,15 +76,15 @@ class RunConfig:
             """
             [server configuration]
             """
-            self.serve_combination = (0, 1)
-            self.policy = "Abacus"
+            self.serve_combination = tuple(args.combination)
+            self.policy = args.policy
             # self.policy = "SJF"
             # self.policy = "FCFS"
-            self.threshold = 1
-            self.qos_target = 50
+            self.threshold = 2
+            self.qos_target = 60
             self.search_ways = 8
             self.total_queries = 1000
-            self.average_duration = 100
+            self.average_duration = args.load
             self.abandon = True
 
         elif self.task == "profile":
@@ -302,27 +303,27 @@ class RunConfig:
                 (1, 3, 3),
             ]
             # self.trained_combinations = [
-                # (0, 5),
-                # (1, 5),
-                # (2, 5),
-                # (3, 5),
-                # (4, 5),
-                # (5, 5),
-                # (0, 4),
-                # (1, 4),
-                # (2, 4),
-                # (3, 4),
-                # (4, 4),
-                # (0, 3),
-                # (1, 3),
-                # (2, 3),
-                # (3, 3),
-                # (0, 2),
-                # (1, 2),
-                # (2, 2),
-                # (0, 1),
-                # (1, 1),
-                # (0, 0),
+            # (0, 5),
+            # (1, 5),
+            # (2, 5),
+            # (3, 5),
+            # (4, 5),
+            # (5, 5),
+            # (0, 4),
+            # (1, 4),
+            # (2, 4),
+            # (3, 4),
+            # (4, 4),
+            # (0, 3),
+            # (1, 3),
+            # (2, 3),
+            # (3, 3),
+            # (0, 2),
+            # (1, 2),
+            # (2, 2),
+            # (0, 1),
+            # (1, 1),
+            # (0, 0),
             # ]
 
             # self.mode = "onebyone"
@@ -389,7 +390,11 @@ def parse_options():
         default="profile",
         choices=["profile", "train", "serve", "background"],
     )
-
+    parser.add_argument("--combination", type=int, nargs="+")
+    parser.add_argument(
+        "--policy", type=str, default="Abacus", choices=["Abacus", "SJF", "FCFS"]
+    )
+    parser.add_argument("--load", type=int, default=50)
     args = parser.parse_args()
 
     run_config = RunConfig(args=args)

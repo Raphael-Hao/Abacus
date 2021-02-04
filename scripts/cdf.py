@@ -169,3 +169,12 @@ print(np.min(all_unpred_latency[6]))
 print(np.sum(all_unpred_latency > 30))
 plt.savefig("unpredictable_latency.pdf", bbox_inches="tight")
 # %%
+
+import numpy as np
+import glob
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+mpl.rcParams["font.family"] = "Times New Roman"
