@@ -80,9 +80,10 @@ class RunConfig:
             self.policy = args.policy
             # self.policy = "SJF"
             # self.policy = "FCFS"
+            self.policy = "EDF"
             self.threshold = 2
             self.qos_target = 60
-            self.search_ways = 8
+            self.search_ways = 2
             self.total_queries = 1000
             self.average_duration = args.load
             self.abandon = True
