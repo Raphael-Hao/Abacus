@@ -228,12 +228,14 @@ class Scheduler(Process):
             self._schedule_func = self.SJF_schedule
         elif self._policy == "FCFS":
             self._schedule_func = self.FCFS_schedule
+        elif self._policy == "EDF":
+            self._schedule_func = self.EDF_schedule
         else:
             raise NotImplementedError
         self._wr.writerow(result_header)
         self._result_file.flush()
 
-        if self._policy == "FCFS" or self._policy == "SJF":
+        if self._policy == "FCFS" or self._policy == "SJF" or self._policy == "EDF":
             while self._stop_flag.value == 1:
                 self.pop_queries()
                 self._schedule_func(self._abandon)
@@ -253,7 +255,7 @@ class Scheduler(Process):
         waiting_scheduling, abandoned_scheduling = self.urgent_sort(True)
         if len(waiting_scheduling) > 0:
             qos_id = waiting_scheduling[0][0]
-            qos = waiting_scheduling[0][1] - self._predicted_latency -10
+            qos = waiting_scheduling[0][1] - self._predicted_latency
             # print(qos)
             # qos = waiting_scheduling[0][1]
             qos_query: Query = self._scheduling_queries[qos_id]
@@ -487,7 +489,7 @@ class Scheduler(Process):
             self.clean_scheduled_queries(model_id=model_id)
         self._result_file.flush()
 
-    def SJF_schedule(self, abandon=False):
+    def EDF_schedule(self, abandon=False):
         waiting_scheduling = {}
         abandoned_scheduling = []
         for model_id in self._serve_combination:
@@ -498,24 +500,14 @@ class Scheduler(Process):
             if abandon == True:
                 if headroom > 0:
                     query.set_op_pos(-1)
-                    with torch.no_grad():
-                        latency = self._predictor(
-                            self.get_layer_feature(
-                                start_pos=0, end_pos=0, search_ways=1, query_l=query
-                            )[1]
-                        )[0]
-                    waiting_scheduling[model_id] = latency
+
+                    waiting_scheduling[model_id] = headroom
                 else:
                     abandoned_scheduling.append(model_id)
             else:
                 query.set_op_pos(-1)
-                with torch.no_grad():
-                    latency = self._predictor(
-                        self.get_layer_feature(
-                            start_pos=0, end_pos=0, search_ways=1, query_l=query
-                        )[1]
-                    )[0]
-                waiting_scheduling[model_id] = latency
+
+                waiting_scheduling[model_id] = headroom
         waiting_scheduling = sorted(waiting_scheduling.items(), key=lambda x: x[1])
         # print(waiting_scheduling)
         for model_id, _ in waiting_scheduling:
