@@ -8,7 +8,6 @@ from abacus.server import AbacusServer
 from abacus.trainer import train_predictor
 from abacus.option import parse_options
 from abacus.background import background
-from abacus.utils import timestamp
 
 if __name__ == "__main__":
     run_config = parse_options()
