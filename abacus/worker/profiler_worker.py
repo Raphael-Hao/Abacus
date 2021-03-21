@@ -35,7 +35,7 @@ class ProfilerWorker(AbacusWorker):
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
         torch.device("cuda:{}".format(self._device))
         torch.backends.cudnn.enabled = True
-        torch.backends.cudnn.benchmark = True
+        torch.backends.cudnn.benchmark = False
         if self._model_name == "inception_v3":
             self._inputs = {
                 k: torch.rand(k, 3, 299, 299).half().cuda(self._device)
@@ -100,6 +100,7 @@ class ProfilerWorker(AbacusWorker):
                     torch.cuda.synchronize()
                     self._barrier.wait()
                 elif action == "forward":
+                    # self._barrier.wait()
                     if self._model_name == "bert":
                         self._model.run(
                             self._inter_input, self._masks[bs][seq_len], start, end

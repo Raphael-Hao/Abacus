@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
+
 #%%
 import numpy as np
 import glob
@@ -27,9 +28,8 @@ def load_single_file(filepath):
     std_deviation = np.array(std_deviation)
     return std_deviation
 
-
 def load_all_std_deviation(
-    data_path="/home/cwh/Lego/data/profile/3in4",
+    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/2in7",
 ):
     all_std_deviation = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
@@ -52,9 +52,8 @@ def load_all_std_deviation(
         else:
             all_std_deviation = np.concatenate((all_std_deviation, std_deviation_data))
     return all_std_deviation.astype(np.float)
-
 def load_all_lantency(
-    data_path="/home/cwh/Lego/data/profile/3in4",
+    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/2in7",
 ):
     all_std_deviation = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
@@ -118,7 +117,7 @@ mpl.rcParams["font.family"] = "Times New Roman"
 
 
 def load_all_unpred_latency(
-    data_path="/home/cwh/Lego/data/profile/mps",
+    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/mps",
 ):
     all_unpred_latency = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
