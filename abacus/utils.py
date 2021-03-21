@@ -39,13 +39,19 @@ def gen_model_combinations(models, combination_len, done_combinations=None):
     return model_combinations
 
 
-def gen_partition(model_len):
-    start = random.randrange(0, model_len - 3)
-    end = start + 4 + random.randrange(0, model_len - start - 3)
-    if start < end:
+def gen_partition(model_len, if_qos=False, if_new=False):
+    start = 0
+    end = model_len
+    if if_new == False:
+        start = random.randrange(0, model_len)
+    if if_qos == False:
+        # start = random.randrange(0, model_len - 3)
+        # end = start + 4 + random.randrange(0, model_len - start - 3)
+        end = random.randrange(start, model_len + 1)
+    if start <= end:
         return start, end
     else:
-        return end, start
+        raise ValueError
 
 
 def make_record(model_config, raw_record):

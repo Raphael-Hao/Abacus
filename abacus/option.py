@@ -16,7 +16,7 @@ class RunConfig:
         # general configurations
         self.total_models = 2
         self.device = 0
-        self.path = "/home/whcui/repository/project/Abacus"
+        self.path = "/state/partition/whcui/repository/project/Abacus"
         # self.path = "/home/cwh/Lego"
         self.data_path = os.path.join(self.path, "data")
         if not os.path.exists(self.data_path):
@@ -58,6 +58,7 @@ class RunConfig:
             4,
             8,
             16,
+            32,
         ]
         self.supported_seqlen = [8, 16, 32, 64]
 
@@ -180,34 +181,34 @@ class RunConfig:
             #     (1, 3, 3),
             # ]
             self.profiled_combinations = [
-                # (1, 3),
-                # (0, 2),
-                # (2, 5),
-                # (0, 3),
-                # (1, 2),
-                # (3, 3),
-                # (5, 5),
-                # (4, 4),
-                # (1, 5),
-                # (2, 2),
-                # (0, 4),
-                # (1, 1),
-                # (0, 0),
-                # (4, 5),
-                # (1, 4),
-                # (0, 5),
-                # (2, 3),
-                # (3, 5),
+                (0, 0),
                 # (0, 1),
-                # (3, 4),
-                # (2, 4),
-                # (6, 6),
-                # (5, 6),
-                # (4, 6),
-                # (3, 6),
-                # (2, 6),
-                # (1, 6),
+                # (0, 2),
+                # (0, 3),
+                # (0, 4),
+                # (0, 5),
                 # (0, 6),
+                (1, 1),
+                # (1, 2),
+                # (1, 3),
+                # (1, 4),
+                # (1, 5),
+                # (1, 6),
+                (2, 2),
+                # (2, 3),
+                # (2, 4),
+                # (2, 5),
+                # (2, 6),
+                (3, 3),
+                # (3, 4),
+                # (3, 5),
+                # (3, 6),
+                (4, 4),
+                # (4, 5),
+                # (4, 6),
+                (5, 5),
+                # (5, 6),
+                (6, 6),
             ]
             self.total_test = 200
             self.test_loop = 100

@@ -220,8 +220,10 @@ class Scheduler(Process):
         result_header = ["model_id", "bs", "seq_len", "latency"]
         if self._policy == "Abacus":
             self._schedule_func = self.Abacus_schedule
+            # the number of scheduled queries in last round of scheduling, equal with schedule_flag + 1
             self._schedule_flag = -1
             self._predicted_latency = 0
+            # search times for the optimal operator group
             self._search_times = 0
             result_header = ["model_id", "bs", "seq_len", "search_times", "latency"]
         elif self._policy == "SJF":
@@ -283,7 +285,7 @@ class Scheduler(Process):
                             )
                         )
                         self._scheduled_queries[qos_id] = qos_query
-                        self.clean_scheduled_queries(model_id=qos_id)
+                        self.clean_scheduled_queries(model_ids=qos_id)
                         self._schedule_flag = 0
                 else:
                     self.Abacus_reset()
@@ -298,7 +300,7 @@ class Scheduler(Process):
                         )
                     )
                     self._scheduled_queries[qos_id] = qos_query
-                    self.clean_scheduled_queries(model_id=qos_id)
+                    self.clean_scheduled_queries(model_ids=qos_id)
                     self._schedule_flag = 0
             elif total_colocated == 2:
                 bg_id = waiting_scheduling[1][0]
@@ -358,7 +360,7 @@ class Scheduler(Process):
                             )
                         )
                         self._scheduled_queries[qos_id] = qos_query
-                        self.clean_scheduled_queries(model_id=qos_id)
+                        self.clean_scheduled_queries(model_ids=qos_id)
                         self._schedule_flag = 0
                 else:
                     bg_query.set_op_pos(searched_pos)
@@ -383,11 +385,13 @@ class Scheduler(Process):
                                 bg_query.seq_len,
                             )
                         )
-                        self._scheduled_queries[qos_id] = qos_query
-                        self.clean_scheduled_queries(model_id=qos_id)
                         if bg_query.if_processed():
+                            self._scheduled_queries[qos_id] = qos_query
                             self._scheduled_queries[bg_id] = bg_query
-                            self.clean_scheduled_queries(model_id=bg_id)
+                            self.clean_scheduled_queries(model_ids=[bg_id, qos_id])
+                        else:
+                            self._scheduled_queries[qos_id] = qos_query
+                            self.clean_scheduled_queries(model_ids=qos_id)
                         self._schedule_flag = 1
                     elif searched_pos == 0:
                         self._pipes[qos_id].send(
@@ -401,7 +405,7 @@ class Scheduler(Process):
                             )
                         )
                         self._scheduled_queries[qos_id] = qos_query
-                        self.clean_scheduled_queries(model_id=qos_id)
+                        self.clean_scheduled_queries(model_ids=qos_id)
                         self._schedule_flag = 0
             elif total_colocated == 3:
                 m_id = waiting_scheduling[1][0]
@@ -411,20 +415,178 @@ class Scheduler(Process):
                 searched_query = None
                 searched_pos = None
                 features = self.get_query_feature(3, qos_query, m_query, r_query)
+                search_times = 1
                 with torch.no_grad():
                     latencies = self._predictor(features).numpy()
-                if qos < latencies[0]:
-                    searched_query = None
-                elif qos < latencies[1]:
-                    searched_query = 1
-                elif qos < latencies[2]:
-                    searched_query = 2
-                else:
+                if qos >= latencies[2]:
                     searched_query = 3
-                if searched_query == 1:
+                elif qos >= latencies[1]:
+                    searched_query = 2
+                elif qos >= latencies[0]:
+                    searched_query = 1
+                else:
+                    searched_query = 0
+
+                if searched_query == 3:
+                    m_query.set_op_pos(-1)
+                    r_query.set_op_pos(-1)
+                elif searched_query == 2:
+                    m_query.set_op_pos(-1)
+                    start_pos = r_query.end_pos
+                    end_pos = r_query.op_len
+                    searched_pos = None
+                    while start_pos < end_pos:
+                        search_times += 1
+                        search_ways = (
+                            self._search_ways
+                            if (end_pos - start_pos) > self._search_ways
+                            else (end_pos - start_pos)
+                        )
+                        op_poses, features = self.get_layer_feature(
+                            start_pos=start_pos,
+                            end_pos=end_pos,
+                            search_ways=search_ways,
+                            l_query=qos_query,
+                            m_query= m_query,
+                            r_query=r_query
+                        )
+                        with torch.no_grad():
+                            latencies = self._predictor(features).numpy()
+                        for i in range(search_ways):
+                            headroom = qos-latencies[i]
+                            if headroom < 0:
+                                end_pos = op_poses[i]
+                            else:
+                                if headroom < self._threashold:
+                                    searched_pos = op_poses[i]
+                                    self._predicted_latency = latencies[i]
+                                    break
+                                else:
+                                    start_pos = op_poses + 1
+                        if searched_pos is not None:
+                            break
+                elif searched_query == 1:
                     start_pos = m_query.end_pos
                     end_pos = m_query.op_len
+                    searched_pos = None
+                    while start_pos < end_pos:
+                        search_times += 1
+                        search_ways = (
+                            self._search_ways
+                            if (end_pos - start_pos) > self._search_ways
+                            else (end_pos - start_pos)
+                        )
+                        op_poses, features = self.get_layer_feature(
+                            start_pos=start_pos,
+                            end_pos=end_pos,
+                            search_ways=search_ways,
+                            l_query=qos_query,
+                            m_query= m_query
+                        )
+                        with torch.no_grad():
+                            latencies = self._predictor(features).numpy()
+                        for i in range(search_ways):
+                            headroom = qos-latencies[i]
+                            if headroom < 0:
+                                end_pos = op_poses[i]
+                            else:
+                                if headroom < self._threashold:
+                                    searched_pos = op_poses[i]
+                                    self._predicted_latency = latencies[i]
+                                    break
+                                else:
+                                    start_pos = op_poses + 1
+                        if searched_pos is not None:
+                            break
+                self.Abacus_reset(search_times=search_times)
 
+                if searched_query == 0:
+                    if self._abandon:
+                        abandoned_scheduling.append(qos_id)
+                    else:
+                        self._pipes[qos_id].send(
+                            (
+                                qos_query.state,
+                                0,
+                                qos_query.start_pos,
+                                qos_query.end_pos,
+                                qos_query.batch_size,
+                                qos_query.seq_len,
+                            )
+                        )
+                        self._scheduled_queries[qos_id] = qos_query
+                        self.clean_scheduled_queries(model_ids=qos_id)
+                        self._schedule_flag = 0
+                elif searched_query == 1:
+                    self._pipes[qos_id].send(
+                        (
+                            qos_query.state,
+                            1,
+                            qos_query.start_pos,
+                            qos_query.end_pos,
+                            qos_query.batch_size,
+                            qos_query.seq_len,
+                        )
+                    )
+                    self._pipes[m_id].send(
+                        (
+                            m_query.state,
+                            1,
+                            m_query.start_pos,
+                            m_query.end_pos,
+                            m_query.batch_size,
+                            m_query.seq_len,
+                        )
+                    )
+                    if m_query.if_processed():
+                        self._scheduled_queries[qos_id] = qos_query
+                        self._scheduled_queries[m_id] = m_query
+                        self.clean_scheduled_queries(model_ids=[qos_id, m_id])
+                    else:
+                        self._scheduled_queries[qos_id] = qos_query
+                        self.clean_scheduled_queries(model_ids=qos_id)
+                    self._schedule_flag = 1
+                elif searched_query >= 2:
+                    self._pipes[qos_id].send(
+                        (
+                            qos_query.state,
+                            2,
+                            qos_query.start_pos,
+                            qos_query.end_pos,
+                            qos_query.batch_size,
+                            qos_query.seq_len,
+                        )
+                    )
+                    self._pipes[m_id].send(
+                        (
+                            m_query.state,
+                            2,
+                            m_query.start_pos,
+                            m_query.end_pos,
+                            m_query.batch_size,
+                            m_query.seq_len,
+                        )
+                    )
+                    self._pipes[r_id].send(
+                        (
+                            r_query.state,
+                            2,
+                            r_query.start_pos,
+                            r_query.end_pos,
+                            r_query.batch_size,
+                            r_query.seq_len,
+                        )
+                    )
+                    if r_query.if_processed():
+                        self._scheduled_queries[qos_id] = qos_query
+                        self._scheduled_queries[m_id] = m_query
+                        self._scheduled_queries[r_id] = r_query
+                        self.clean_scheduled_queries(model_ids=[qos_id, m_id, r_id])
+                    else:
+                        self._scheduled_queries[qos_id] = qos_query
+                        self._scheduled_queries[m_id] = m_query
+                        self.clean_scheduled_queries(model_ids=[qos_id, m_id])
+                    self._schedule_flag = 2
             else:
                 raise NotImplementedError
         else:
@@ -436,7 +598,7 @@ class Scheduler(Process):
             self._wr.writerow(
                 np.array([query.model_id, query.batch_size, query.seq_len, 0, -1])
             )
-            self.clean_scheduled_queries(model_id=model_id)
+            self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
 
     def Abacus_reset(self, search_times=0):
@@ -491,7 +653,7 @@ class Scheduler(Process):
                 )
             )
             self._barrier[0].wait()
-            self.clean_scheduled_queries(model_id=model_id)
+            self.clean_scheduled_queries(model_ids=model_id)
             self._wr.writerow(
                 np.array(
                     [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
@@ -502,7 +664,7 @@ class Scheduler(Process):
             self._wr.writerow(
                 np.array([query.model_id, query.batch_size, query.seq_len, -1])
             )
-            self.clean_scheduled_queries(model_id=model_id)
+            self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
 
     def EDF_schedule(self, abandon=False):
@@ -544,17 +706,21 @@ class Scheduler(Process):
                     [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
                 )
             )
-            self.clean_scheduled_queries(model_id=model_id)
+            self.clean_scheduled_queries(model_ids=model_id)
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
                 np.array([query.model_id, query.batch_size, query.seq_len, -1])
             )
-            self.clean_scheduled_queries(model_id=model_id)
+            self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
 
-    def clean_scheduled_queries(self, model_id):
-        self._scheduling_queries[model_id] = None
+    def clean_scheduled_queries(self, model_ids):
+        if isinstance(model_ids, list):
+            for i in model_ids:
+                self._scheduling_queries[i] = None
+        else:
+            self._scheduling_queries[model_ids] = None
 
     def urgent_sort(self, abandon):
         waiting_scheduling = {}

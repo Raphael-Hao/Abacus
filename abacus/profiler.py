@@ -62,12 +62,21 @@ def profile(run_config: RunConfig):
             worker_list.append((model_worker, pipe_parent))
         barrier.wait()
 
-        for bs_it in itertools.product(run_config.supported_batchsize, repeat=run_config.total_models):
+        for bs_it in itertools.product(
+            run_config.supported_batchsize, repeat=run_config.total_models
+        ):
+            model_ids = [i for i in range(run_config.total_models)]
             for test_i in range(run_config.total_test):
                 model_config = []
+                qos_query_cnt = random.randrange(1, run_config.total_models + 1)
+                new_query_cnt = random.randrange(1, run_config.total_models + 1)
+                qos_ids = random.sample(model_ids, qos_query_cnt)
+                new_ids = random.sample(model_ids, new_query_cnt)
                 for i in range(run_config.total_models):
                     start, end = gen_partition(
-                        run_config.models_len[model_combination[i]]
+                        run_config.models_len[model_combination[i]],
+                        True if i in qos_ids else False,
+                        True if i in new_ids else False,
                     )
                     seq_len = (
                         random.choice(run_config.supported_seqlen)
@@ -105,6 +114,8 @@ def profile(run_config: RunConfig):
                                     model_config[i][4],
                                 )
                             )
+                        # barrier.wait()
+                        # start_time = datetime.datetime.now()
                         barrier.wait()
                         elapsed_time_us = (
                             datetime.datetime.now() - start_time
