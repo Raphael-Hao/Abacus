@@ -95,8 +95,6 @@ print(np.mean(all_latency))
 print(np.max(all_latency))
 print(np.min(all_latency))
 
-
-
 # %%
 
 import seaborn as sns
