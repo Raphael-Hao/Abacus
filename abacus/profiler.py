@@ -66,6 +66,7 @@ def profile(run_config: RunConfig):
             run_config.supported_batchsize, repeat=run_config.total_models
         ):
             model_ids = [i for i in range(run_config.total_models)]
+            profiled_config = set()
             for test_i in range(run_config.total_test):
                 model_config = []
                 qos_query_cnt = random.randrange(1, run_config.total_models + 1)
@@ -86,47 +87,66 @@ def profile(run_config: RunConfig):
                     model_config.append(
                         [model_combination[i], start, end, bs_it[i], seq_len]
                     )
-                    model_worker, model_pipe = worker_list[i]
-                    model_pipe.send(
-                        (
-                            model_config[i][0],
-                            "prepare",
-                            model_config[i][1],
-                            model_config[i][2],
-                            model_config[i][3],
-                            model_config[i][4],
+                pendding_profile_config = tuple(tuple(i) for i in model_config)
+                if pendding_profile_config in profiled_config:
+                    print(
+                        "Profiled model config: {}, {}, {}, {}, {},{}, {}, {}, {}, {}".format(
+                            model_config[0][0],
+                            model_config[0][1],
+                            model_config[0][2],
+                            model_config[0][3],
+                            model_config[0][4],
+                            model_config[1][0],
+                            model_config[1][1],
+                            model_config[1][2],
+                            model_config[1][3],
+                            model_config[1][4],
                         )
                     )
-                barrier.wait()
-                record = []
-                with tqdm(range(run_config.test_loop)) as t:
-                    for loop_i in t:
-                        start_time = datetime.datetime.now()
-                        for i in range(run_config.total_models):
-                            _, model_pipe = worker_list[i]
-                            model_pipe.send(
-                                (
-                                    model_config[i][0],
-                                    "forward",
-                                    model_config[i][1],
-                                    model_config[i][2],
-                                    model_config[i][3],
-                                    model_config[i][4],
-                                )
+                else:
+                    profiled_config.add(pendding_profile_config)
+                    for i in range(run_config.total_models):
+                        _, model_pipe = worker_list[i]
+                        model_pipe.send(
+                            (
+                                model_config[i][0],
+                                "prepare",
+                                model_config[i][1],
+                                model_config[i][2],
+                                model_config[i][3],
+                                model_config[i][4],
                             )
-                        # barrier.wait()
-                        # start_time = datetime.datetime.now()
-                        barrier.wait()
-                        elapsed_time_us = (
-                            datetime.datetime.now() - start_time
-                        ).microseconds
-                        t.set_postfix(elapsed=elapsed_time_us)
-                        t.update(1)
-                        record.append(elapsed_time_us)
+                        )
+                    barrier.wait()
+                    record = []
+                    with tqdm(range(run_config.test_loop)) as t:
+                        for loop_i in t:
+                            start_time = datetime.datetime.now()
+                            for i in range(run_config.total_models):
+                                _, model_pipe = worker_list[i]
+                                model_pipe.send(
+                                    (
+                                        model_config[i][0],
+                                        "forward",
+                                        model_config[i][1],
+                                        model_config[i][2],
+                                        model_config[i][3],
+                                        model_config[i][4],
+                                    )
+                                )
+                            # barrier.wait()
+                            # start_time = datetime.datetime.now()
+                            barrier.wait()
+                            elapsed_time_us = (
+                                datetime.datetime.now() - start_time
+                            ).microseconds
+                            t.set_postfix(elapsed=elapsed_time_us)
+                            t.update(1)
+                            record.append(elapsed_time_us)
 
-                profile_record = make_record(model_config, record)
-                wr.writerow(profile_record)
-                profile_file.flush()
+                    profile_record = make_record(model_config, record)
+                    wr.writerow(profile_record)
+                    profile_file.flush()
         for i in range(run_config.total_models):
             _, model_pipe = worker_list[i]
             model_pipe.send(("none", "terminate", -1, -1, -1, -1))
