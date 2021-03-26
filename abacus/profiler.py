@@ -24,8 +24,7 @@ def profile(run_config: RunConfig):
         os.mkdir(profile_data_path)
     for model_combination in gen_model_combinations(
         run_config.models_name,
-        run_config.total_models,
-        run_config.profiled_combinations,
+        run_config.profiling_combinations,
     ):
         print(model_combination)
         profile_filename = model_combination[0]
