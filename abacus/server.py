@@ -407,14 +407,18 @@ class Scheduler(Process):
                         self._scheduled_queries[qos_id] = qos_query
                         self.clean_scheduled_queries(model_ids=qos_id)
                         self._schedule_flag = 0
-            elif total_colocated == 3:
+            elif total_colocated >= 3:
+                l_id = waiting_scheduling[1][0]
+                l_query: Query = self._scheduling_queries[l_id]
                 m_id = waiting_scheduling[1][0]
                 m_query: Query = self._scheduling_queries[m_id]
                 r_id = waiting_scheduling[2][0]
                 r_query: Query = self._scheduling_queries[r_id]
                 searched_query = None
                 searched_pos = None
-                features = self.get_query_feature(3, qos_query, m_query, r_query)
+                features = self.get_query_feature(
+                    total_colocated, qos_query, m_query, r_query
+                )
                 search_times = 1
                 with torch.no_grad():
                     latencies = self._predictor(features).numpy()
@@ -447,13 +451,13 @@ class Scheduler(Process):
                             end_pos=end_pos,
                             search_ways=search_ways,
                             l_query=qos_query,
-                            m_query= m_query,
-                            r_query=r_query
+                            m_query=m_query,
+                            r_query=r_query,
                         )
                         with torch.no_grad():
                             latencies = self._predictor(features).numpy()
                         for i in range(search_ways):
-                            headroom = qos-latencies[i]
+                            headroom = qos - latencies[i]
                             if headroom < 0:
                                 end_pos = op_poses[i]
                             else:
@@ -481,12 +485,12 @@ class Scheduler(Process):
                             end_pos=end_pos,
                             search_ways=search_ways,
                             l_query=qos_query,
-                            m_query= m_query
+                            m_query=m_query,
                         )
                         with torch.no_grad():
                             latencies = self._predictor(features).numpy()
                         for i in range(search_ways):
-                            headroom = qos-latencies[i]
+                            headroom = qos - latencies[i]
                             if headroom < 0:
                                 end_pos = op_poses[i]
                             else:
@@ -743,28 +747,35 @@ class Scheduler(Process):
     def get_query_feature(
         self,
         search_ways,
-        l_query: Query,
+        qos_query: Query,
+        l_query: Query = None,
         m_query: Query = None,
         r_query: Query = None,
     ):
         input_feature = torch.zeros(search_ways, self._models_feature)
-        input_feature[0:search_ways, l_query.model_id] += 1
-        input_feature[0:search_ways, 7] = l_query.start_pos
-        input_feature[0:search_ways, 8] = l_query.end_pos
-        input_feature[0:search_ways, 9] = l_query.batch_size
-        input_feature[0:search_ways, 10] = l_query.seq_len
+        input_feature[0:search_ways, qos_query.model_id] += 1
+        input_feature[0:search_ways, 7] = qos_query.start_pos
+        input_feature[0:search_ways, 8] = qos_query.end_pos
+        input_feature[0:search_ways, 9] = qos_query.batch_size
+        input_feature[0:search_ways, 10] = qos_query.seq_len
+        if l_query is not None:
+            input_feature[1:search_ways, l_query.model_id] += 1
+            input_feature[1:search_ways, 11] = l_query.end_pos
+            input_feature[1:search_ways, 12] = l_query.op_len
+            input_feature[1:search_ways, 13] = l_query.batch_size
+            input_feature[1:search_ways, 14] = l_query.seq_len
         if m_query is not None:
-            input_feature[1:search_ways, r_query.model_id] += 1
-            input_feature[1:search_ways, 11] = r_query.end_pos
-            input_feature[1:search_ways, 12] = r_query.op_len
-            input_feature[1:search_ways, 13] = r_query.batch_size
-            input_feature[1:search_ways, 14] = r_query.seq_len
+            input_feature[2:search_ways, m_query.model_id] += 1
+            input_feature[2:search_ways, 15] = m_query.end_pos
+            input_feature[2:search_ways, 16] = m_query.op_len
+            input_feature[2:search_ways, 17] = m_query.batch_size
+            input_feature[2:search_ways, 18] = m_query.seq_len
         if r_query is not None:
-            input_feature[2, r_query.model_id] += 1
-            input_feature[2, 15] = r_query.end_pos
-            input_feature[2, 16] = r_query.op_len
-            input_feature[2, 17] = r_query.batch_size
-            input_feature[2, 18] = r_query.seq_len
+            input_feature[3, r_query.model_id] += 1
+            input_feature[3, 19] = r_query.end_pos
+            input_feature[3, 20] = r_query.op_len
+            input_feature[3, 21] = r_query.batch_size
+            input_feature[3, 22] = r_query.seq_len
         return input_feature
 
     def get_layer_feature(
@@ -772,18 +783,21 @@ class Scheduler(Process):
         start_pos,
         end_pos,
         search_ways,
-        l_query: Query,
+        qos_query: Query,
+        l_query: Query = None,
         m_query: Query = None,
         r_query: Query = None,
     ):
         step = (end_pos - start_pos) // (search_ways + 1)
         poses = []
         input_feature = torch.zeros(search_ways, self._models_feature)
-        input_feature[0:search_ways, l_query.model_id] += 1
-        input_feature[0:search_ways, 7] = l_query.start_pos
-        input_feature[0:search_ways, 8] = l_query.end_pos
-        input_feature[0:search_ways, 9] = l_query.batch_size
-        input_feature[0:search_ways, 10] = l_query.seq_len
+        input_feature[0:search_ways, qos_query.model_id] += 1
+        input_feature[0:search_ways, 7] = qos_query.start_pos
+        input_feature[0:search_ways, 8] = qos_query.end_pos
+        input_feature[0:search_ways, 9] = qos_query.batch_size
+        input_feature[0:search_ways, 10] = qos_query.seq_len
+        if l_query is not None:
+            raise NotImplementedError
         if r_query is not None:
             input_feature[0:search_ways, r_query.model_id] += 1
             input_feature[0:search_ways, 11] = r_query.start_pos

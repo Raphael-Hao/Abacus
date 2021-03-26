@@ -80,7 +80,7 @@ def train_predictor(args: RunConfig):
 
     elif args.mode == "onebyone":
         for model_combination in gen_model_combinations(
-            args.models_name, args.total_models, args.trained_combinations
+            args.models_name, args.trained_combinations
         ):
 
             data_filename = model_combination[0]

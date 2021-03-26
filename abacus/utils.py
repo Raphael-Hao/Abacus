@@ -21,16 +21,16 @@ def gen_background_combinations(models, background_combinations):
     return model_combinations
 
 
-def gen_model_combinations(models, combination_len, done_combinations=None):
-    id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
-    id_combinations = set(itertools.combinations(id_combinations, combination_len))
-    print(id_combinations)
-    for profiled in done_combinations:
-        id_combinations.remove(profiled)
+def gen_model_combinations(models, profiling_combinations=None):
+    # id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
+    # id_combinations = set(itertools.combinations(id_combinations, combination_len))
+    # print(id_combinations)
+    # for profiled in done_combinations:
+    #     id_combinations.remove(profiled)
+    # id_combinations = list(id_combinations)
+    # id_combinations = sorted(id_combinations, key=lambda x: (x[0], x[1]))
     model_combinations = []
-    id_combinations = list(id_combinations)
-    id_combinations = sorted(id_combinations, key=lambda x: (x[0], x[1]))
-    for id_comb in id_combinations:
+    for id_comb in profiling_combinations:
         model_comb = []
         for id in id_comb:
             model_comb.append(models[id])
