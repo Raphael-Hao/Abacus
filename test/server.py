@@ -14,7 +14,7 @@ run_config = parse_options()
 def prepare_test_queries(total_queries=1000):
     test_queries = []
     for i in range(total_queries):
-        model_id = i+3
+        model_id = i + 3
         # model_id = random.choice(run_config.serve_combination)
         bs = random.choice(run_config.supported_batchsize)
         seq_len = random.choice(run_config.supported_seqlen) if model_id == 6 else 0

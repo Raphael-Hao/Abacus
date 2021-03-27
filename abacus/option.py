@@ -52,10 +52,19 @@ class RunConfig:
             "bert": 12,
         }
 
+        # self.supported_batchsize = [
+        #     1,
+        #     2,
+        #     4,
+        #     8,
+        #     16,
+        #     32,
+        # ]
+        # mig batch size
         self.supported_batchsize = [
-            1,
-            2,
-            4,
+            # 1,
+            # 2,
+            # 4,
             8,
             16,
             32,
@@ -93,8 +102,8 @@ class RunConfig:
             """
             [profiled configurations]
             """
-            # self.total_test = 200 #2in7
-            self.total_test = 50  # 3in4
+            self.total_test = 100 #2in7
+            # self.total_test = 50  # 3in4
             # self.total_test = 1
             self.test_loop = 100
             self.profiling_combinations = [(1, 2, 5, 6)]
