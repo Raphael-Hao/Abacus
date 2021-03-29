@@ -14,7 +14,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.total_models = 4
+        self.total_models = 3
         self.device = 0
         self.path = "/state/partition/whcui/repository/project/Abacus"
         # self.path = "/home/cwh/Lego"
@@ -64,7 +64,7 @@ class RunConfig:
         self.supported_batchsize = [
             # 1,
             # 2,
-            # 4,
+            4,
             8,
             16,
             32,
@@ -102,47 +102,40 @@ class RunConfig:
             """
             [profiled configurations]
             """
-            self.total_test = 100 #2in7
+            self.total_test = 200  # 2in7
             # self.total_test = 50  # 3in4
             # self.total_test = 1
             self.test_loop = 100
-            self.profiling_combinations = [(1, 2, 5, 6)]
+            # self.profiling_combinations = [(1, 2, 5, 6)]
+            self.profiling_combinations = [
+                # 1, 2, 5, 6
+                (1, 2, 5),
+                (1, 2, 6),
+                (1, 5, 6),
+                (2, 5, 6),
+            ]
             # self.profiling_combinations = [
-            #     # 1, 2, 5, 6
-            #     (1, 2, 5),
-            #     (1, 2, 6),
-            #     (1, 5, 6),
-            #     (2, 5, 6),
-            # ]
-            # self.profiled_combinations = [
-            #     (0, 0),
-            #     (1, 1),
-            #     (2, 2),
-            #     (3, 3),
-            #     (4, 4),
-            #     (5, 5),
-            #     (6, 6),
-            #     # (0, 1),
-            #     # (0, 2),
-            #     # (0, 3),
-            #     # (0, 4),
-            #     # (0, 5),
-            #     # (0, 6),
-            #     # (1, 2),
-            #     # (1, 3),
-            #     # (1, 4),
-            #     # (1, 5),
-            #     # (1, 6),
-            #     # (2, 3),
-            #     # (2, 4),
-            #     # (2, 5),
-            #     # (2, 6),
-            #     # (3, 4),
-            #     # (3, 5),
-            #     # (3, 6),
-            #     # (4, 5),
-            #     # (4, 6),
-            #     # (5, 6),
+            #     (0, 1),
+            #     (0, 2),
+            #     (0, 3),
+            #     (0, 4),
+            #     (0, 5),
+            #     (0, 6),
+            #     (1, 2),
+            #     (1, 3),
+            #     (1, 4),
+            #     (1, 5),
+            #     (1, 6),
+            #     (2, 3),
+            #     (2, 4),
+            #     (2, 5),
+            #     (2, 6),
+            #     (3, 4),
+            #     (3, 5),
+            #     (3, 6),
+            #     (4, 5),
+            #     (4, 6),
+            #     (5, 6),
             # ]
 
         elif args.task == "train":
