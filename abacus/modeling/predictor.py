@@ -47,7 +47,14 @@ class MultiDNNPredictor:
         self._models_id = models_id
         self._path = path
         self._total_models = total_models
-        self._data_path = os.path.join(self._path, "data/profile/3in4")
+        if self._total_models == 2:
+            self._data_path = os.path.join(self._path, "data/profile/A100/2in7")
+        elif self._total_models == 3:
+            self._data_path = os.path.join(self._path, "data/profile/A100/3in4")
+        elif self._total_models == 4:
+            self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
+        else:
+            raise NotImplementedError
         self._save_path = os.path.join(self._path, "model")
         if not os.path.exists(self._save_path):
             os.mkdir(self._save_path)
@@ -145,6 +152,7 @@ class MLPPredictor(MultiDNNPredictor):
                         }
                     )
                     t.update(1)
+            self.validate()
             train_loss_all.append(train_loss.avg)
         plt.figure(figsize=(10, 6))
         plt.plot(train_loss_all, "ro-", label="Train loss")
@@ -157,9 +165,9 @@ class MLPPredictor(MultiDNNPredictor):
             bbox_inches="tight",
         )
         plt.show()
-        self.validate()
+        self.validate(if_save=True)
 
-    def validate(self):
+    def validate(self, if_save=False):
         origin_latency = None
         predict_latency = None
         self._model.eval()
@@ -192,52 +200,51 @@ class MLPPredictor(MultiDNNPredictor):
                         )
 
         mae = np.average(np.abs(predict_latency - origin_latency))
-        print(mae)
         mape = np.average(np.abs(predict_latency - origin_latency) / origin_latency)
-        print(mape)
-        self.save_result(self._data_fname, mae, mape)
-        index = np.argsort(origin_latency)
-        plt.figure(figsize=(12, 5))
-        plt.plot(
-            np.arange(len(origin_latency)),
-            origin_latency[index],
-            "r",
-            label="original y",
-        )
-        plt.scatter(
-            np.arange(len(predict_latency)),
-            predict_latency[index],
-            s=3,
-            c="b",
-            label="prediction",
-        )
-        plt.legend(loc="upper left")
-        plt.grid()
-        plt.xlabel("index")
-        plt.ylabel("y")
-        plt.savefig(
-            os.path.join(self._result_path, self._data_fname + "_test.pdf"),
-            bbox_inches="tight",
-        )
-        plt.show()
-        self.save_model()
-        self._model.cpu().eval()
-        for cores in range(1, 29):
-            torch.set_num_threads(cores)
-            # torch.set_num_interop_threads(cores)
-            with torch.no_grad():
-                for bs in range(1, 17):
-                    test_input = torch.rand((bs, self._firt_layer))
-                    start_time = time.time()
-                    for i in range(1000):
-                        test_output = self._model(test_input)
-                        # print(test_output[0])
-                    end_time = time.time() - start_time
-                    print(
-                        "cores: {}, batch size: {}, Inference time: {} ms".format(
-                            cores, bs, end_time
+        print("mae: {}, mape: {}".format(mae, mape))
+        if if_save is True:
+            self.save_result(self._data_fname, mae, mape)
+            index = np.argsort(origin_latency)
+            plt.figure(figsize=(12, 5))
+            plt.plot(
+                np.arange(len(origin_latency)),
+                origin_latency[index],
+                "r",
+                label="original y",
+            )
+            plt.scatter(
+                np.arange(len(predict_latency)),
+                predict_latency[index],
+                s=3,
+                c="b",
+                label="prediction",
+            )
+            plt.legend(loc="upper left")
+            plt.grid()
+            plt.xlabel("index")
+            plt.ylabel("y")
+            plt.savefig(
+                os.path.join(self._result_path, self._data_fname + "_test.pdf"),
+                bbox_inches="tight",
+            )
+            self.save_model()
+            self._model.cpu().eval()
+            for cores in range(1, 29):
+                torch.set_num_threads(cores)
+                # torch.set_num_interop_threads(cores)
+                with torch.no_grad():
+                    for bs in range(1, 17):
+                        test_input = torch.rand((bs, self._firt_layer))
+                        start_time = time.time()
+                        for i in range(1000):
+                            test_output = self._model(test_input)
+                            # print(test_output[0])
+                        end_time = time.time() - start_time
+                        print(
+                            "cores: {}, batch size: {}, Inference time: {} ms".format(
+                                cores, bs, end_time
+                            )
                         )
-                    )
 
     def calc_learning_rate(self, epoch, batch=0):
         if self._lr_schedule_type == "cosine":
