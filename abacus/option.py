@@ -14,10 +14,10 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.total_models = 3
+        self.total_models = 2
         self.device = 0
-        self.path = "/state/partition/whcui/repository/project/Abacus"
-        # self.path = "/home/cwh/Lego"
+        # self.path = "/state/partition/whcui/repository/project/Abacus"
+        self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
         if not os.path.exists(self.data_path):
             os.mkdir(self.data_path)
@@ -142,7 +142,7 @@ class RunConfig:
             """
             [prediction model configurations]
             """
-            self.training_combinations = [1, 2, 5, 6]
+            # self.training_combinations = [1, 2, 5, 6]
             # self.training_combinations = [
             # 1, 2, 5, 6
             # (1, 2, 5),
@@ -151,29 +151,29 @@ class RunConfig:
             # (2, 5, 6),
             # ]
             # ]
-            # self.training_combinations = [
-            #     (0, 1),
-            #     (0, 2),
-            #     (0, 3),
-            #     (0, 4),
-            #     (0, 5),
-            #     (0, 6),
-            #     (1, 2),
-            #     (1, 3),
-            #     (1, 4),
-            #     (1, 5),
-            #     (1, 6),
-            #     (2, 3),
-            #     (2, 4),
-            #     (2, 5),
-            #     (2, 6),
-            #     (3, 4),
-            #     (3, 5),
-            #     (3, 6),
-            #     (4, 5),
-            #     (4, 6),
-            #     (5, 6),
-            # ]
+            self.training_combinations = [
+                (0, 1),
+                (0, 2),
+                (0, 3),
+                (0, 4),
+                (0, 5),
+                (0, 6),
+                (1, 2),
+                (1, 3),
+                (1, 4),
+                (1, 5),
+                (1, 6),
+                (2, 3),
+                (2, 4),
+                (2, 5),
+                (2, 6),
+                (3, 4),
+                (3, 5),
+                (3, 6),
+                (4, 5),
+                (4, 6),
+                (5, 6),
+            ]
 
             # self.mode = "onebyone"
             # self.mode = "single"
@@ -183,7 +183,7 @@ class RunConfig:
             self.modeling = "mlp"
             self.model_combination = "resnet152_resnet152"
             self.hyper_params = {
-                "all": [0.002, 180],
+                "all": [0.001, 180],
                 # "all": [0.002, 280],
                 "resnet101_inception_v3": [0.001, 100],
                 "bert_bert": [0.001, 100],
