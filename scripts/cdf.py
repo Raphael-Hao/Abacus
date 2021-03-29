@@ -80,6 +80,7 @@ all_latency = load_all_lantency()
 all_std_deviation = load_all_std_deviation()
 
 #%%
+print(all_latency.shape)
 print(np.percentile(all_std_deviation, 80))
 print(np.percentile(all_std_deviation, 90))
 print(np.percentile(all_std_deviation, 99))
