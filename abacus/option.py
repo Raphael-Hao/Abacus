@@ -14,7 +14,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.total_models = 2
+        self.total_models = 4
         self.device = 0
         # self.path = "/state/partition/whcui/repository/project/Abacus"
         self.path = "/home/whcui/project/Abacus"
@@ -106,14 +106,14 @@ class RunConfig:
             # self.total_test = 50  # 3in4
             # self.total_test = 1
             self.test_loop = 100
-            # self.profiling_combinations = [(1, 2, 5, 6)]
-            self.profiling_combinations = [
-                # 1, 2, 5, 6
-                (1, 2, 5),
-                (1, 2, 6),
-                (1, 5, 6),
-                (2, 5, 6),
-            ]
+            self.profiling_combinations = [(1, 2, 5, 6)]
+            # self.profiling_combinations = [
+            #     # 1, 2, 5, 6
+            #     (1, 2, 5),
+            #     (1, 2, 6),
+            #     (1, 5, 6),
+            #     (2, 5, 6),
+            # ]
             # self.profiling_combinations = [
             #     (0, 1),
             #     (0, 2),
