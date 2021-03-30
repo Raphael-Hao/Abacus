@@ -29,7 +29,7 @@ def load_single_file(filepath):
     return std_deviation
 
 def load_all_std_deviation(
-    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/A100/2in7",
+    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/A100/3in4",
 ):
     all_std_deviation = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
@@ -53,7 +53,7 @@ def load_all_std_deviation(
             all_std_deviation = np.concatenate((all_std_deviation, std_deviation_data))
     return all_std_deviation.astype(np.float)
 def load_all_lantency(
-    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/A100/2in7",
+    data_path="/state/partition/whcui/repository/project/Abacus/data/profile/A100/3in4",
 ):
     all_std_deviation = None
     for filename in glob.glob(os.path.join(data_path, "*.csv")):
