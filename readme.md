@@ -65,10 +65,10 @@ $ python main.py --task serve
 ```
 
 # Evaluation
-| Experiment Name/ Section/ Paragraph | Related Figures | Experiment |
-| ----------------------------------- | --------------- | ---------- |
-|   7.2                                  |                 |            |
-|   7.3                                  |                 |            |
-|   7.4                                  |                 |            |
-|   7.5                                  |                 |            |
-|   7.6                                  |                 |            |
+| Experiment Name/ Section/ Paragraph                            | Related Figures | Experiment |
+| -------------------------------------------------------------- | --------------- | ---------- |
+| 7.2 QoS of simultaneous DNN services                           |                 |            |
+| 7.3 Improving the System Throughput                            |                 |            |
+| 7.4 More Services and More MIGs                                |                 |            |
+| 7.5 Effectiveness of Multi-way Search and Pipelined Scheduling |                 |            |
+| 7.6 Overhead                                                   |                 |            |
