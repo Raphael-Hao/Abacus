@@ -188,10 +188,12 @@ class RunConfig:
             # self.mode = "onebyone"
             # self.mode = "single"
             self.mode = args.mode
+            if self.mode == "single":
+                self.model_combination = args.model_comb
             # self.modeling = "lr"
             # self.modeling = "svm"
             self.modeling = args.modeling
-            self.model_combination = args.model_comb
+
             self.hyper_params = {
                 "all": [0.001, 180],
                 # "all": [0.002, 280],
@@ -253,9 +255,7 @@ def parse_options():
     """[summary]
     online serve
     """
-    parser.add_argument(
-        "--comb", type=int, required="serve" in sys.argv, nargs="+"
-    )
+    parser.add_argument("--comb", type=int, required="serve" in sys.argv, nargs="+")
     parser.add_argument(
         "--policy",
         type=str,
