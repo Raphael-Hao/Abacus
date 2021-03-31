@@ -92,9 +92,9 @@ class RunConfig:
             # self.policy = "SJF"
             # self.policy = "FCFS"
             # self.policy = "EDF"
-            self.threshold = 2
-            self.qos_target = 60
-            self.search_ways = 2
+            self.threshold = args.threshold
+            self.qos_target = args.qos
+            self.search_ways = args.ways
             self.total_queries = 1000
             self.average_duration = args.load
             self.abandon = True
@@ -249,9 +249,12 @@ def parse_options():
         default="profile",
         choices=["profile", "train", "serve", "background"],
     )
-    ## online serve
+
+    """[summary]
+    online serve
+    """
     parser.add_argument(
-        "--combination", type=int, required="serve" in sys.argv, nargs="+"
+        "--comb", type=int, required="serve" in sys.argv, nargs="+"
     )
     parser.add_argument(
         "--policy",
@@ -261,6 +264,9 @@ def parse_options():
         choices=["Abacus", "SJF", "FCFS"],
     )
     parser.add_argument("--load", type=int, required="serve" in sys.argv, default=50)
+    parser.add_argument("--qos", type=int, required="serve" in sys.argv, default=60)
+    parser.add_argument("--thld", type=int, required="serve" in sys.argv, default=60)
+    parser.add_argument("--ways", type=int, required="serve" in sys.argv, default=60)
 
     ## profiling
     parser.add_argument("--test", type=int, required="profile" in sys.argv, default=200)
