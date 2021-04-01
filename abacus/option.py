@@ -15,7 +15,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.total_models = 2
+        self.total_models = args.model_num
         self.device = 0
         # self.path = "/state/partition/whcui/repository/project/Abacus"
         self.path = "/home/whcui/project/Abacus"
@@ -193,9 +193,13 @@ class RunConfig:
             # self.modeling = "lr"
             # self.modeling = "svm"
             self.modeling = args.modeling
+            if self.mode == "all" and self.modeling == "mlp":
+                self.profile_predictor = True
+            else:
+                self.profile_predictor = False
 
             self.hyper_params = {
-                "all": [0.001, 180],
+                "all": [0.001, 1],
                 # "all": [0.002, 280],
                 "resnet101_inception_v3": [0.001, 100],
                 "bert_bert": [0.001, 100],
@@ -249,9 +253,17 @@ def parse_options():
         "--task",
         type=str,
         default="profile",
+        required=True,
         choices=["profile", "train", "serve", "background"],
     )
 
+    parser.add_argument(
+        "--model_num",
+        type=int,
+        default="2",
+        required=True,
+        choices=[2, 3, 4],
+    )
     """[summary]
     online serve
     """
@@ -284,10 +296,13 @@ def parse_options():
         type=str,
         default="mlp",
         required="train" in sys.argv,
-        choices=["mlp", "onebyone"],
+        choices=["mlp", "svm", "lr"],
     )
     parser.add_argument(
-        "--model_comb", type=str, default="resnet152_resnet152", required="single"
+        "--model_comb",
+        type=str,
+        default="resnet152_resnet152",
+        required="single" in sys.argv,
     )
     args = parser.parse_args()
 

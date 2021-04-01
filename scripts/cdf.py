@@ -8,14 +8,6 @@ import glob
 import pandas as pd
 import os
 
-import matplotlib as mpl
-
-mpl.use("Agg")
-import matplotlib.pyplot as plt
-
-mpl.rcParams["font.family"] = "Times New Roman"
-
-# %%
 def load_all_std_deviation(
     data_path="../data/profile/A100/3in4",
 ):
@@ -41,18 +33,6 @@ def load_all_std_deviation(
     return all_std_deviation.astype(np.float)
 
 
-all_std_deviation = load_all_std_deviation() / 1000
-
-#%%
-print("{} samples are collected".format(len(all_std_deviation)))
-print("80%-ile std: {}".format(np.percentile(all_std_deviation, 80)))
-print("90%-ile std: {}".format(np.percentile(all_std_deviation, 90)))
-print("99%-ile std: {}".format(np.percentile(all_std_deviation, 99)))
-print("mean std: {}".format(np.mean(all_std_deviation)))
-print("max std: {}".format(np.max(all_std_deviation)))
-print("min std: {}".format(np.min(all_std_deviation)))
-
-# %%
 def load_all_lantency(
     data_path="../data/profile/A100/3in4",
 ):
@@ -79,22 +59,52 @@ def load_all_lantency(
     return all_std_deviation.astype(np.float)
 
 
-all_latency = load_all_lantency() / 1000
+#%% 2in7
+all_std_deviation = load_all_std_deviation("../data/profile/A100/2in7") / 1000
+all_latency = load_all_lantency("../data/profile/A100/2in7") / 1000
+
+#%% 3in4
+all_std_deviation = load_all_std_deviation("../data/profile/A100/3in4") / 1000
+all_latency = load_all_lantency("../data/profile/A100/3in4") / 1000
+
+#%% 4in4
+all_std_deviation = load_all_std_deviation("../data/profile/A100/4in4") / 1000
+all_latency = load_all_lantency("../data/profile/A100/4in4") / 1000
+
+#%% 2in4
+all_std_deviation = load_all_std_deviation("../data/profile/mig/2in4") / 1000
+all_latency = load_all_lantency("../data/profile/mig/2in4") / 1000
 
 # %%
-print(np.percentile(all_latency, 80))
-print(np.percentile(all_latency, 90))
-print(np.percentile(all_latency, 99))
-print(np.mean(all_latency))
-print(np.max(all_latency))
-print(np.min(all_latency))
+
+print("{} samples are collected".format(len(all_std_deviation)))
+print("80%-ile std: {}".format(np.percentile(all_std_deviation, 80)))
+print("90%-ile std: {}".format(np.percentile(all_std_deviation, 90)))
+print("99%-ile std: {}".format(np.percentile(all_std_deviation, 99)))
+print("mean std: {}".format(np.mean(all_std_deviation)))
+print("max std: {}".format(np.max(all_std_deviation)))
+print("min std: {}".format(np.min(all_std_deviation)))
+
 
 # %%
-print(np.mean(all_std_deviation / all_latency))
+print("80%-ile e2e: {}".format(np.percentile(all_latency, 80)))
+print("90%-ile std: {}".format(np.percentile(all_latency, 90)))
+print("99%-ile std: {}".format(np.percentile(all_latency, 99)))
+print("mean std: {}".format(np.mean(all_latency)))
+print("max std: {}".format(np.max(all_latency)))
+print("min std: {}".format(np.min(all_latency)))
+
+# %%
+print("ratio of average e2e to std: {}".format(np.mean(all_std_deviation / all_latency)))
 
 # %%
 import seaborn as sns
+import matplotlib as mpl
+mpl.use("Agg")
+import matplotlib.pyplot as plt
+mpl.rcParams["font.family"] = "Times New Roman"
 
+# %%
 fig = plt.figure(figsize=(16, 3))
 ax = fig.add_subplot(111)
 ax.set_xlabel("Standard deviation of latencies(ms)", fontsize=32)
@@ -110,7 +120,6 @@ plt.savefig("../figure/std_deviation.pdf", bbox_inches="tight")
 plt.show()
 
 # %%
-import seaborn as sns
 
 fig = plt.figure(figsize=(16, 3))
 ax = fig.add_subplot(111)
@@ -126,10 +135,9 @@ sns.ecdfplot(all_latency)
 plt.tight_layout()
 
 plt.savefig("../figure/profiled_latency.pdf", bbox_inches="tight")
-plt.show()
+plt.show(block=False)
 
 # %%
-import seaborn as sns
 
 fig = plt.figure(figsize=(16, 3))
 ax = fig.add_subplot(111)
@@ -148,7 +156,7 @@ sns.ecdfplot(all_std_deviation, label="std", legend=True, linewidth=3)
 plt.legend(ncol=2, loc="upper right", fontsize=28)
 plt.tight_layout()
 plt.savefig("../figure/latency_cdf.pdf", bbox_inches="tight")
-plt.show()
+plt.show(block=False)
 
 
 # %%
