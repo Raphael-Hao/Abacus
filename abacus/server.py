@@ -13,7 +13,7 @@ from torch.multiprocessing import Process
 from abacus.option import RunConfig
 from abacus.utils import timestamp
 from abacus.worker import ServerWorker
-from abacus.modeling.models import MLPregression
+from abacus.modeling.predictor.mlp import MLPregression
 
 
 class Query:
