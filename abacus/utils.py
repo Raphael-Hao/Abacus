@@ -4,7 +4,6 @@
 
 import sys
 import time
-import itertools
 import random
 import numpy as np
 import numpy.ma as ma

@@ -1,0 +1,5 @@
+sklearn
+pandas==1.2.3
+transformers==4.4.1
+tqdm==4.59.0
+matplotlib==3.3.4

@@ -167,7 +167,7 @@ class MLPPredictor(MultiDNNPredictor):
         plt.show()
         self.validate(if_save=True)
 
-    def validate(self, if_save=False):
+    def validate(self, if_save=False, if_profile=False):
         origin_latency = None
         predict_latency = None
         self._model.eval()
@@ -228,6 +228,7 @@ class MLPPredictor(MultiDNNPredictor):
                 bbox_inches="tight",
             )
             self.save_model()
+        if if_profile is True:
             self._model.cpu().eval()
             for cores in range(1, 29):
                 torch.set_num_threads(cores)
