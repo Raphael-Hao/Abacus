@@ -69,6 +69,7 @@ def load_torch_data(
     all_latency = None
     if model_combinatin == "all":
         for filename in glob.glob(os.path.join(data_path, "*.csv")):
+            # print(filename)
             feature_data, latency_data = load_single_file(
                 filename, models_id, total_models
             )

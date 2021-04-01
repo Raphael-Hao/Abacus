@@ -3,6 +3,7 @@
 # Author: raphael hao
 
 import argparse
+import sys
 import os
 from abacus.network.resnet_splited import resnet50, resnet101, resnet152
 from abacus.network.inception_splited import inception_v3
@@ -14,7 +15,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.task = args.task
         # general configurations
-        self.total_models = 4
+        self.total_models = 2
         self.device = 0
         # self.path = "/state/partition/whcui/repository/project/Abacus"
         self.path = "/home/whcui/project/Abacus"
@@ -90,10 +91,10 @@ class RunConfig:
             self.policy = args.policy
             # self.policy = "SJF"
             # self.policy = "FCFS"
-            self.policy = "EDF"
-            self.threshold = 2
-            self.qos_target = 60
-            self.search_ways = 2
+            # self.policy = "EDF"
+            self.threshold = args.threshold
+            self.qos_target = args.qos
+            self.search_ways = args.ways
             self.total_queries = 1000
             self.average_duration = args.load
             self.abandon = True
@@ -102,86 +103,97 @@ class RunConfig:
             """
             [profiled configurations]
             """
-            self.total_test = 200  # 2in7
+            self.total_test = args.test  # 2in7
             # self.total_test = 50  # 3in4
             # self.total_test = 1
             self.test_loop = 100
-            self.profiling_combinations = [(1, 2, 5, 6)]
-            # self.profiling_combinations = [
-            #     # 1, 2, 5, 6
-            #     (1, 2, 5),
-            #     (1, 2, 6),
-            #     (1, 5, 6),
-            #     (2, 5, 6),
-            # ]
-            # self.profiling_combinations = [
-            #     (0, 1),
-            #     (0, 2),
-            #     (0, 3),
-            #     (0, 4),
-            #     (0, 5),
-            #     (0, 6),
-            #     (1, 2),
-            #     (1, 3),
-            #     (1, 4),
-            #     (1, 5),
-            #     (1, 6),
-            #     (2, 3),
-            #     (2, 4),
-            #     (2, 5),
-            #     (2, 6),
-            #     (3, 4),
-            #     (3, 5),
-            #     (3, 6),
-            #     (4, 5),
-            #     (4, 6),
-            #     (5, 6),
-            # ]
+            if self.total_models == 4:
+                self.profiling_combinations = [(1, 2, 5, 6)]
+            elif self.total_models == 3:
+                self.profiling_combinations = [
+                    # 1, 2, 5, 6
+                    (1, 2, 5),
+                    (1, 2, 6),
+                    (1, 5, 6),
+                    (2, 5, 6),
+                ]
+            elif self.total_models == 2:
+                self.profiling_combinations = [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 4),
+                    (0, 5),
+                    (0, 6),
+                    (1, 2),
+                    (1, 3),
+                    (1, 4),
+                    (1, 5),
+                    (1, 6),
+                    (2, 3),
+                    (2, 4),
+                    (2, 5),
+                    (2, 6),
+                    (3, 4),
+                    (3, 5),
+                    (3, 6),
+                    (4, 5),
+                    (4, 6),
+                    (5, 6),
+                ]
+            else:
+                raise NotImplementedError
 
         elif args.task == "train":
             """
             [prediction model configurations]
             """
-            # self.training_combinations = [1, 2, 5, 6]
-            # self.training_combinations = [
-            # 1, 2, 5, 6
-            # (1, 2, 5),
-            # (1, 2, 6),
-            # (1, 5, 6),
-            # (2, 5, 6),
-            # ]
-            # ]
-            self.training_combinations = [
-                (0, 1),
-                (0, 2),
-                (0, 3),
-                (0, 4),
-                (0, 5),
-                (0, 6),
-                (1, 2),
-                (1, 3),
-                (1, 4),
-                (1, 5),
-                (1, 6),
-                (2, 3),
-                (2, 4),
-                (2, 5),
-                (2, 6),
-                (3, 4),
-                (3, 5),
-                (3, 6),
-                (4, 5),
-                (4, 6),
-                (5, 6),
-            ]
+            if self.total_models == 4:
+                self.training_combinations = [1, 2, 5, 6]
+            elif self.total_models == 3:
+                self.training_combinations = [
+                    #   1, 2, 5, 6
+                    (1, 2, 5),
+                    (1, 2, 6),
+                    (1, 5, 6),
+                    (2, 5, 6),
+                ]
+            elif self.total_models == 2:
+                self.training_combinations = [
+                    (0, 1),
+                    (0, 2),
+                    (0, 3),
+                    (0, 4),
+                    (0, 5),
+                    (0, 6),
+                    (1, 2),
+                    (1, 3),
+                    (1, 4),
+                    (1, 5),
+                    (1, 6),
+                    (2, 3),
+                    (2, 4),
+                    (2, 5),
+                    (2, 6),
+                    (3, 4),
+                    (3, 5),
+                    (3, 6),
+                    (4, 5),
+                    (4, 6),
+                    (5, 6),
+                ]
+            else:
+                raise NotImplementedError
 
             # self.mode = "onebyone"
             # self.mode = "single"
-            self.mode = "all"
+            self.mode = args.mode
+            if self.mode == "single":
+                self.model_combination = args.model_comb
             # self.modeling = "lr"
             # self.modeling = "svm"
-            self.modeling = "mlp"
-            self.model_combination = "resnet152_resnet152"
+            self.modeling = args.modeling
+
             self.hyper_params = {
                 "all": [0.001, 180],
                 # "all": [0.002, 280],
@@ -239,11 +251,44 @@ def parse_options():
         default="profile",
         choices=["profile", "train", "serve", "background"],
     )
-    parser.add_argument("--combination", type=int, nargs="+")
+
+    """[summary]
+    online serve
+    """
+    parser.add_argument("--comb", type=int, required="serve" in sys.argv, nargs="+")
     parser.add_argument(
-        "--policy", type=str, default="Abacus", choices=["Abacus", "SJF", "FCFS"]
+        "--policy",
+        type=str,
+        default="Abacus",
+        required="serve" in sys.argv,
+        choices=["Abacus", "SJF", "FCFS"],
     )
-    parser.add_argument("--load", type=int, default=50)
+    parser.add_argument("--load", type=int, required="serve" in sys.argv, default=50)
+    parser.add_argument("--qos", type=int, required="serve" in sys.argv, default=60)
+    parser.add_argument("--thld", type=int, required="serve" in sys.argv, default=60)
+    parser.add_argument("--ways", type=int, required="serve" in sys.argv, default=60)
+
+    ## profiling
+    parser.add_argument("--test", type=int, required="profile" in sys.argv, default=200)
+
+    ## training
+    parser.add_argument(
+        "--mode",
+        type=str,
+        default="all",
+        required="train" in sys.argv,
+        choices=["all", "onebyone", "single"],
+    )
+    parser.add_argument(
+        "--modeling",
+        type=str,
+        default="mlp",
+        required="train" in sys.argv,
+        choices=["mlp", "onebyone"],
+    )
+    parser.add_argument(
+        "--model_comb", type=str, default="resnet152_resnet152", required="single"
+    )
     args = parser.parse_args()
 
     run_config = RunConfig(args=args)
