@@ -38,7 +38,7 @@ class LRPredictor(MultiDNNPredictor):
             self._data_fname, self._split_ratio, self._models_id, self._data_path
         )
 
-    def train(self, if_profile=False):
+    def train(self, save_result=False, save_model=False, perf=False):
         regr = linear_model.LinearRegression(normalize=True)
         self._model = regr
         print(self.trainX, self.trainY)
@@ -49,5 +49,5 @@ class LRPredictor(MultiDNNPredictor):
         mape = np.average(np.abs(e) / self.testY)
         print(mae)
         print(mape)
-        self.save_result(combination=self._data_fname, mae=mae, mape=mape)
-
+        if save_result is True:
+            self.save_result(combination=self._data_fname, mae=mae, mape=mape)

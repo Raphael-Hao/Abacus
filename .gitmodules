@@ -1,3 +1,0 @@
-[submodule "op_profile/3rdparty/dmlc-core"]
-	path = op_profile/3rdparty/dmlc-core
-	url = https://github.com/dmlc/dmlc-core.git

@@ -4,6 +4,7 @@
 import os
 import csv
 
+
 class MultiDNNPredictor:
     def __init__(
         self,
@@ -44,10 +45,10 @@ class MultiDNNPredictor:
             wr = csv.writer(result_file, dialect="excel")
             wr.writerow(["predictor", "combinations", "mae", "mape"])
 
-    def train(self, if_profile=False):
+    def train(self, save_result=False, save_model=False, perf=False):
         raise NotImplementedError
 
-    def validate(self, if_save=False, if_profile=False):
+    def validate(self, save_result=False, save_model=False, perf=False):
         raise NotImplementedError
 
     def save_result(self, combination, mae, mape):

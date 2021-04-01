@@ -18,8 +18,6 @@ from abacus.modeling.dataloader import load_torch_data
 from abacus.modeling.utils import AverageMeter
 
 
-
-
 class MLPregression(nn.Module):
     def __init__(self, first_layer=15):
         super(MLPregression, self).__init__()
@@ -34,6 +32,7 @@ class MLPregression(nn.Module):
         x = F.relu(self.hidden3(x))
         output = self.predict(x)
         return output[:, 0]
+
 
 class MLPPredictor(MultiDNNPredictor):
     def __init__(
@@ -77,7 +76,7 @@ class MLPPredictor(MultiDNNPredictor):
         self._optimizer = torch.optim.SGD(self._model.parameters(), lr=self._init_lr)
         self._loss_func = nn.MSELoss()
 
-    def train(self, if_profile=False):
+    def train(self, save_result=False, save_model=False, perf=False):
 
         train_loss_all = []
         for epoch in range(self._total_epochs):
@@ -119,9 +118,9 @@ class MLPPredictor(MultiDNNPredictor):
             bbox_inches="tight",
         )
         plt.show()
-        self.validate(if_save=True, if_profile=if_profile)
+        self.validate(save_result=save_result, save_model=save_model, perf=perf)
 
-    def validate(self, if_save=False, if_profile=False):
+    def validate(self, save_result=False, save_model=False, perf=False):
         origin_latency = None
         predict_latency = None
         self._model.eval()
@@ -156,7 +155,7 @@ class MLPPredictor(MultiDNNPredictor):
         mae = np.average(np.abs(predict_latency - origin_latency))
         mape = np.average(np.abs(predict_latency - origin_latency) / origin_latency)
         print("mae: {}, mape: {}".format(mae, mape))
-        if if_save is True:
+        if save_result is True:
             self.save_result(self._data_fname, mae, mape)
             index = np.argsort(origin_latency)
             plt.figure(figsize=(12, 5))
@@ -181,8 +180,9 @@ class MLPPredictor(MultiDNNPredictor):
                 os.path.join(self._result_path, self._data_fname + "_test.pdf"),
                 bbox_inches="tight",
             )
+        if save_model:
             self.save_model()
-        if if_profile is True:
+        if perf is True:
             self._model.cpu().eval()
             total_cores = os.cpu_count()
             for cores in range(1, total_cores + 1):
