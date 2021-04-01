@@ -32,7 +32,7 @@ class SVMPredictor(MultiDNNPredictor):
             total_models,
         )
 
-    def train(self, if_profile=False):
+    def train(self,  save_result=False, save_model=False, perf=False):
         trainX, trainY, testX, testY  = load_data_for_sklearn(
             self._data_fname, self._split_ratio, self._models_id, self._data_path
         )
@@ -51,4 +51,5 @@ class SVMPredictor(MultiDNNPredictor):
         mape = np.average(np.abs(e) / testY)
         print(mae)
         print(mape)
-        self.save_result(combination=self._data_fname, mae=mae, mape=mape)
+        if save_result is True:
+            self.save_result(combination=self._data_fname, mae=mae, mape=mape)

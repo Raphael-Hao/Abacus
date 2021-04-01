@@ -185,13 +185,9 @@ class RunConfig:
             else:
                 raise NotImplementedError
 
-            # self.mode = "onebyone"
-            # self.mode = "single"
             self.mode = args.mode
             if self.mode == "single":
                 self.model_combination = args.model_comb
-            # self.modeling = "lr"
-            # self.modeling = "svm"
             self.modeling = args.modeling
             if self.mode == "all" and self.modeling == "mlp":
                 self.profile_predictor = True
@@ -199,7 +195,7 @@ class RunConfig:
                 self.profile_predictor = False
 
             self.hyper_params = {
-                "all": [0.001, 1],
+                "all": [0.001, 250],
                 # "all": [0.002, 280],
                 "resnet101_inception_v3": [0.001, 100],
                 "bert_bert": [0.001, 100],

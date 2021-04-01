@@ -11,6 +11,7 @@ def train_predictor(args: RunConfig):
     if args.mode == "all":
         if args.modeling == "mlp":
             from abacus.modeling.predictor.mlp import MLPPredictor
+
             predictor = MLPPredictor(
                 models_id=args.models_id,
                 lr=args.hyper_params[args.mode][0],
@@ -24,6 +25,7 @@ def train_predictor(args: RunConfig):
             )
         elif args.modeling == "lr":
             from abacus.modeling.predictor.lr import LRPredictor
+
             predictor = LRPredictor(
                 models_id=args.models_id,
                 epoch=200,
@@ -34,6 +36,7 @@ def train_predictor(args: RunConfig):
             )
         elif args.modeling == "svm":
             from abacus.modeling.predictor.svm import SVMPredictor
+
             predictor = SVMPredictor(
                 models_id=args.models_id,
                 epoch=200,
@@ -44,10 +47,11 @@ def train_predictor(args: RunConfig):
             )
         else:
             raise NotImplementedError
-        predictor.train(if_profile=args.profile_predictor)
+        predictor.train(save_result=True, save_model=True, perf=True)
     elif args.mode == "single":
         if args.modeling == "mlp":
             from abacus.modeling.predictor.mlp import MLPPredictor
+
             predictor = MLPPredictor(
                 models_id=args.models_id,
                 epoch=args.hyper_params[args.model_combination][1],
@@ -61,6 +65,7 @@ def train_predictor(args: RunConfig):
             )
         elif args.modeling == "lr":
             from abacus.modeling.predictor.lr import LRPredictor
+
             predictor = LRPredictor(
                 models_id=args.models_id,
                 epoch=200,
@@ -71,6 +76,7 @@ def train_predictor(args: RunConfig):
             )
         elif args.modeling == "svm":
             from abacus.modeling.predictor.lr import LRPredictor
+
             predictor = SVMPredictor(
                 models_id=args.models_id,
                 epoch=200,
@@ -81,7 +87,7 @@ def train_predictor(args: RunConfig):
             )
         else:
             raise NotImplementedError
-        predictor.train()
+        predictor.train(save_result=True, save_model=False, perf=False)
 
     elif args.mode == "onebyone":
         for model_combination in gen_model_combinations(
@@ -94,6 +100,7 @@ def train_predictor(args: RunConfig):
             print(data_filename)
             if args.modeling == "mlp":
                 from abacus.modeling.predictor.mlp import MLPPredictor
+
                 predictor = MLPPredictor(
                     models_id=args.models_id,
                     lr=args.hyper_params[data_filename][0],
@@ -107,6 +114,7 @@ def train_predictor(args: RunConfig):
                 )
             elif args.modeling == "lr":
                 from abacus.modeling.predictor.lr import LRPredictor
+
                 predictor = LRPredictor(
                     models_id=args.models_id,
                     epoch=200,
@@ -117,6 +125,7 @@ def train_predictor(args: RunConfig):
                 )
             elif args.modeling == "svm":
                 from abacus.modeling.predictor.svm import SVMPredictor
+
                 predictor = SVMPredictor(
                     models_id=args.models_id,
                     epoch=200,
@@ -127,7 +136,7 @@ def train_predictor(args: RunConfig):
                 )
             else:
                 raise NotImplementedError
-            predictor.train(if_profile=args.profile_predictor)
+            predictor.train(save_result=True, save_model=False, perf=False)
 
     else:
         raise NotImplementedError

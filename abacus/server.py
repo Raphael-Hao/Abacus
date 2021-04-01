@@ -267,7 +267,7 @@ class Scheduler(Process):
                 if self._abandon:
                     with torch.no_grad():
                         self._predicted_latency = self._predictor(
-                            self.get_layer_feature(0, 0, 1, l_query=qos_query)[1]
+                            self.get_layer_feature(0, 0, 1, qos_query=qos_query)[1]
                         )[0]
                     self.Abacus_reset()
                     if qos < self._predicted_latency:
