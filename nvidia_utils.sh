@@ -89,6 +89,8 @@ if [ "$TASK" = "MPS" ]; then
     echo "Stopping the mps server"
     if [ "$MIG_ENABLED" = true ]; then
       if [ "$MIG_CNT" = 1 ]; then
+        export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps-0
+        export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log-0
         export CUDA_VISIBLE_DEVICES=MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0
         echo quit | nvidia-cuda-mps-control
       elif [ "$MIG_CNT" = 2 ]; then
