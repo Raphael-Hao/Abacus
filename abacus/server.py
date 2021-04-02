@@ -94,7 +94,7 @@ class AbacusServer:
 
     def start_up(self):
         timestamp("All Server Workers", "Initializing")
-        for model_id in self._run_config.serve_combination:
+        for worker_id, model_id in enumerate(self._run_config.serve_combination):
             model_name = self._run_config.models_name[model_id]
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ServerWorker(
@@ -105,6 +105,7 @@ class AbacusServer:
                 pipe_child,
                 self._barrier,
                 self._warmup_barrier,
+                worker_id,
             )
             model_worker.start()
             self._workers[model_id] = model_worker

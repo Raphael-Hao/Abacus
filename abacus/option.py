@@ -17,11 +17,72 @@ class RunConfig:
         # general configurations
         self.total_models = args.model_num
         self.device = 0
+        self.mps_devices = {
+            1: [
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
+            ],
+            2: [
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/3/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/3/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/5/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/5/0",
+            ],
+            4: [
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/7/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/8/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/9/0",
+                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/10/0",
+            ],
+        }
+        self.mps_pipe_dirs = {
+            1: [
+                "/tmp/nvidia-mps-0",
+                "/tmp/nvidia-mps-0",
+                "/tmp/nvidia-mps-0",
+                "/tmp/nvidia-mps-0",
+            ],
+            2: [
+                "/tmp/nvidia-mps-0",
+                "/tmp/nvidia-mps-0",
+                "/tmp/nvidia-mps-1",
+                "/tmp/nvidia-mps-1",
+            ],
+            4: [
+                "/tmp/nvidia-mps-0",
+                "/tmp/nvidia-mps-1",
+                "/tmp/nvidia-mps-2",
+                "/tmp/nvidia-mps-3",
+            ],
+        }
+        self.mps_log_dirs = {
+            1: [
+                "/tmp/nvidia-log-0",
+                "/tmp/nvidia-log-0",
+                "/tmp/nvidia-log-0",
+                "/tmp/nvidia-log-0",
+            ],
+            2: [
+                "/tmp/nvidia-log-0",
+                "/tmp/nvidia-log-0",
+                "/tmp/nvidia-log-1",
+                "/tmp/nvidia-log-1",
+            ],
+            4: [
+                "/tmp/nvidia-log-0",
+                "/tmp/nvidia-log-1",
+                "/tmp/nvidia-log-2",
+                "/tmp/nvidia-log-3",
+            ],
+        }
         # self.path = "/state/partition/whcui/repository/project/Abacus"
         self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
-        if not os.path.exists(self.data_path):
-            os.mkdir(self.data_path)
+
+        self.mig = args.mig
+        os.makedirs(self.data_path, exist_ok=True)
 
         self.models_name = [
             "resnet50",  # 0
@@ -118,29 +179,41 @@ class RunConfig:
                     (2, 5, 6),
                 ]
             elif self.total_models == 2:
-                self.profiling_combinations = [
-                    (0, 1),
-                    (0, 2),
-                    (0, 3),
-                    (0, 4),
-                    (0, 5),
-                    (0, 6),
-                    (1, 2),
-                    (1, 3),
-                    (1, 4),
-                    (1, 5),
-                    (1, 6),
-                    (2, 3),
-                    (2, 4),
-                    (2, 5),
-                    (2, 6),
-                    (3, 4),
-                    (3, 5),
-                    (3, 6),
-                    (4, 5),
-                    (4, 6),
-                    (5, 6),
-                ]
+                if self.mig == 0:
+                    self.profiling_combinations = [
+                        (0, 1),
+                        (0, 2),
+                        (0, 3),
+                        (0, 4),
+                        (0, 5),
+                        (0, 6),
+                        (1, 2),
+                        (1, 3),
+                        (1, 4),
+                        (1, 5),
+                        (1, 6),
+                        (2, 3),
+                        (2, 4),
+                        (2, 5),
+                        (2, 6),
+                        (3, 4),
+                        (3, 5),
+                        (3, 6),
+                        (4, 5),
+                        (4, 6),
+                        (5, 6),
+                    ]
+                elif self.mig == 2:
+                    self.profiling_combinations = [
+                        (1, 2),
+                        (1, 5),
+                        (1, 6),
+                        (2, 5),
+                        (2, 6),
+                        (5, 6),
+                    ]
+                else:
+                    raise NotImplementedError
             else:
                 raise NotImplementedError
 
@@ -159,29 +232,41 @@ class RunConfig:
                     (2, 5, 6),
                 ]
             elif self.total_models == 2:
-                self.training_combinations = [
-                    (0, 1),
-                    (0, 2),
-                    (0, 3),
-                    (0, 4),
-                    (0, 5),
-                    (0, 6),
-                    (1, 2),
-                    (1, 3),
-                    (1, 4),
-                    (1, 5),
-                    (1, 6),
-                    (2, 3),
-                    (2, 4),
-                    (2, 5),
-                    (2, 6),
-                    (3, 4),
-                    (3, 5),
-                    (3, 6),
-                    (4, 5),
-                    (4, 6),
-                    (5, 6),
-                ]
+                if self.mig == 0:
+                    self.training_combinations = [
+                        (0, 1),
+                        (0, 2),
+                        (0, 3),
+                        (0, 4),
+                        (0, 5),
+                        (0, 6),
+                        (1, 2),
+                        (1, 3),
+                        (1, 4),
+                        (1, 5),
+                        (1, 6),
+                        (2, 3),
+                        (2, 4),
+                        (2, 5),
+                        (2, 6),
+                        (3, 4),
+                        (3, 5),
+                        (3, 6),
+                        (4, 5),
+                        (4, 6),
+                        (5, 6),
+                    ]
+                elif self.mig == 2:
+                    self.training_combinations = [
+                        (1, 2),
+                        (1, 5),
+                        (1, 6),
+                        (2, 5),
+                        (2, 6),
+                        (5, 6),
+                    ]
+                else:
+                    raise NotImplementedError
             else:
                 raise NotImplementedError
 
@@ -260,6 +345,9 @@ def parse_options():
         required=True,
         choices=[2, 3, 4],
     )
+
+    parser.add_argument("--mig", type=int, default=0, choices=[0, 1, 2, 4])
+
     """[summary]
     online serve
     """

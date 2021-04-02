@@ -20,8 +20,7 @@ def profile(run_config: RunConfig):
     mp.set_start_method("spawn")
     barrier = mp.Barrier(run_config.total_models + 1)
     profile_data_path = os.path.join(run_config.data_path, "profile")
-    if not os.path.exists(profile_data_path):
-        os.mkdir(profile_data_path)
+    os.makedirs(profile_data_path, exist_ok=True)
     for model_combination in gen_model_combinations(
         run_config.models_name,
         run_config.profiling_combinations,
@@ -47,7 +46,7 @@ def profile(run_config: RunConfig):
         wr.writerow(profile_head)
 
         worker_list = []
-        for model_name in model_combination:
+        for worker_id, model_name in enumerate(model_combination):
             pipe_parent, pipe_child = mp.Pipe()
             model_worker = ProfilerWorker(
                 run_config,
@@ -56,6 +55,7 @@ def profile(run_config: RunConfig):
                 run_config.supported_seqlen,
                 pipe_child,
                 barrier,
+                worker_id,
             )
             model_worker.start()
             worker_list.append((model_worker, pipe_parent))
