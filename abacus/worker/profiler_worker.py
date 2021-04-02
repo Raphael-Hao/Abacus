@@ -22,19 +22,37 @@ class ProfilerWorker(AbacusWorker):
         supported_seqlen,
         recv_pipe,
         barrier,
+        worker_id,
     ):
         super().__init__(
-            args, model_name, supported_batchsize, supported_seqlen, recv_pipe
+            args,
+            model_name,
+            supported_batchsize,
+            supported_seqlen,
+            recv_pipe,
+            worker_id,
         )
         self._barrier = barrier
 
     def run(self) -> None:
         timestamp("worker", "starting")
-        os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
-        os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
-        # os.environ["CUDA_VISIBLE_DEVICES"] = "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/1/0"
-        os.environ["CUDA_VISIBLE_DEVICES"] = "GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22"
+        if self._mig != 0:
+            os.environ["CUDA_MPS_PIPE_DIRECTORY"] = self._mps_pipe_dirs[self._mig][
+                self._worker_id
+            ]
+            os.environ["CUDA_MPS_LOG_DIRECTORY"] = self._mps_log_dirs[self._mig][
+                self._worker_id
+            ]
+            os.environ["CUDA_VISIBLE_DEVICES"] = self._mps_devices[self._mig][
+                self._worker_id
+            ]
+        else:
+            os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
+            os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
+            os.environ[
+                "CUDA_VISIBLE_DEVICES"
+            ] = "GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22"
         torch.device("cuda:{}".format(self._device))
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = False
@@ -93,7 +111,10 @@ class ProfilerWorker(AbacusWorker):
                 if action == "prepare":
                     if self._model_name == "bert":
                         self._inter_input = self._model.run(
-                            self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, start
+                            self._inputs[bs][seq_len],
+                            self._masks[bs][seq_len],
+                            0,
+                            start,
                         )
                     else:
                         submodel = nn.Sequential(*self._submodules[:start])

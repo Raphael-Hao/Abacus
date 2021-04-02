@@ -16,6 +16,7 @@ class MultiDNNPredictor:
         split_ratio=0.8,
         path="/home/cwh/Lego",
         total_models=2,
+        mig_enabled=False,
     ):
         self._model_select = model_select
         self._total_epochs = total_epochs
@@ -25,20 +26,30 @@ class MultiDNNPredictor:
         self._models_id = models_id
         self._path = path
         self._total_models = total_models
+        self._mig_enabled = mig_enabled
         if self._total_models == 2:
-            self._data_path = os.path.join(self._path, "data/profile/A100/2in7")
+            if self._mig_enabled is False:
+                self._data_path = os.path.join(self._path, "data/profile/A100/2in7")
+                self._save_path = os.path.join(self._path, "model/A100/2in7")
+            else:
+                self._data_path = os.path.join(self._path, "data/profile/mig/2in4")
+                self._save_path = os.path.join(self._path, "model/mig/2in4")
         elif self._total_models == 3:
             self._data_path = os.path.join(self._path, "data/profile/A100/3in4")
+            self._save_path = os.path.join(self._path, "model/A100/3in4")
         elif self._total_models == 4:
-            self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
+            if self._mig_enabled is False:
+                self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
+                self._save_path = os.path.join(self._path, "model/A100/4in4")
+            else:
+                self._data_path = os.path.join(self._path, "data/profile/mig/4in4")
+                self._save_path = os.path.join(self._path, "model/mig/4in4")
         else:
             raise NotImplementedError
-        self._save_path = os.path.join(self._path, "model")
-        if not os.path.exists(self._save_path):
-            os.mkdir(self._save_path)
+
+        os.makedirs(self._save_path, exist_ok=True)
         self._result_path = os.path.join(self._path, "result")
-        if not os.path.exists(self._result_path):
-            os.mkdir(self._result_path)
+        os.makedirs(self._result_path, exist_ok=True)
         self._result_fname = os.path.join(self._path, "results.csv")
         if not os.path.exists(self._result_fname):
             result_file = open(self._result_fname, "w+")
