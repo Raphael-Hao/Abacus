@@ -16,12 +16,13 @@ def train_predictor(args: RunConfig):
                 models_id=args.models_id,
                 lr=args.hyper_params[args.mode][0],
                 epoch=args.hyper_params[args.mode][1],
-                batch_size=128,
+                batch_size=args.hyper_params[args.mode][2],
                 data_fname=args.mode,
                 split_ratio=0.8,
                 device=args.device,
                 path=args.path,
                 total_models=args.total_models,
+                mig=args.mig,
             )
         elif args.modeling == "lr":
             from abacus.modeling.predictor.lr import LRPredictor
@@ -33,6 +34,7 @@ def train_predictor(args: RunConfig):
                 data_fname="all",
                 path=args.path,
                 total_models=args.total_models,
+                mig=args.mig,
             )
         elif args.modeling == "svm":
             from abacus.modeling.predictor.svm import SVMPredictor
@@ -44,10 +46,11 @@ def train_predictor(args: RunConfig):
                 data_fname="all",
                 path=args.path,
                 total_models=args.total_models,
+                mig=args.mig,
             )
         else:
             raise NotImplementedError
-        predictor.train(save_result=True, save_model=True, perf=True)
+        predictor.train(save_result=True, save_model=True, perf=args.perf)
     elif args.mode == "single":
         if args.modeling == "mlp":
             from abacus.modeling.predictor.mlp import MLPPredictor
@@ -62,6 +65,7 @@ def train_predictor(args: RunConfig):
                 device=args.device,
                 path=args.path,
                 total_models=args.total_models,
+                mig=args.mig,
             )
         elif args.modeling == "lr":
             from abacus.modeling.predictor.lr import LRPredictor
@@ -73,6 +77,7 @@ def train_predictor(args: RunConfig):
                 data_fname=args.model_combination,
                 path=args.path,
                 total_models=args.total_models,
+                mig=args.mig,
             )
         elif args.modeling == "svm":
             from abacus.modeling.predictor.lr import LRPredictor
@@ -84,6 +89,7 @@ def train_predictor(args: RunConfig):
                 data_fname=args.model_combination,
                 path=args.path,
                 total_models=args.total_models,
+                mig=args.mig,
             )
         else:
             raise NotImplementedError
@@ -111,6 +117,7 @@ def train_predictor(args: RunConfig):
                     path=args.path,
                     device=args.device,
                     total_models=args.total_models,
+                    mig=args.mig,
                 )
             elif args.modeling == "lr":
                 from abacus.modeling.predictor.lr import LRPredictor
@@ -122,6 +129,7 @@ def train_predictor(args: RunConfig):
                     data_fname=data_filename,
                     path=args.path,
                     total_models=args.total_models,
+                    mig=args.mig,
                 )
             elif args.modeling == "svm":
                 from abacus.modeling.predictor.svm import SVMPredictor
@@ -133,6 +141,7 @@ def train_predictor(args: RunConfig):
                     data_fname=data_filename,
                     path=args.path,
                     total_models=args.total_models,
+                    mig=args.mig,
                 )
             else:
                 raise NotImplementedError

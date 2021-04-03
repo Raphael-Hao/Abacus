@@ -1,0 +1,3 @@
+predictor,combinations,mae,mape
+mlp,all,2.6959424,0.10997312
+mlp,all,1.6548518,0.068104856

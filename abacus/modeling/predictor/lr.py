@@ -23,6 +23,7 @@ class LRPredictor(MultiDNNPredictor):
         split_ratio=0.8,
         path="/home/cwh/Lego",
         total_models=2,
+        mig=0,
     ):
         super().__init__(
             "lr",
@@ -33,6 +34,7 @@ class LRPredictor(MultiDNNPredictor):
             split_ratio,
             path,
             total_models,
+            mig,
         )
         self.trainX, self.trainY, self.testX, self.testY = load_data_for_sklearn(
             self._data_fname, self._split_ratio, self._models_id, self._data_path
