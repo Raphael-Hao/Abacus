@@ -10,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from abacus.modeling.dataloader import load_data_for_sklearn
 from abacus.modeling.predictor import MultiDNNPredictor
 
+
 class SVMPredictor(MultiDNNPredictor):
     def __init__(
         self,
@@ -20,6 +21,7 @@ class SVMPredictor(MultiDNNPredictor):
         split_ratio=0.8,
         path="/home/cwh/Lego",
         total_models=2,
+        mig=0,
     ):
         super().__init__(
             "svm",
@@ -30,10 +32,11 @@ class SVMPredictor(MultiDNNPredictor):
             split_ratio,
             path,
             total_models,
+            mig=mig,
         )
 
-    def train(self,  save_result=False, save_model=False, perf=False):
-        trainX, trainY, testX, testY  = load_data_for_sklearn(
+    def train(self, save_result=False, save_model=False, perf=False):
+        trainX, trainY, testX, testY = load_data_for_sklearn(
             self._data_fname, self._split_ratio, self._models_id, self._data_path
         )
         regr = make_pipeline(StandardScaler(), LinearSVR(random_state=0, tol=1e-5))

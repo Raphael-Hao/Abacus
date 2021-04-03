@@ -269,7 +269,7 @@ class RunConfig:
                     raise NotImplementedError
             else:
                 raise NotImplementedError
-
+            self.perf = args.perf
             self.mode = args.mode
             if self.mode == "single":
                 self.model_combination = args.model_comb
@@ -278,39 +278,45 @@ class RunConfig:
                 self.profile_predictor = True
             else:
                 self.profile_predictor = False
-
-            self.hyper_params = {
-                "all": [0.001, 250],
-                # "all": [0.002, 280],
-                "resnet101_inception_v3": [0.001, 100],
-                "bert_bert": [0.001, 100],
-                "vgg19_bert": [0.001, 100],
-                "resnet50_resnet152": [0.001, 100],
-                "resnet101_bert": [0.001, 100],
-                "resnet152_vgg19": [0.001, 100],
-                "resnet50_inception_v3": [0.001, 100],
-                "resnet101_resnet152": [0.001, 100],
-                "inception_v3_inception_v3": [0.001, 100],
-                "vgg19_vgg19": [0.001, 150],
-                "vgg16_vgg16": [0.001, 150],
-                "resnet101_vgg19": [0.001, 100],
-                "inception_v3_bert": [0.001, 100],
-                "resnet152_resnet152": [0.0001, 200],
-                "resnet50_vgg16": [0.001, 100],
-                "resnet101_resnet101": [0.001, 100],
-                "resnet50_resnet50": [0.001, 100],
-                "resnet152_bert": [0.001, 100],
-                "vgg16_vgg19": [0.001, 200],
-                "resnet101_vgg16": [0.001, 100],
-                "resnet50_vgg19": [0.001, 100],
-                "resnet152_inception_v3": [0.001, 100],
-                "inception_v3_vgg19": [0.001, 100],
-                "resnet50_resnet101": [0.001, 100],
-                "vgg16_bert": [0.001, 100],
-                "resnet50_bert": [0.001, 100],
-                "inception_v3_vgg16": [0.001, 100],
-                "resnet152_vgg16": [0.001, 100],
-            }
+            if self.mig == 0:
+                self.hyper_params = {
+                    "all": [0.001, 250, 128],
+                    # "all": [0.002, 280],
+                    "resnet101_inception_v3": [0.001, 100],
+                    "bert_bert": [0.001, 100],
+                    "vgg19_bert": [0.001, 100],
+                    "resnet50_resnet152": [0.001, 100],
+                    "resnet101_bert": [0.001, 100],
+                    "resnet152_vgg19": [0.001, 100],
+                    "resnet50_inception_v3": [0.001, 100],
+                    "resnet101_resnet152": [0.001, 100],
+                    "inception_v3_inception_v3": [0.001, 100],
+                    "vgg19_vgg19": [0.001, 150],
+                    "vgg16_vgg16": [0.001, 150],
+                    "resnet101_vgg19": [0.001, 100],
+                    "inception_v3_bert": [0.001, 100],
+                    "resnet152_resnet152": [0.0001, 200],
+                    "resnet50_vgg16": [0.001, 100],
+                    "resnet101_resnet101": [0.001, 100],
+                    "resnet50_resnet50": [0.001, 100],
+                    "resnet152_bert": [0.001, 100],
+                    "vgg16_vgg19": [0.001, 200],
+                    "resnet101_vgg16": [0.001, 100],
+                    "resnet50_vgg19": [0.001, 100],
+                    "resnet152_inception_v3": [0.001, 100],
+                    "inception_v3_vgg19": [0.001, 100],
+                    "resnet50_resnet101": [0.001, 100],
+                    "vgg16_bert": [0.001, 100],
+                    "resnet50_bert": [0.001, 100],
+                    "inception_v3_vgg16": [0.001, 100],
+                    "resnet152_vgg16": [0.001, 100],
+                }
+            elif self.mig == 1:
+                self.hyper_params = {"all": [0.0001, 250, 32]}
+            elif self.mig == 2:
+                self.hyper_params = {"all": [0.0001, 200, 16]}
+            else:
+                raise NotImplementedError
         elif args.task == "background":
             self.background_combinations = [
                 (2, 0),
@@ -388,6 +394,8 @@ def parse_options():
         default="resnet152_resnet152",
         required="single" in sys.argv,
     )
+    parser.add_argument("--perf", action="store_true")
+
     args = parser.parse_args()
 
     run_config = RunConfig(args=args)

@@ -47,6 +47,7 @@ class MLPPredictor(MultiDNNPredictor):
         path="/home/cwh/Lego",
         device=0,
         total_models=2,
+        mig=0,
     ):
         super().__init__(
             "mlp",
@@ -57,6 +58,7 @@ class MLPPredictor(MultiDNNPredictor):
             split_ratio,
             path,
             total_models,
+            mig,
         )
         self._train_loader, self._test_loader = load_torch_data(
             self._data_fname,
