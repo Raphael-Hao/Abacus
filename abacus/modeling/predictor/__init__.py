@@ -35,7 +35,7 @@ class MultiDNNPredictor:
             elif self._mig == 2:
                 self._data_path = os.path.join(self._path, "data/profile/mig/2in4")
                 self._save_path = os.path.join(self._path, "model/mig/2in4")
-                self._result_path = os.path.join(self._path, "result/mig/2in7")
+                self._result_path = os.path.join(self._path, "result/mig/2in4")
             else:
                 raise NotImplementedError
         elif self._total_models == 3:
