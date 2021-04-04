@@ -160,7 +160,7 @@ class RunConfig:
             self.search_ways = args.ways
             self.total_queries = args.queries
             self.average_duration = args.load
-            self.abandon = True
+            self.abandon = args.abandon
 
         elif self.task == "profile":
             """
@@ -365,7 +365,7 @@ def parse_options():
         type=str,
         default="Abacus",
         required="serve" in sys.argv,
-        choices=["Abacus", "SJF", "FCFS"],
+        choices=["Abacus", "SJF", "FCFS", "EDF"],
     )
     parser.add_argument("--load", type=int, required="serve" in sys.argv, default=50)
     parser.add_argument(
@@ -374,6 +374,7 @@ def parse_options():
     parser.add_argument("--qos", type=int, required="serve" in sys.argv, default=60)
     parser.add_argument("--thld", type=int, required="serve" in sys.argv, default=10)
     parser.add_argument("--ways", type=int, required="Abacus" in sys.argv, default=4)
+    parser.add_argument("--abandon", action="store_true")
 
     ## profiling
     parser.add_argument("--test", type=int, required="profile" in sys.argv, default=200)
