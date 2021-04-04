@@ -2,14 +2,14 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
+import os
+import logging
+import numpy as np
 from torch.multiprocessing import Process
 import torch
 import torch.nn as nn
-import os
-import numpy as np
 from torch.cuda.streams import Stream
 
-from abacus.utils import timestamp
 from abacus.worker.worker import AbacusWorker
 
 
@@ -37,7 +37,7 @@ class ServerWorker(AbacusWorker):
         self._warmup_barrier = warmup_barrier
 
     def run(self) -> None:
-        timestamp("Server Woker for {}".format(self._model_name), "Starting")
+        logging.info("Server woker for {} starting".format(self._model_name))
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
         if self._mig != 0:
             os.environ["CUDA_MPS_PIPE_DIRECTORY"] = self._mps_pipe_dirs[self._mig][
@@ -92,7 +92,7 @@ class ServerWorker(AbacusWorker):
             self._total_module = len(self._submodules)
         self._stream = Stream(0)
         self._event = torch.cuda.Event(enable_timing=False)
-        timestamp("Server Woker for {}".format(self._model_name), "warming")
+        logging.info("Server Woker for {} warming".format(self._model_name))
         with torch.cuda.stream(self._stream):
             for k in self._supported_batchsize:
                 if self._model_name == "bert":
@@ -131,7 +131,7 @@ class ServerWorker(AbacusWorker):
                 elif action == "terminate":
                     break
                 else:
-                    print(
+                    logging.error(
                         "Not supported action {} for worker{}".format(
                             action, self._model_name
                         )

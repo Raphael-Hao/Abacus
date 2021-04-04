@@ -2,15 +2,16 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 
+import os
+import logging
+import numpy as np
+import random
+
 from torch.multiprocessing import Process
 import torch
 import torch.nn as nn
-import os
-import numpy as np
-import random
 from torch.cuda.streams import Stream
 
-from abacus.utils import timestamp
 from abacus.worker.worker import AbacusWorker
 
 
@@ -36,7 +37,7 @@ class BackgroundWorker(AbacusWorker):
         self.shared_flag = shared_flag
 
     def run(self) -> None:
-        timestamp("worker", "starting")
+        logging.info("worker", "starting")
         os.environ["CUDA_MPS_PIPE_DIRECTORY"] = "/tmp/nvidia-mps"
         os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
@@ -76,7 +77,7 @@ class BackgroundWorker(AbacusWorker):
             self._total_module = len(self._submodules)
         self._stream = Stream(0)
         self._event = torch.cuda.Event(enable_timing=False)
-        timestamp("worker", "warming")
+        logging.info("worker", "warming")
         with torch.cuda.stream(self._stream):
             for k in self._supported_batchsize:
                 if self._model_name == "bert":

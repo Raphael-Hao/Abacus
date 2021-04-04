@@ -8,17 +8,11 @@ import random
 import numpy as np
 import numpy.ma as ma
 
-
-def timestamp(name, stage):
-    print("TIMESTAMP, %s, %s, %f" % (name, stage, time.time()), file=sys.stderr)
-
-
 def gen_background_combinations(models, background_combinations):
     model_combinations = []
     for pair in background_combinations:
         model_combinations.append((models[pair[0]], models[pair[1]]))
     return model_combinations
-
 
 def gen_model_combinations(models, profiling_combinations=None):
     # id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
@@ -37,7 +31,6 @@ def gen_model_combinations(models, profiling_combinations=None):
     print(model_combinations)
     return model_combinations
 
-
 def gen_partition(model_len, if_qos=False, if_new=False):
     start = 0
     end = model_len
@@ -51,7 +44,6 @@ def gen_partition(model_len, if_qos=False, if_new=False):
         return start, end
     else:
         raise ValueError
-
 
 def make_record(model_config, raw_record):
     record_max = np.max(raw_record)
