@@ -298,12 +298,12 @@ class Scheduler(Process):
 
     def Abacus_schedule(self):
         waiting_scheduling, abandoned_scheduling = self.urgent_sort(True)
-        if len(waiting_scheduling) > 0:
+        total_colocated = len(waiting_scheduling)
+        if total_colocated > 0:
             qos_id = waiting_scheduling[0][0]
             qos = waiting_scheduling[0][1] - self._predicted_latency
             qos_query: Query = self._scheduling_queries[qos_id]
             qos_query.set_op_pos(-1)
-            total_colocated = len(waiting_scheduling)
             if total_colocated == 1:
                 if self._abandon:
                     with torch.no_grad():
@@ -463,18 +463,24 @@ class Scheduler(Process):
             elif total_colocated >= 3:
                 l_id = waiting_scheduling[1][0]
                 l_query: Query = self._scheduling_queries[l_id]
-                m_id = waiting_scheduling[1][0]
+                m_id = waiting_scheduling[2][0]
                 m_query: Query = self._scheduling_queries[m_id]
-                r_id = waiting_scheduling[2][0]
-                r_query: Query = self._scheduling_queries[r_id]
+                if total_colocated == 4:
+                    r_id = waiting_scheduling[3][0]
+                    r_query: Query = self._scheduling_queries[r_id]
+                else:
+                    r_id = None
+                    r_query = None
                 searched_query = None
                 searched_pos = None
                 features = self.get_query_feature(
-                    total_colocated, qos_query, m_query, r_query
+                    total_colocated, qos_query, l_query, m_query, r_query
                 )
                 search_times = 1
                 with torch.no_grad():
                     latencies = self._predictor(features).numpy()
+                if qos >= latencies[3]:
+                    searched_query = 4
                 if qos >= latencies[2]:
                     searched_query = 3
                 elif qos >= latencies[1]:
