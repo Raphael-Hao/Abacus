@@ -6,10 +6,10 @@ from torch.multiprocessing import Process
 import torch
 import torch.nn as nn
 import os
+import logging
 import numpy as np
 from torch.cuda.streams import Stream
 
-from abacus.utils import timestamp
 from abacus.worker.worker import AbacusWorker
 
 
@@ -35,7 +35,7 @@ class ProfilerWorker(AbacusWorker):
         self._barrier = barrier
 
     def run(self) -> None:
-        timestamp("worker", "starting")
+        logging.info("worker", "starting")
         os.environ["CUDA_MPS_ACTIVE_THREAD_PERCENTAGE"] = "100"
         if self._mig != 0:
             os.environ["CUDA_MPS_PIPE_DIRECTORY"] = self._mps_pipe_dirs[self._mig][
@@ -92,7 +92,7 @@ class ProfilerWorker(AbacusWorker):
             self._total_module = len(self._submodules)
         self._stream = Stream(0)
         self._event = torch.cuda.Event(enable_timing=False)
-        timestamp("worker", "warming")
+        logging.info("worker", "warming")
         with torch.cuda.stream(self._stream):
             for k in self._supported_batchsize:
                 if self._model_name == "bert":

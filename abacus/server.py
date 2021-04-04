@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 # Author: raphael hao
 import os
+import logging
 import time
 import numpy as np
 import random
@@ -11,7 +12,6 @@ import torch.multiprocessing as mp
 from torch.multiprocessing import Process
 
 from abacus.option import RunConfig
-from abacus.utils import timestamp
 from abacus.worker import ServerWorker
 from abacus.modeling.predictor.mlp import MLPregression
 
@@ -60,9 +60,20 @@ class Query:
     def if_processed(self):
         return self.end_pos == self.op_len
 
-    @property
     def latency_ms(self):
         return (time.time() - self.start_stamp) * 1000
+
+    def __str__(self) -> str:
+        return "model_id: {}, bs: {}, seq_len: {}, start: {}, end: {}, op_len: {}, qos_target: {}, state: {}".format(
+            self.model_id,
+            self.batch_size,
+            self.seq_len,
+            self.start_pos,
+            self.end_pos,
+            self.op_len,
+            self.qos_targt,
+            self.state,
+        )
 
 
 class AbacusServer:
@@ -93,7 +104,7 @@ class AbacusServer:
         )
 
     def start_up(self):
-        timestamp("All Server Workers", "Initializing")
+        logging.info("All Server Workers Initializing")
         for worker_id, model_id in enumerate(self._run_config.serve_combination):
             model_name = self._run_config.models_name[model_id]
             pipe_parent, pipe_child = mp.Pipe()
@@ -112,8 +123,8 @@ class AbacusServer:
             self._queues[model_id] = mp.Queue()
             self._pipes[model_id] = pipe_parent
         self._warmup_barrier.wait()
-        timestamp("All Server Workers", "Initialized")
-        timestamp("Scheduler", "Initializing")
+        logging.info("All Server Workers Initialized")
+        logging.info("Scheduler Initializing")
         self._scheduler = Scheduler(
             run_config=self._run_config,
             barrier=self._barrier,
@@ -122,7 +133,7 @@ class AbacusServer:
             stop_flag=self._stop_flag,
         )
         self._scheduler.start()
-        timestamp("Scheduler", "Initialized")
+        logging.info("Scheduler Initialized")
 
     def prepare_test_queries(self, total_queries=1000, average_duration=20):
         self._test_queries = []
@@ -142,14 +153,13 @@ class AbacusServer:
         i = 0
         for model_id, sleep_duration, bs, seq_len in self._test_queries:
             i += 1
-            # timestamp("abacus", "send {}-th query, sleeping {:.5f}".format(i, sleep_duration))
             self.send_query(model_id=model_id, batch_size=bs, seq_len=seq_len)
             time.sleep(sleep_duration)
 
     def stop_test(self):
         while not self.if_all_processed():
-            print("Queries remain to be processed")
-            time.sleep(0.05)
+            logging.info("Queries remain to be processed")
+            time.sleep(0.001)
         self._stop_flag.value = 0
         for pipe in self._pipes.values():
             pipe.send(("terminate", -1, -1, -1, -1, -1))
@@ -178,20 +188,46 @@ class Scheduler(Process):
         if self._policy == "Abacus":
             self._search_ways = run_config.search_ways
             self._threashold = run_config.threshold
+
+        if run_config.total_models == 2:
+            if run_config.mig == 0:
+                predictor_path = "model/A100/2in7/all.ckpt"
+                log_path = "data/server/A100/2in7/" + self._policy
+            elif run_config.mig == 2:
+                predictor_path = "model/mig/2in4/all.ckpt"
+                log_path = "data/server/mig/2in7/" + self._policy
+            else:
+                raise NotImplementedError
+        elif run_config.total_models == 3:
+            if run_config.mig == 0:
+                predictor_path = "model/A100/3in4/all.ckpt"
+                log_path = "data/server/A100/3in4/" + self._policy
+            else:
+                raise NotImplementedError
+        elif run_config.total_models == 4:
+            if run_config.mig == 0:
+                predictor_path = "model/A100/4in4/all.ckpt"
+                log_path = "data/server/A100/4in4/" + self._policy
+            elif run_config.mig == 1:
+                predictor_path = "model/mig/4in4/all.ckpt"
+                log_path = "data/server/mig/4in4/" + self._policy
+            else:
+                raise NotImplementedError
+        else:
+            raise NotImplementedError
+
+        log_dir = os.path.join(run_config.path, log_path)
+        os.makedirs(log_dir, exist_ok=True)
+
         self._serve_combination = run_config.serve_combination
-        result_dir = os.path.join(run_config.path, "data/server/" + self._policy)
-        if not os.path.exists(result_dir):
-            os.makedirs(result_dir)
         result_fname = ""
         for model_id in self._serve_combination:
             result_fname += run_config.models_name[model_id]
         result_fname += ".csv"
-        self._result_path = os.path.join(result_dir, result_fname)
-        self._predictor_ckpt_path = os.path.join(
-            run_config.path,
-            "model/2in7/predictor.ckpt"
-            # run_config.path, "model/3in4/predictor.ckpt"
-        )
+        self._result_path = os.path.join(log_dir, result_fname)
+
+        self._predictor_ckpt_path = os.path.join(run_config.path, predictor_path)
+
         self._abandon = run_config.abandon
         self._barrier = barrier
         self._queues = queues
@@ -204,17 +240,20 @@ class Scheduler(Process):
         self._result_file = open(self._result_path, "w+")
         self._wr = csv.writer(self._result_file, dialect="excel")
 
-        # print(torch.get_num_threads())
-        # torch.set_num_threads(56)
-
         self._predictor = MLPregression(self._models_feature)
 
-        timestamp("Scheduler", "loading predictor")
+        logging.info("Scheduler loading predictor")
         self._predictor.load_state_dict(
             torch.load(self._predictor_ckpt_path, map_location="cpu")
         )
         self._predictor.eval()
-        timestamp("Scheduler", "Ready")
+        logging.info("Scheduler warmpup predictor")
+        warmp_up_input = torch.zeros(16, self._models_feature)
+        with torch.no_grad():
+            for i in range(200):
+                warmp_up_output = self._predictor(warmp_up_input).numpy()
+        logging.info("Scheduler end up warm up")
+        logging.info("Scheduler Ready")
         self._scheduling_queries = {key: None for key in self._serve_combination}
         self._scheduled_queries = {key: None for key in self._serve_combination}
 
@@ -259,8 +298,6 @@ class Scheduler(Process):
         if len(waiting_scheduling) > 0:
             qos_id = waiting_scheduling[0][0]
             qos = waiting_scheduling[0][1] - self._predicted_latency
-            # print(qos)
-            # qos = waiting_scheduling[0][1]
             qos_query: Query = self._scheduling_queries[qos_id]
             qos_query.set_op_pos(-1)
             total_colocated = len(waiting_scheduling)
@@ -311,6 +348,8 @@ class Scheduler(Process):
                 searched_pos = None
                 latencies = None
                 search_times = 0
+                logging.debug("qos query: {}".format(qos_query))
+                logging.debug("bg query: {}".format(bg_query))
                 while start_pos < end_pos:
                     search_times += 1
                     search_ways = (
@@ -322,16 +361,17 @@ class Scheduler(Process):
                         start_pos=start_pos,
                         end_pos=end_pos,
                         search_ways=search_ways,
-                        l_query=qos_query,
-                        m_query=bg_query,
+                        qos_query=qos_query,
+                        l_query=bg_query,
                     )
                     with torch.no_grad():
                         latencies = self._predictor(features).numpy()
-                    # print(
-                    #     "searching for qos target: {} form start pos: {}, end pos: {}, search po: {}, predicted: {}".format(
-                    #         qos, start_pos, end_pos, op_poses[0], latencies
-                    #     )
-                    # )
+                    logging.debug("latencies: {}".format(latencies))
+                    logging.debug(
+                        "searching for qos target: {} form start pos: {}, end pos: {}, search po: {}, predicted: {}".format(
+                            qos, start_pos, end_pos, op_poses[0], latencies
+                        )
+                    )
                     for i in range(search_ways):
                         headroom = qos - latencies[i]
                         if headroom < 0:
@@ -343,6 +383,8 @@ class Scheduler(Process):
                                 break
                             else:
                                 start_pos = op_poses[i] + 1
+                        if i == search_ways - 1:
+                            searched_pos = op_poses[i]
                     if searched_pos is not None:
                         break
                 self.Abacus_reset(search_times=search_times)
@@ -386,6 +428,7 @@ class Scheduler(Process):
                                 bg_query.seq_len,
                             )
                         )
+                        logging.debug("Sending bg query: {}".format(bg_query))
                         if bg_query.if_processed():
                             self._scheduled_queries[qos_id] = qos_query
                             self._scheduled_queries[bg_id] = bg_query
@@ -599,7 +642,6 @@ class Scheduler(Process):
 
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
-            # print(model_id)
             self._wr.writerow(
                 np.array([query.model_id, query.batch_size, query.seq_len, 0, -1])
             )
@@ -619,7 +661,7 @@ class Scheduler(Process):
                             query.batch_size,
                             query.seq_len,
                             self._search_times,
-                            query.latency_ms,
+                            query.latency_ms(),
                         ]
                     )
                     self._scheduled_queries[model_id] = None
@@ -661,9 +703,76 @@ class Scheduler(Process):
             self.clean_scheduled_queries(model_ids=model_id)
             self._wr.writerow(
                 np.array(
-                    [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
+                    [
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        query.latency_ms(),
+                    ]
                 )
             )
+        for model_id in abandoned_scheduling:
+            query = self._scheduling_queries[model_id]
+            self._wr.writerow(
+                np.array([query.model_id, query.batch_size, query.seq_len, -1])
+            )
+            self.clean_scheduled_queries(model_ids=model_id)
+        self._result_file.flush()
+
+    def SJF_schedule(self, abandon=False):
+        waiting_scheduling = {}
+        abandoned_scheduling = []
+        for model_id in self._serve_combination:
+            query: Query = self._scheduling_queries[model_id]
+            if query is None:
+                continue
+            headroom = query.get_headromm()
+            if abandon == True:
+                if headroom > 0:
+                    query.set_op_pos(-1)
+                    with torch.no_grad():
+                        latency = self._predictor(
+                            self.get_layer_feature(
+                                start_pos=0, end_pos=0, search_ways=1, qos_query=query
+                            )[1]
+                        )[0]
+                    waiting_scheduling[model_id] = latency
+                else:
+                    abandoned_scheduling.append(model_id)
+            else:
+                query.set_op_pos(-1)
+                with torch.no_grad():
+                    latency = self._predictor(
+                        self.get_layer_feature(
+                            start_pos=0, end_pos=0, search_ways=1, qos_query=query
+                        )[1]
+                    )[0]
+                waiting_scheduling[model_id] = latency
+        waiting_scheduling = sorted(waiting_scheduling.items(), key=lambda x: x[1])
+        for model_id, _ in waiting_scheduling:
+            query: Query = self._scheduling_queries[model_id]
+            self._pipes[model_id].send(
+                (
+                    "new",
+                    0,
+                    query.start_pos,
+                    query.end_pos,
+                    query.batch_size,
+                    query.seq_len,
+                )
+            )
+            self._barrier[0].wait()
+            self._wr.writerow(
+                np.array(
+                    [
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        query.latency_ms(),
+                    ]
+                )
+            )
+            self.clean_scheduled_queries(model_ids=model_id)
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
@@ -692,7 +801,6 @@ class Scheduler(Process):
 
                 waiting_scheduling[model_id] = headroom
         waiting_scheduling = sorted(waiting_scheduling.items(), key=lambda x: x[1])
-        # print(waiting_scheduling)
         for model_id, _ in waiting_scheduling:
             query: Query = self._scheduling_queries[model_id]
             self._pipes[model_id].send(
@@ -708,7 +816,12 @@ class Scheduler(Process):
             self._barrier[0].wait()
             self._wr.writerow(
                 np.array(
-                    [query.model_id, query.batch_size, query.seq_len, query.latency_ms]
+                    [
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        query.latency_ms(),
+                    ]
                 )
             )
             self.clean_scheduled_queries(model_ids=model_id)
@@ -797,29 +910,50 @@ class Scheduler(Process):
         input_feature[0:search_ways, 8] = qos_query.end_pos
         input_feature[0:search_ways, 9] = qos_query.batch_size
         input_feature[0:search_ways, 10] = qos_query.seq_len
-        if l_query is not None:
-            raise NotImplementedError
         if r_query is not None:
+            input_feature[0:search_ways, l_query.model_id] += 1
+            input_feature[0:search_ways, 11] = l_query.start_pos
+            input_feature[0:search_ways, 12] = l_query.end_pos
+            input_feature[0:search_ways, 13] = l_query.batch_size
+            input_feature[0:search_ways, 14] = l_query.seq_len
+            input_feature[0:search_ways, m_query.model_id] += 1
+            input_feature[0:search_ways, 15] = m_query.start_pos
+            input_feature[0:search_ways, 16] = m_query.end_pos
+            input_feature[0:search_ways, 17] = m_query.batch_size
+            input_feature[0:search_ways, 18] = m_query.seq_len
             input_feature[0:search_ways, r_query.model_id] += 1
-            input_feature[0:search_ways, 11] = r_query.start_pos
-            input_feature[0:search_ways, 12] = r_query.end_pos
-            input_feature[0:search_ways, 13] = r_query.batch_size
-            input_feature[0:search_ways, 14] = r_query.seq_len
-            input_feature[0:search_ways, r_query.model_id] += 1
-            input_feature[0:search_ways, 15] = r_query.end_pos
-            input_feature[0:search_ways, 17] = r_query.batch_size
-            input_feature[0:search_ways, 18] = r_query.seq_len
+            input_feature[0:search_ways, 19] = r_query.start_pos
+            # input_feature[0:search_ways, 20] = r_query.end_pos
+            input_feature[0:search_ways, 21] = r_query.batch_size
+            input_feature[0:search_ways, 22] = r_query.seq_len
+            for i in range(search_ways):
+                start_pos += step
+                input_feature[i, 20] = start_pos
+                poses.append(start_pos)
+        elif m_query is not None:
+            input_feature[0:search_ways, l_query.model_id] += 1
+            input_feature[0:search_ways, 11] = l_query.start_pos
+            input_feature[0:search_ways, 12] = l_query.end_pos
+            input_feature[0:search_ways, 13] = l_query.batch_size
+            input_feature[0:search_ways, 14] = l_query.seq_len
+            input_feature[0:search_ways, m_query.model_id] += 1
+            input_feature[0:search_ways, 15] = m_query.start_pos
+            # input_feature[0:search_ways, 16] = m_query.end_pos
+            input_feature[0:search_ways, 17] = m_query.batch_size
+            input_feature[0:search_ways, 18] = m_query.seq_len
             for i in range(search_ways):
                 start_pos += step
                 input_feature[i, 16] = start_pos
                 poses.append(start_pos)
-        if m_query is not None:
-            input_feature[0:search_ways, m_query.model_id] += 1
-            input_feature[0:search_ways, 11] = m_query.end_pos
-            input_feature[0:search_ways, 13] = m_query.batch_size
-            input_feature[0:search_ways, 14] = m_query.seq_len
+        if l_query is not None:
+            input_feature[0:search_ways, l_query.model_id] += 1
+            input_feature[0:search_ways, 11] = l_query.start_pos
+            # input_feature[0:search_ways, 12] = l_query.end_pos
+            input_feature[0:search_ways, 13] = l_query.batch_size
+            input_feature[0:search_ways, 14] = l_query.seq_len
             for i in range(search_ways):
                 start_pos += step
                 input_feature[i, 12] = start_pos
                 poses.append(start_pos)
+        logging.debug("input feature: {}".format(input_feature))
         return poses, input_feature

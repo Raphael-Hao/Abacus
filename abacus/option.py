@@ -5,6 +5,7 @@
 import argparse
 import sys
 import os
+import logging
 from abacus.network.resnet_splited import resnet50, resnet101, resnet152
 from abacus.network.inception_splited import inception_v3
 from abacus.network.vgg_splited import vgg16, vgg19
@@ -13,6 +14,7 @@ from abacus.network.bert import BertModel
 
 class RunConfig:
     def __init__(self, args) -> None:
+        self.debug = args.debug
         self.task = args.task
         # general configurations
         self.total_models = args.model_num
@@ -148,15 +150,15 @@ class RunConfig:
             """
             [server configuration]
             """
-            self.serve_combination = tuple(args.combination)
+            self.serve_combination = tuple(args.comb)
             self.policy = args.policy
             # self.policy = "SJF"
             # self.policy = "FCFS"
             # self.policy = "EDF"
-            self.threshold = args.threshold
+            self.threshold = args.thld
             self.qos_target = args.qos
             self.search_ways = args.ways
-            self.total_queries = 1000
+            self.total_queries = args.queries
             self.average_duration = args.load
             self.abandon = True
 
@@ -329,7 +331,7 @@ class RunConfig:
             ]
             self.total_test = 1000
         else:
-            print("Not supported task, supported: server, profile, train")
+            logging.error("Not supported task, supported: server, profile, train")
             raise NotImplementedError
 
 
@@ -366,9 +368,12 @@ def parse_options():
         choices=["Abacus", "SJF", "FCFS"],
     )
     parser.add_argument("--load", type=int, required="serve" in sys.argv, default=50)
+    parser.add_argument(
+        "--queries", type=int, required="serve" in sys.argv, default=100
+    )
     parser.add_argument("--qos", type=int, required="serve" in sys.argv, default=60)
-    parser.add_argument("--thld", type=int, required="serve" in sys.argv, default=60)
-    parser.add_argument("--ways", type=int, required="serve" in sys.argv, default=60)
+    parser.add_argument("--thld", type=int, required="serve" in sys.argv, default=10)
+    parser.add_argument("--ways", type=int, required="Abacus" in sys.argv, default=4)
 
     ## profiling
     parser.add_argument("--test", type=int, required="profile" in sys.argv, default=200)
@@ -395,6 +400,8 @@ def parse_options():
         required="single" in sys.argv,
     )
     parser.add_argument("--perf", action="store_true")
+
+    parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
 
