@@ -27,7 +27,8 @@ class Query:
         6: 12,
     }
 
-    def __init__(self, model_id, batch_size, seq_len, qos_target=60) -> None:
+    def __init__(self, id, model_id, batch_size, seq_len, qos_target=60) -> None:
+        self.id = id
         self.model_id = model_id
         self.batch_size = batch_size
         self.seq_len = seq_len
@@ -86,16 +87,17 @@ class AbacusServer:
                 self._barrier.append(mp.Barrier(i + 2))
         else:
             self._barrier = [mp.Barrier(2)]
-        self._stop_flag = mp.RawValue("i", 1)
+        self._stop_event = mp.Event()
         self._workers = {}
         self._queues = {}
         self._pipes = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
 
-    def send_query(self, model_id, batch_size, seq_len):
+    def send_query(self, id, model_id, batch_size, seq_len):
         self._queues[model_id].put(
             Query(
+                id=id,
                 model_id=model_id,
                 batch_size=batch_size,
                 seq_len=seq_len,
@@ -130,7 +132,7 @@ class AbacusServer:
             barrier=self._barrier,
             queues=self._queues,
             pipes=self._pipes,
-            stop_flag=self._stop_flag,
+            stop_event=self._stop_event,
         )
         self._scheduler.start()
         logging.info("Scheduler Initialized")
@@ -153,17 +155,17 @@ class AbacusServer:
         i = 0
         for model_id, sleep_duration, bs, seq_len in self._test_queries:
             i += 1
-            self.send_query(model_id=model_id, batch_size=bs, seq_len=seq_len)
+            self.send_query(id=i, model_id=model_id, batch_size=bs, seq_len=seq_len)
             time.sleep(sleep_duration)
 
     def stop_test(self):
         while not self.if_all_processed():
             logging.info("Queries remain to be processed")
-            time.sleep(0.001)
-        self._stop_flag.value = 0
-        for pipe in self._pipes.values():
-            pipe.send(("terminate", -1, -1, -1, -1, -1))
+            time.sleep(0.01)
+        self._stop_event.set()
         self._scheduler.join()
+        for pipe in self._pipes.values():
+            pipe.send((-1, "terminate", -1, -1, -1, -1, -1))
         for worker in self._workers.values():
             worker.join()
 
@@ -181,7 +183,7 @@ class Scheduler(Process):
         barrier,
         queues,
         pipes,
-        stop_flag,
+        stop_event,
     ) -> None:
         super().__init__()
         self._policy = run_config.policy
@@ -232,7 +234,7 @@ class Scheduler(Process):
         self._barrier = barrier
         self._queues = queues
         self._pipes = pipes
-        self._stop_flag = stop_flag
+        self._stop_event = stop_event
         self._models_feature = len(Query.MODELS_LEN) + 4 * run_config.total_models
 
     def run(self) -> None:
@@ -257,7 +259,7 @@ class Scheduler(Process):
         self._scheduling_queries = {key: None for key in self._serve_combination}
         self._scheduled_queries = {key: None for key in self._serve_combination}
 
-        result_header = ["model_id", "bs", "seq_len", "latency"]
+        result_header = ["query_id", "model_id", "bs", "seq_len", "latency"]
         if self._policy == "Abacus":
             self._schedule_func = self.Abacus_schedule
             # the number of scheduled queries in last round of scheduling, equal with schedule_flag + 1
@@ -265,7 +267,14 @@ class Scheduler(Process):
             self._predicted_latency = 0
             # search times for the optimal operator group
             self._search_times = 0
-            result_header = ["model_id", "bs", "seq_len", "search_times", "latency"]
+            result_header = [
+                "query_id",
+                "model_id",
+                "bs",
+                "seq_len",
+                "search_times",
+                "latency",
+            ]
         elif self._policy == "SJF":
             self._schedule_func = self.SJF_schedule
         elif self._policy == "FCFS":
@@ -278,20 +287,14 @@ class Scheduler(Process):
         self._result_file.flush()
 
         if self._policy == "FCFS" or self._policy == "SJF" or self._policy == "EDF":
-            while self._stop_flag.value == 1:
+            while not self._stop_event.is_set() or self.remain_schedule():
                 self.pop_queries()
                 self._schedule_func(self._abandon)
         elif self._policy == "Abacus":
-            while self._stop_flag.value == 1:
+            while not self._stop_event.is_set():
                 self.pop_queries()
                 self.Abacus_schedule()
-
-    def pop_queries(self):
-        for model_id in self._serve_combination:
-            if (self._scheduling_queries[model_id] is None) and (
-                not self._queues[model_id].empty()
-            ):
-                self._scheduling_queries[model_id] = self._queues[model_id].get()
+            self.Abacus_reset()
 
     def Abacus_schedule(self):
         waiting_scheduling, abandoned_scheduling = self.urgent_sort(True)
@@ -314,6 +317,7 @@ class Scheduler(Process):
                     else:
                         self._pipes[qos_id].send(
                             (
+                                qos_query.id,
                                 qos_query.state,
                                 0,
                                 qos_query.start_pos,
@@ -329,6 +333,7 @@ class Scheduler(Process):
                     self.Abacus_reset()
                     self._pipes[qos_id].send(
                         (
+                            qos_query.id,
                             qos_query.state,
                             0,
                             qos_query.start_pos,
@@ -394,6 +399,7 @@ class Scheduler(Process):
                     else:
                         self._pipes[qos_id].send(
                             (
+                                qos_query.id,
                                 qos_query.state,
                                 0,
                                 qos_query.start_pos,
@@ -410,6 +416,7 @@ class Scheduler(Process):
                     if searched_pos > 0:
                         self._pipes[qos_id].send(
                             (
+                                qos_query.id,
                                 qos_query.state,
                                 1,
                                 qos_query.start_pos,
@@ -420,6 +427,7 @@ class Scheduler(Process):
                         )
                         self._pipes[bg_id].send(
                             (
+                                bg_query.id,
                                 bg_query.state,
                                 1,
                                 bg_query.start_pos,
@@ -440,6 +448,7 @@ class Scheduler(Process):
                     elif searched_pos == 0:
                         self._pipes[qos_id].send(
                             (
+                                qos_query.id,
                                 qos_query.state,
                                 0,
                                 qos_query.start_pos,
@@ -554,6 +563,7 @@ class Scheduler(Process):
                     else:
                         self._pipes[qos_id].send(
                             (
+                                qos_query.id,
                                 qos_query.state,
                                 0,
                                 qos_query.start_pos,
@@ -568,6 +578,7 @@ class Scheduler(Process):
                 elif searched_query == 1:
                     self._pipes[qos_id].send(
                         (
+                            qos_query.id,
                             qos_query.state,
                             1,
                             qos_query.start_pos,
@@ -578,6 +589,7 @@ class Scheduler(Process):
                     )
                     self._pipes[m_id].send(
                         (
+                            m_query.id,
                             m_query.state,
                             1,
                             m_query.start_pos,
@@ -597,6 +609,7 @@ class Scheduler(Process):
                 elif searched_query >= 2:
                     self._pipes[qos_id].send(
                         (
+                            qos_query.id,
                             qos_query.state,
                             2,
                             qos_query.start_pos,
@@ -607,6 +620,7 @@ class Scheduler(Process):
                     )
                     self._pipes[m_id].send(
                         (
+                            m_query.id,
                             m_query.state,
                             2,
                             m_query.start_pos,
@@ -617,6 +631,7 @@ class Scheduler(Process):
                     )
                     self._pipes[r_id].send(
                         (
+                            r_query.id,
                             r_query.state,
                             2,
                             r_query.start_pos,
@@ -643,7 +658,9 @@ class Scheduler(Process):
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
-                np.array([query.model_id, query.batch_size, query.seq_len, 0, -1])
+                np.array(
+                    [query.id, query.model_id, query.batch_size, query.seq_len, 0, -1]
+                )
             )
             self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
@@ -657,6 +674,7 @@ class Scheduler(Process):
                 if query is not None:
                     self._wr.writerow(
                         [
+                            query.id,
                             query.model_id,
                             query.batch_size,
                             query.seq_len,
@@ -691,6 +709,7 @@ class Scheduler(Process):
             query: Query = self._scheduling_queries[model_id]
             self._pipes[model_id].send(
                 (
+                    query.id,
                     "new",
                     0,
                     query.start_pos,
@@ -704,6 +723,7 @@ class Scheduler(Process):
             self._wr.writerow(
                 np.array(
                     [
+                        query.id,
                         query.model_id,
                         query.batch_size,
                         query.seq_len,
@@ -714,7 +734,9 @@ class Scheduler(Process):
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
-                np.array([query.model_id, query.batch_size, query.seq_len, -1])
+                np.array(
+                    [query.id, query.model_id, query.batch_size, query.seq_len, -1]
+                )
             )
             self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
@@ -753,6 +775,7 @@ class Scheduler(Process):
             query: Query = self._scheduling_queries[model_id]
             self._pipes[model_id].send(
                 (
+                    query.id,
                     "new",
                     0,
                     query.start_pos,
@@ -765,6 +788,7 @@ class Scheduler(Process):
             self._wr.writerow(
                 np.array(
                     [
+                        query.id,
                         query.model_id,
                         query.batch_size,
                         query.seq_len,
@@ -776,7 +800,9 @@ class Scheduler(Process):
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
-                np.array([query.model_id, query.batch_size, query.seq_len, -1])
+                np.array(
+                    [query.id, query.model_id, query.batch_size, query.seq_len, -1]
+                )
             )
             self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
@@ -805,6 +831,7 @@ class Scheduler(Process):
             query: Query = self._scheduling_queries[model_id]
             self._pipes[model_id].send(
                 (
+                    query.id,
                     "new",
                     0,
                     query.start_pos,
@@ -817,6 +844,7 @@ class Scheduler(Process):
             self._wr.writerow(
                 np.array(
                     [
+                        query.id,
                         query.model_id,
                         query.batch_size,
                         query.seq_len,
@@ -828,10 +856,25 @@ class Scheduler(Process):
         for model_id in abandoned_scheduling:
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
-                np.array([query.model_id, query.batch_size, query.seq_len, -1])
+                np.array(
+                    [query.id, query.model_id, query.batch_size, query.seq_len, -1]
+                )
             )
             self.clean_scheduled_queries(model_ids=model_id)
         self._result_file.flush()
+
+    def pop_queries(self):
+        for model_id in self._serve_combination:
+            if (self._scheduling_queries[model_id] is None) and (
+                not self._queues[model_id].empty()
+            ):
+                self._scheduling_queries[model_id] = self._queues[model_id].get()
+
+    def remain_schedule(self):
+        for key in self._scheduling_queries:
+            if self._scheduling_queries[key] is not None:
+                return True
+        return False
 
     def clean_scheduled_queries(self, model_ids):
         if isinstance(model_ids, list):

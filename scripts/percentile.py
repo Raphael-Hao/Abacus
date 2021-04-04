@@ -14,7 +14,7 @@ def get_latency(data):
         line = data[i]
         latency = float(line[-1])
         if latency == -1:
-            continue
+            latency_data.append(150)
         latency_data.append(latency)
     latency_data = np.array(latency_data)
     return latency_data
@@ -29,7 +29,7 @@ def load_single_file(filepath):
     return get_latency(data)
 
 
-# %%
+# %% 2in7 in A100
 
 colo_names = [
     "Res50+Res101",
@@ -81,129 +81,70 @@ file_names = [
 
 
 qos_target = {
-    "resnet50resnet101": 60,
-    "resnet50resnet152": 60,
-    "resnet50inception_v3": 70,
-    "resnet50vgg16": 40,
-    "resnet50vgg19": 50,
-    "resnet50bert": 60,
-    "resnet101resnet152": 60,
-    "resnet101inception_v3": 75,
-    "resnet101vgg16": 50,
-    "resnet101vgg19": 50,
-    "resnet101bert": 60,
-    "resnet152inception_v3": 70,
-    "resnet152vgg16": 60,
-    "resnet152vgg19": 60,
-    "resnet152bert": 65,
-    "inception_v3vgg16": 65,  # 混跑带来了开销
-    "inception_v3vgg19": 65,
-    "inception_v3bert": 70,
-    "vgg16vgg19": 33,
-    "vgg16bert": 50,
-    "vgg19bert": 50,
+    "resnet50resnet101": 100,
+    "resnet50resnet152": 100,
+    "resnet50inception_v3": 100,
+    "resnet50vgg16": 100,
+    "resnet50vgg19": 100,
+    "resnet50bert": 100,
+    "resnet101resnet152": 100,
+    "resnet101inception_v3": 100,
+    "resnet101vgg16": 100,
+    "resnet101vgg19": 100,
+    "resnet101bert": 100,
+    "resnet152inception_v3": 100,
+    "resnet152vgg16": 100,
+    "resnet152vgg19": 100,
+    "resnet152bert": 100,
+    "inception_v3vgg16": 100,
+    "inception_v3vgg19": 100,
+    "inception_v3bert": 100,
+    "vgg16vgg19": 100,
+    "vgg16bert": 100,
+    "vgg19bert": 100,
 }
+
+data_dir = "../data/server/A100/2in7/"
+
+
+# %% tail latency caculator
 
 for i in range(len(file_names)):
     # print("--------------{}--------------".format(file_names[i]))
-    abacus_latency = load_single_file(
-        "../data/server/tail_th/Abacus/{}.csv".format(file_names[i])
-    )
-    fcfs_latency = load_single_file(
-        "../data/server/tail_th/FCFS/{}.csv".format(file_names[i])
-    )
-    sjf_latency = load_single_file(
-        "../data/server/tail_th/SJF/{}.csv".format(file_names[i])
-    )
+    abacus_latency = load_single_file(data_dir + "Abacus/{}.csv".format(file_names[i]))
+    fcfs_latency = load_single_file(data_dir + "FCFS/{}.csv".format(file_names[i]))
+    sjf_latency = load_single_file(data_dir + "SJF/{}.csv".format(file_names[i]))
+    edf_latency = load_single_file(data_dir + "EDF/{}.csv".format(file_names[i]))
+
     abacus_tail = np.percentile(abacus_latency, 99)
     fcfs_tail = np.percentile(fcfs_latency, 99)
     sjf_tail = np.percentile(sjf_latency, 99)
+    edf_tail = np.percentile(sjf_latency, 99)
 
-    abacus_vio = abacus_latency[abacus_latency < qos_target[file_names[i]]]
-    fcfs_vio = fcfs_latency[fcfs_latency < qos_target[file_names[i]]]
-    sjf_vio = sjf_latency[sjf_latency < qos_target[file_names[i]]]
+    print("Abacus 99%-ile latency: {} for {}".format(abacus_tail, colo_names[i]))
+    print("FCFS 99%-ile latency: {} for {}".format(fcfs_tail, colo_names[i]))
+    print("SJF 99%-ile latency: {} for {}".format(sjf_tail, colo_names[i]))
+    print("EDF 99%-ile latency: {} for {}".format(edf_tail, colo_names[i]))
+
+    # abacus_vio = abacus_latency[abacus_latency < qos_target[file_names[i]]]
+    # fcfs_vio = fcfs_latency[fcfs_latency < qos_target[file_names[i]]]
+    # sjf_vio = sjf_latency[sjf_latency < qos_target[file_names[i]]]
+    # edf_vio = edf_latency[edf_latency < qos_target[file_names[i]]]
+
+    # origin_abacus_load = abacus_latency.shape[0]
+    # origin_fcfs_load = fcfs_latency.shape[0]
+    # origin_sjf_load = sjf_latency.shape[0]
+    # abacus_load = abacus_vio.shape[0]
+    # fcfs_load = fcfs_vio.shape[0]
+    # sjf_load = sjf_vio.shape[0]
+
     # print(
-    #     "abacus: {},fcfs: {}, sjf：{}".format(
-    #         abacus_latency.shape, fcfs_latency.shape, sjf_latency.shape
-    #     )
-    # )
-    origin_abacus_load = abacus_latency.shape[0]
-    origin_fcfs_load = fcfs_latency.shape[0]
-    origin_sjf_load = sjf_latency.shape[0]
-    abacus_load = abacus_vio.shape[0]
-    fcfs_load = fcfs_vio.shape[0]
-    sjf_load = sjf_vio.shape[0]
-    # print(
-    #     "{},{},{},{},{},{},{},{}".format(
+    #     "{}, {},{},{}".format(
     #         colo_names[i],
-    #         qos_target[file_names[i]],
-    #         fcfs_tail,
-    #         sjf_tail,
-    #         abacus_tail,
-    #         fcfs_load,
-    #         sjf_load,
-    #         abacus_load,
+    #         fcfs_load / origin_fcfs_load,
+    #         sjf_load / origin_sjf_load,
+    #         abacus_load / origin_abacus_load,
     #     )
     # )
-    print(
-        "{}, {},{},{}".format(
-             colo_names[i],
-            fcfs_load / origin_fcfs_load,
-            sjf_load / origin_sjf_load,
-            abacus_load / origin_abacus_load,
-        )
-    )
 
-# %%
-
-# import numpy as np
-# import pandas as pd
-
-
-# def get_latency(data):
-
-#     n = data.shape[0]
-#     latency_data = []
-#     for i in range(n):
-#         line = data[i]
-#         latency = float(line[-1])
-#         if latency == -1:
-#             continue
-#         latency_data.append(latency)
-#     latency_data = np.array(latency_data)
-#     return latency_data
-
-
-# def load_single_file(filepath):
-#     data = pd.read_csv(filepath, header=0)
-#     data = data.values.tolist()
-#     total_data_num = len(data)
-#     # print("{} samples loaded from {}".format(total_data_num, filepath))
-#     data = np.array(data).astype(np.float32)
-#     return get_latency(data)
-
-
-# colo_names = [
-#     "Res101+Res152",
-# ]
-
-# file_names = [
-#     "resnet101resnet152_1",
-#     "resnet101resnet152_2",
-#     "resnet101resnet152_4",
-#     "resnet101resnet152_8",
-# ]
-
-
-# for i in range(len(file_names)):
-#     # print("--------------{}--------------".format(file_names[i]))
-#     abacus_latency = load_single_file(
-#         "../data/server/Abacus/{}.csv".format(file_names[i])
-#     )
-#     abacus_tail = np.percentile(abacus_latency, 99)
-#     print(abacus_tail)
-#     abacus_qos = abacus_latency[abacus_latency < 80]
-#     print(abacus_qos.shape)
-#     print(abacus_latency.shape)
-#     print(abacus_qos.shape[0] / abacus_latency.shape[0])
 # %%

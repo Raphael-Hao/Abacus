@@ -107,7 +107,15 @@ class ServerWorker(AbacusWorker):
         self._warmup_barrier.wait()
         with torch.no_grad():
             while True:
-                action, barrier_id, start, end, bs, seq_len = self._pipe.recv()
+                (
+                    query_id,
+                    action,
+                    barrier_id,
+                    start,
+                    end,
+                    bs,
+                    seq_len,
+                ) = self._pipe.recv()
                 if action == "new":
                     if self._model_name == "bert":
                         self._inter_input = self._model.run(
@@ -118,6 +126,11 @@ class ServerWorker(AbacusWorker):
                         self._inter_input = submodel(self._inputs[bs])
                     torch.cuda.synchronize()
                     self._barrier[barrier_id].wait()
+                    logging.debug(
+                        "Worker: {} processing New Query: {}".format(
+                            self._worker_id, query_id
+                        )
+                    )
                 elif action == "inter":
                     if self._model_name == "bert":
                         self._inter_input = self._model.run(
@@ -128,7 +141,15 @@ class ServerWorker(AbacusWorker):
                         self._inter_input = submodel(self._inter_input)
                     torch.cuda.synchronize()
                     self._barrier[barrier_id].wait()
+                    logging.debug(
+                        "Worker: {} processing Inter Query: {}".format(
+                            self._worker_id, query_id
+                        )
+                    )
                 elif action == "terminate":
+                    logging.info(
+                        "Terminating server worker: {}".format(self._worker_id)
+                    )
                     break
                 else:
                     logging.error(
