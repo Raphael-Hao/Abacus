@@ -81,27 +81,27 @@ file_names = [
 
 
 qos_target = {
-    "resnet50resnet101": 100,
-    "resnet50resnet152": 100,
-    "resnet50inception_v3": 100,
-    "resnet50vgg16": 100,
-    "resnet50vgg19": 100,
-    "resnet50bert": 100,
-    "resnet101resnet152": 100,
-    "resnet101inception_v3": 100,
-    "resnet101vgg16": 100,
-    "resnet101vgg19": 100,
-    "resnet101bert": 100,
-    "resnet152inception_v3": 100,
-    "resnet152vgg16": 100,
-    "resnet152vgg19": 100,
-    "resnet152bert": 100,
-    "inception_v3vgg16": 100,
-    "inception_v3vgg19": 100,
-    "inception_v3bert": 100,
-    "vgg16vgg19": 100,
-    "vgg16bert": 100,
-    "vgg19bert": 100,
+    "resnet50resnet101": 140,
+    "resnet50resnet152": 160,
+    "resnet50inception_v3": 130,
+    "resnet50vgg16": 50,
+    "resnet50vgg19": 50,
+    "resnet50bert": 75,
+    "resnet101resnet152": 150,
+    "resnet101inception_v3": 150,
+    "resnet101vgg16": 90,
+    "resnet101vgg19": 80,
+    "resnet101bert": 130,
+    "resnet152inception_v3": 150,
+    "resnet152vgg16": 150,
+    "resnet152vgg19": 150,
+    "resnet152bert": 150,
+    "inception_v3vgg16": 85,
+    "inception_v3vgg19": 80,
+    "inception_v3bert": 120,
+    "vgg16vgg19": 35,
+    "vgg16bert": 60,
+    "vgg19bert": 60,
 }
 
 data_dir = "../data/server/A100/2in7/"
@@ -119,7 +119,7 @@ for i in range(len(file_names)):
     abacus_tail = np.percentile(abacus_latency, 99)
     fcfs_tail = np.percentile(fcfs_latency, 99)
     sjf_tail = np.percentile(sjf_latency, 99)
-    edf_tail = np.percentile(sjf_latency, 99)
+    edf_tail = np.percentile(edf_latency, 99)
 
     print("Abacus 99%-ile latency: {} for {}".format(abacus_tail, colo_names[i]))
     print("FCFS 99%-ile latency: {} for {}".format(fcfs_tail, colo_names[i]))
@@ -147,4 +147,4 @@ for i in range(len(file_names)):
     #     )
     # )
 
-# %%
+# %% load
