@@ -38,22 +38,22 @@ colo_names = [
     "Res50+IncepV3",
     "Res50+VGG16",
     "Res50+VGG19",
-    "Res50+bert",
+    "Res50+Bert",
     "Res101+Res152",
     "Res101+IncepV3",
     "Res101+VGG16",
     "Res101+VGG19",
-    "Res101+bert",
+    "Res101+Bert",
     "Res152+IncepV3",
     "Res152+VGG16",
     "Res152+VGG19",
-    "Res152+bert",
+    "Res152+Bert",
     "IncepV3+VGG16",
     "IncepV3+VGG19",
-    "IncepV3+bert",
+    "IncepV3+Bert",
     "VGG16+VGG19",
-    "VGG16+bert",
-    "VGG19+bert",
+    "VGG16+Bert",
+    "VGG19+Bert",
 ]
 
 file_names = [
@@ -97,20 +97,97 @@ qos_target = {
     "resnet152vgg16": 150,
     "resnet152vgg19": 150,
     "resnet152bert": 150,
-    "inception_v3vgg16": 85,
+    "inception_v3vgg16": 80,
     "inception_v3vgg19": 80,
-    "inception_v3bert": 120,
-    "vgg16vgg19": 35,
+    "inception_v3bert": 80,
+    "vgg16vgg19": 30,
     "vgg16bert": 60,
     "vgg19bert": 60,
 }
 
 data_dir = "../results/A100/2in7/"
 
+# %%
+colo_names = [
+    "Res101+Res152+VGG19",
+    "Res101+Res152+Bert",
+    "Res101+VGG19+Bert",
+    "Res152+VGG19+Bert",
+]
+
+file_names = [
+    "resnet101resnet152vgg19",
+    "resnet101resnet152bert",
+    "resnet101vgg19bert",
+    "resnet152vgg19bert",
+]
+
+
+qos_target = {
+    "resnet101resnet152vgg19": 100,
+    "resnet101resnet152bert": 100,
+    "resnet101vgg19bert": 100,
+    "resnet152vgg19bert": 100,
+}
+
+data_dir = "../results/A100/3in4/"
+
+# %%
+colo_names = [
+    "Res101+Res152+VGG19+Bert",
+]
+
+file_names = [
+    "resnet101resnet152vgg19bert",
+]
+
+
+qos_target = {
+    "resnet101resnet152vgg19bert": 100,
+}
+
+data_dir = "../results/A100/4in4/"
+
+# %%
+colo_names = [
+    "Res101+Res152+VGG19+Bert",
+]
+
+file_names = [
+    "resnet101resnet152vgg19bert",
+]
+
+
+qos_target = {
+    "resnet101resnet152vgg19bert": 100,
+}
+
+data_dir = "../results/mig/4in4/"
 
 # %% tail latency caculator
+import csv
 
-for i in range(21):
+result_filepath = data_dir + "result.csv"
+result_file = open(result_filepath, "w+")
+csv_writer = csv.writer(result_file, dialect="excel")
+result_header = [
+    "colocation",
+    "FCFS_tail",
+    "FCFS_throughput",
+    "FCFS_violation",
+    "SJF_tail",
+    "SJF_throughput",
+    "SJF_violation",
+    "EDF_tail",
+    "EDF_throughput",
+    "EDF_violation",
+    "Abacus_tail",
+    "Abacus_throughput",
+    "Abacus_violation",
+]
+csv_writer.writerow(result_header)
+
+for i in range(len(colo_names)):
     # print("--------------{}--------------".format(file_names[i]))
     abacus_latency = load_single_file(data_dir + "Abacus/{}.csv".format(file_names[i]))
     fcfs_latency = load_single_file(data_dir + "FCFS/{}.csv".format(file_names[i]))
@@ -143,25 +220,35 @@ for i in range(21):
         )
     )
 
-    # abacus_vio = abacus_latency[abacus_latency < qos_target[file_names[i]]]
-    # fcfs_vio = fcfs_latency[fcfs_latency < qos_target[file_names[i]]]
-    # sjf_vio = sjf_latency[sjf_latency < qos_target[file_names[i]]]
-    # edf_vio = edf_latency[edf_latency < qos_target[file_names[i]]]
+    abacus_vio = abacus_latency[abacus_latency < qos_target[file_names[i]]]
+    fcfs_vio = fcfs_latency[fcfs_latency < qos_target[file_names[i]]]
+    sjf_vio = sjf_latency[sjf_latency < qos_target[file_names[i]]]
+    edf_vio = edf_latency[edf_latency < qos_target[file_names[i]]]
 
-    # origin_abacus_load = abacus_latency.shape[0]
-    # origin_fcfs_load = fcfs_latency.shape[0]
-    # origin_sjf_load = sjf_latency.shape[0]
-    # abacus_load = abacus_vio.shape[0]
-    # fcfs_load = fcfs_vio.shape[0]
-    # sjf_load = sjf_vio.shape[0]
-
-    # print(
-    #     "{}, {},{},{}".format(
-    #         colo_names[i],
-    #         fcfs_load / origin_fcfs_load,
-    #         sjf_load / origin_sjf_load,
-    #         abacus_load / origin_abacus_load,
-    #     )
-    # )
-
+    abacus_load = abacus_latency.shape[0]
+    fcfs_load = fcfs_latency.shape[0]
+    sjf_load = sjf_latency.shape[0]
+    edf_load = edf_latency.shape[0]
+    abacus_vio_ratio = abacus_vio.shape[0] / 1000
+    fcfs_vio_ratio = fcfs_vio.shape[0] / 1000
+    sjf_vio_ratio = sjf_vio.shape[0] / 1000
+    edf_vio_ratio = edf_vio.shape[0] / 1000
+    csv_writer.writerow(
+        [
+            colo_names[i],
+            fcfs_tail,
+            fcfs_load,
+            fcfs_vio_ratio,
+            sjf_tail,
+            sjf_load,
+            sjf_vio_ratio,
+            edf_tail,
+            edf_load,
+            edf_vio_ratio,
+            abacus_tail,
+            abacus_load,
+            abacus_vio_ratio,
+        ]
+    )
+result_file.flush()
 # %% load

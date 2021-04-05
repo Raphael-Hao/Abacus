@@ -1,0 +1,2 @@
+colocation,FCFS_tail,FCFS_throughput,FCFS_violation,SJF_tail,SJF_throughput,SJF_violation,EDF_tail,EDF_throughput,EDF_violation,Abacus_tail,Abacus_throughput,Abacus_violation
+Res101+Res152+VGG19+Bert,116.90803367614745,948,0.892,149.36068389892577,900,0.756,124.37525161743164,915,0.823,98.1494770812988,999,0.989
