@@ -27,59 +27,63 @@ combination=(
 
 qos_target=(
   '100'
+  '150'
   '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
-  '100'
+  '50'
+  '50'
+  '75'
+  '160'
+  '150'
+  '90'
+  '80'
+  '130'
+  '150'
+  '150'
+  '150'
+  '150'
+  '80'
+  '80'
+  '80'
+  '30' # problems
+  '60'
+  '60'
 )
 # qos
 echo "working dir $(pwd)"
+comb_len=${#combination[@]}
+tested_comb=20
+testing=$((comb_len - tested_comb))
+echo "$testing combination are tested"
 
-# for comb_id in {0..20}; do
-#   python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy Abacus --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2 --abandon
-# done
+for ((i = tested_comb; i < comb_len; i++)); do
+  python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy SJF --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2
+done
 
-# for comb_id in {0..20}; do
-#   python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy SJF --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2
-# done
+for ((i = tested_comb; i < comb_len; i++)); do
+  python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy FCFS --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2
+done
 
-# for comb_id in {0..20}; do
-#   python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy FCFS --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2
-# done
+for ((i = tested_comb; i < comb_len; i++)); do
+  python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy EDF --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2
+done
 
-# for comb_id in {0..20}; do
-#   python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy EDF --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2
-# done
+for ((i = tested_comb; i < comb_len; i++)); do
+  python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
+done
 
 # throughput
-for comb_id in {0..20}; do
-  python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy Abacus --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2 --abandon
-done
+# for i in {0..20}; do
+#   python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
+# done
 
-for comb_id in {0..20}; do
-  python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy SJF --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2 --abandon
-done
+# for i in {0..20}; do
+#   python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy SJF --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
+# done
 
-for comb_id in {0..20}; do
-  python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy FCFS --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2 --abandon
-done
+# for i in {0..20}; do
+#   python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy FCFS --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
+# done
 
-for comb_id in {0..20}; do
-  python main.py --task serve --model_num 2 --comb ${combination["$comb_id"]} --policy EDF --load 50 --qos ${qos_target["$comb_id"]} --queries 1000 --thld 5 --ways 2 --abandon
-done
+# for i in {0..20}; do
+#   python main.py --task serve --model_num 2 --comb ${combination["$i"]} --policy EDF --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
+# done

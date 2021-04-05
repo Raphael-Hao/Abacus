@@ -14,7 +14,8 @@ def get_latency(data):
         line = data[i]
         latency = float(line[-1])
         if latency == -1:
-            latency_data.append(150)
+            # latency_data.append(150)
+            continue
         latency_data.append(latency)
     latency_data = np.array(latency_data)
     return latency_data
@@ -81,13 +82,13 @@ file_names = [
 
 
 qos_target = {
-    "resnet50resnet101": 140,
-    "resnet50resnet152": 160,
-    "resnet50inception_v3": 130,
+    "resnet50resnet101": 100,
+    "resnet50resnet152": 150,
+    "resnet50inception_v3": 100,
     "resnet50vgg16": 50,
     "resnet50vgg19": 50,
     "resnet50bert": 75,
-    "resnet101resnet152": 150,
+    "resnet101resnet152": 160,
     "resnet101inception_v3": 150,
     "resnet101vgg16": 90,
     "resnet101vgg19": 80,
@@ -104,12 +105,12 @@ qos_target = {
     "vgg19bert": 60,
 }
 
-data_dir = "../data/server/A100/2in7/"
+data_dir = "../results/A100/2in7/"
 
 
 # %% tail latency caculator
 
-for i in range(len(file_names)):
+for i in range(21):
     # print("--------------{}--------------".format(file_names[i]))
     abacus_latency = load_single_file(data_dir + "Abacus/{}.csv".format(file_names[i]))
     fcfs_latency = load_single_file(data_dir + "FCFS/{}.csv".format(file_names[i]))
@@ -121,10 +122,26 @@ for i in range(len(file_names)):
     sjf_tail = np.percentile(sjf_latency, 99)
     edf_tail = np.percentile(edf_latency, 99)
 
-    print("Abacus 99%-ile latency: {} for {}".format(abacus_tail, colo_names[i]))
-    print("FCFS 99%-ile latency: {} for {}".format(fcfs_tail, colo_names[i]))
-    print("SJF 99%-ile latency: {} for {}".format(sjf_tail, colo_names[i]))
-    print("EDF 99%-ile latency: {} for {}".format(edf_tail, colo_names[i]))
+    print(
+        "Abacus 99%-ile latency: {}, {} queries satified for {}".format(
+            abacus_tail, abacus_latency.shape, colo_names[i]
+        )
+    )
+    print(
+        "FCFS 99%-ile latency: {}, {} queries satified for {}".format(
+            fcfs_tail, fcfs_latency.shape, colo_names[i]
+        )
+    )
+    print(
+        "SJF 99%-ile latency: {}, {} queries satified for {}".format(
+            sjf_tail, sjf_latency.shape, colo_names[i]
+        )
+    )
+    print(
+        "EDF 99%-ile latency: {}, {} queries satified for {}".format(
+            edf_tail, edf_latency.shape, colo_names[i]
+        )
+    )
 
     # abacus_vio = abacus_latency[abacus_latency < qos_target[file_names[i]]]
     # fcfs_vio = fcfs_latency[fcfs_latency < qos_target[file_names[i]]]
