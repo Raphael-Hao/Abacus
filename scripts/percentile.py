@@ -269,6 +269,43 @@ def select_experiment_data(target, platform, model_config):
         }
 
         data_dir = "../data/server/throughput/A100/2in7/"
+    elif target == "throughput" and platform == "A100" and model_config == "3in4":
+        colo_names = [
+            "Res101+Res152+VGG19",
+            "Res101+Res152+Bert",
+            "Res101+VGG19+Bert",
+            "Res152+VGG19+Bert",
+        ]
+
+        file_names = [
+            "resnet101resnet152vgg19",
+            "resnet101resnet152bert",
+            "resnet101vgg19bert",
+            "resnet152vgg19bert",
+        ]
+
+        qos_target = {
+            "resnet101resnet152vgg19": 100,
+            "resnet101resnet152bert": 100,
+            "resnet101vgg19bert": 100,
+            "resnet152vgg19bert": 100,
+        }
+
+        data_dir = "../data/server/throughput/A100/3in4/"
+    elif target == "throughput" and platform == "A100" and model_config == "4in4":
+        colo_names = [
+            "Res101+Res152+VGG19+Bert",
+        ]
+
+        file_names = [
+            "resnet101resnet152vgg19bert",
+        ]
+
+        qos_target = {
+            "resnet101resnet152vgg19bert": 100,
+        }
+
+        data_dir = "../data/server/throughput/A100/4in4/"
     return colo_names, file_names, qos_target, data_dir
 
 
@@ -382,6 +419,8 @@ if __name__ == "__main__":
     data_preprocess("qos", "A100", "4in4")
     # A100 throughput
     data_preprocess("throughput", "A100", "2in7")
+    data_preprocess("throughput", "A100", "3in4")
+    data_preprocess("throughput", "A100", "4in4")
     # mig
     data_preprocess("qos", "mig", "1in4")
     data_preprocess("qos", "mig", "2in4")
