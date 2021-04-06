@@ -215,6 +215,15 @@ class Scheduler(Process):
                 log_path = "results/mig/4in4/" + self._policy
             else:
                 raise NotImplementedError
+        elif run_config.total_models == 1:
+            if run_config.mig == 0:
+                predictor_path = None
+                log_path = "results/A100/1in4/" + self._policy
+            elif run_config.mig == 4:
+                predictor_path = None
+                log_path = "results/mig/1in4/" + self._policy
+            else:
+                raise NotImplementedError
         else:
             raise NotImplementedError
 
@@ -227,9 +236,10 @@ class Scheduler(Process):
             result_fname += run_config.models_name[model_id]
         result_fname += ".csv"
         self._result_path = os.path.join(log_dir, result_fname)
-
-        self._predictor_ckpt_path = os.path.join(run_config.path, predictor_path)
-
+        if predictor_path is not None:
+            self._predictor_ckpt_path = os.path.join(run_config.path, predictor_path)
+        else:
+            self._predictor_ckpt_path = None
         self._abandon = run_config.abandon
         self._barrier = barrier
         self._queues = queues
@@ -242,19 +252,19 @@ class Scheduler(Process):
         self._result_file = open(self._result_path, "w+")
         self._wr = csv.writer(self._result_file, dialect="excel")
 
-        self._predictor = MLPregression(self._models_feature)
-
-        logging.info("Scheduler loading predictor")
-        self._predictor.load_state_dict(
-            torch.load(self._predictor_ckpt_path, map_location="cpu")
-        )
-        self._predictor.eval()
-        logging.info("Scheduler warmpup predictor")
-        warmp_up_input = torch.zeros(16, self._models_feature)
-        with torch.no_grad():
-            for i in range(200):
-                warmp_up_output = self._predictor(warmp_up_input).numpy()
-        logging.info("Scheduler end up warm up")
+        if self._predictor_ckpt_path is not None:
+            logging.info("Scheduler loading predictor")
+            self._predictor = MLPregression(self._models_feature)
+            self._predictor.load_state_dict(
+                torch.load(self._predictor_ckpt_path, map_location="cpu")
+            )
+            self._predictor.eval()
+            logging.info("Scheduler warmpup predictor")
+            warmp_up_input = torch.zeros(16, self._models_feature)
+            with torch.no_grad():
+                for i in range(200):
+                    warmp_up_output = self._predictor(warmp_up_input).numpy()
+            logging.info("Scheduler end up warm up")
         logging.info("Scheduler Ready")
         self._scheduling_queries = {key: None for key in self._serve_combination}
         self._scheduled_queries = {key: None for key in self._serve_combination}

@@ -351,7 +351,7 @@ def parse_options():
         type=int,
         default="2",
         required=True,
-        choices=[2, 3, 4],
+        choices=[1,2, 3, 4],
     )
 
     parser.add_argument("--mig", type=int, default=0, choices=[0, 1, 2, 4])

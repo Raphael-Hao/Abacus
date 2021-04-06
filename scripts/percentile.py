@@ -159,10 +159,49 @@ file_names = [
 
 
 qos_target = {
-    "resnet101resnet152vgg19bert": 100,
+    "resnet101resnet152vgg19bert": 130,
 }
 
 data_dir = "../results/mig/4in4/"
+
+
+# %%
+colo_names = [
+    "Res101Bert_Res152VGG19",
+    "Res101Res152_VGG19Bert",
+    "Res101VGG19_Resn152Bert",
+]
+
+file_names = [
+    "resnet101bert_resnet152vgg19",
+    "resnet101resnet152_vgg19bert",
+    "resnet101vgg19_resnet152bert",
+]
+
+
+qos_target = {
+    "resnet101bert_resnet152vgg19": 130,
+    "resnet101resnet152_vgg19bert": 130,
+    "resnet101vgg19_resnet152bert": 130,
+}
+
+data_dir = "../results/mig/2in4/"
+
+# %%
+colo_names = [
+    "Res101+Res152+VGG19+Bert",
+]
+
+file_names = [
+    "resnet101resnet152vgg19bert",
+]
+
+
+qos_target = {
+    "resnet101resnet152vgg19bert": 130,
+}
+
+data_dir = "../results/mig/1in4/"
 
 # %% tail latency caculator
 import csv
