@@ -18,7 +18,7 @@ qos_target=(
 # qos
 echo "working dir $(pwd)"
 comb_len=${#combination[@]}
-tested_comb=3
+tested_comb=0
 testing=$((comb_len - tested_comb))
 echo "$testing combination are tested"
 
