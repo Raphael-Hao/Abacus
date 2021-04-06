@@ -1,0 +1,5 @@
+colocation,FCFS_throughput,SJF_throughput,EDF_throughput,Abacus_throughput
+Res101Res152VGG19,555,424,430,750
+Res101Res152Bert,451,431,444,750
+Res101VGG19Bert,649,573,626,881
+Res152VGG19Bert,489,442,567,815
