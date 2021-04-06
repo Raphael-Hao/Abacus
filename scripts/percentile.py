@@ -123,9 +123,9 @@ def select_experiment_data(target, platform, model_config):
 
         qos_target = {
             "resnet101resnet152vgg19": 100,
-            "resnet101resnet152bert": 100,
-            "resnet101vgg19bert": 100,
-            "resnet152vgg19bert": 100,
+            "resnet101resnet152bert": 150,
+            "resnet101vgg19bert": 80,
+            "resnet152vgg19bert": 80,
         }
 
         data_dir = "../data/server/qos/A100/3in4/"
@@ -332,6 +332,7 @@ def data_preprocess(target, platform, model_config):
         "Abacus_tail",
         "Abacus_throughput",
         "Abacus_violation",
+        # "qos_target",
     ]
     csv_writer.writerow(result_header)
 
@@ -395,18 +396,19 @@ def data_preprocess(target, platform, model_config):
         csv_writer.writerow(
             [
                 colo_names[i],
-                fcfs_tail,
+                fcfs_tail / qos_target[file_names[i]],
                 fcfs_load,
                 fcfs_vio_ratio,
-                sjf_tail,
+                sjf_tail / qos_target[file_names[i]],
                 sjf_load,
                 sjf_vio_ratio,
-                edf_tail,
+                edf_tail / qos_target[file_names[i]],
                 edf_load,
                 edf_vio_ratio,
-                abacus_tail,
+                abacus_tail / qos_target[file_names[i]],
                 abacus_load,
                 abacus_vio_ratio,
+                # qos_target[file_names[i]],
             ]
         )
     result_file.flush()
