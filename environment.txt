@@ -1,0 +1,434 @@
+LIBRARY_PATH=/home/USER/.local/lib:/home/USER/.local/tensorrt/lib:/usr/local/cuda/lib64:
+GIT_INTERNAL_GETTEXT_TEST_FALLBACKS=1
+CONDA_PROMPT_MODIFIER=(base) 
+USER=USER
+LC_TIME=zh_CN.UTF-8
+SSH_CLIENT=10.2.0.1 56573 22
+XDG_SESSION_TYPE=tty
+SHLVL=1
+LD_LIBRARY_PATH=/home/USER/.local/lib:/home/USER/.local/tensorrt/lib:/usr/local/cuda/lib64:/usr/local/cuda/lib64:
+HOME=/home/USER
+MOTD_SHOWN=pam
+OLDPWD=/home/USER/project/Abacus
+LESS=-R
+CONDA_SHLVL=1
+SSH_TTY=/dev/pts/0
+ZSH=/home/USER/.oh-my-zsh
+LSCOLORS=Gxfxcxdxbxegedabagacad
+PAGER=less
+LC_MONETARY=zh_CN.UTF-8
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/2003/bus
+P9K_TTY=old
+_CE_M=
+CPLUS_INCLUDE_PATH=/home/USER/.local/include:/home/USER/.local/tensorrt/include:/usr/local/cuda/include:
+LOGNAME=USER
+_ZL_MATCH_MODE=1
+_=/home/USER/./collect_environment.sh
+XDG_SESSION_CLASS=user
+PKG_CONFIG_PATH=:/home/USER/.local/lib/pkgconfig
+TERM=xterm-256color
+XDG_SESSION_ID=839
+_CE_CONDA=
+PATH=/state/partition/USER/tools/anaconda3/bin:/state/partition/USER/tools/anaconda3/condabin:/usr/local/go/bin:/snap/bin:usr/local/cuda/bin:/home/USER/.local/tensorrt/bin:/home/USER/.local/bin:/home/USER/.local/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+CUDA_ROOT=/usr/local/cuda
+XDG_RUNTIME_DIR=/run/user/2003
+LC_ADDRESS=zh_CN.UTF-8
+ZSH_DISABLE_COMPFIX=true
+LANG=en_US.UTF-8
+LC_TELEPHONE=zh_CN.UTF-8
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+_ZL_FZF_FLAG=-e
+CONDA_PYTHON_EXE=/state/partition/USER/tools/anaconda3/bin/python
+SHELL=/usr/bin/zsh
+LC_NAME=zh_CN.UTF-8
+CONDA_DEFAULT_ENV=base
+LC_MEASUREMENT=zh_CN.UTF-8
+LC_IDENTIFICATION=zh_CN.UTF-8
+P9K_SSH=1
+PWD=/home/USER
+SSH_CONNECTION=10.2.0.1 56573 10.2.64.71 22
+_P9K_TTY=/dev/pts/0
+CONDA_EXE=/state/partition/USER/tools/anaconda3/bin/conda
+LC_NUMERIC=zh_CN.UTF-8
+LC_PAPER=zh_CN.UTF-8
+CPATH=/usr/local/cuda/include:
+CONDA_PREFIX=/state/partition/USER/tools/anaconda3
+CUDA_INC_DIR=/usr/local/cuda/bin:
+CMAKE_PREFIX_PATH=/home/USER/.local:/home/USER/.local/tensorrt:
+Distributor ID:	Ubuntu
+Description:	Ubuntu 20.04.2 LTS
+Release:	20.04
+Codename:	focal
+Linux a100-01 5.8.0-48-generic #54~20.04.1-Ubuntu SMP Sat Mar 20 13:40:25 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+Architecture:                    x86_64
+CPU op-mode(s):                  32-bit, 64-bit
+Byte Order:                      Little Endian
+Address sizes:                   46 bits physical, 48 bits virtual
+CPU(s):                          40
+On-line CPU(s) list:             0-39
+Thread(s) per core:              2
+Core(s) per socket:              10
+Socket(s):                       2
+NUMA node(s):                    2
+Vendor ID:                       GenuineIntel
+CPU family:                      6
+Model:                           85
+Model name:                      Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
+Stepping:                        7
+CPU MHz:                         1520.451
+CPU max MHz:                     3200.0000
+CPU min MHz:                     1000.0000
+BogoMIPS:                        4800.00
+Virtualization:                  VT-x
+L1d cache:                       640 KiB
+L1i cache:                       640 KiB
+L2 cache:                        20 MiB
+L3 cache:                        27.5 MiB
+NUMA node0 CPU(s):               0-9,20-29
+NUMA node1 CPU(s):               10-19,30-39
+Vulnerability Itlb multihit:     KVM: Mitigation: VMX disabled
+Vulnerability L1tf:              Not affected
+Vulnerability Mds:               Not affected
+Vulnerability Meltdown:          Not affected
+Vulnerability Spec store bypass: Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+Vulnerability Spectre v1:        Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:        Mitigation; Enhanced IBRS, IBPB conditional, RSB filling
+Vulnerability Srbds:             Not affected
+Vulnerability Tsx async abort:   Mitigation; TSX disabled
+Flags:                           fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 invpcid_single intel_ppin ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts pku ospke avx512_vnni md_clear flush_l1d arch_capabilities
+MemTotal:       263781496 kB
+MemFree:        241408264 kB
+MemAvailable:   259371136 kB
+Buffers:         1098332 kB
+Cached:         17583000 kB
+SwapCached:            0 kB
+Active:          5882620 kB
+Inactive:       13927856 kB
+Active(anon):    1127700 kB
+Inactive(anon):    12924 kB
+Active(file):    4754920 kB
+Inactive(file): 13914932 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:       2097148 kB
+SwapFree:        2097148 kB
+Dirty:               100 kB
+Writeback:             0 kB
+AnonPages:       1129268 kB
+Mapped:           421888 kB
+Shmem:             15200 kB
+KReclaimable:    1141936 kB
+Slab:            1834120 kB
+SReclaimable:    1141936 kB
+SUnreclaim:       692184 kB
+KernelStack:       19312 kB
+PageTables:        16184 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    133987896 kB
+Committed_AS:    6661536 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      315020 kB
+VmallocChunk:          0 kB
+Percpu:           113472 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:         0 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:         0 kB
+FilePmdMapped:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+Hugetlb:               0 kB
+DirectMap4k:     2408952 kB
+DirectMap2M:    32880640 kB
+DirectMap1G:    234881024 kB
+NAME                MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+loop0                 7:0    0 55.5M  1 loop /snap/core18/1988
+loop1                 7:1    0   51M  1 loop /snap/snap-store/518
+loop2                 7:2    0 32.3M  1 loop /snap/snapd/11402
+loop3                 7:3    0        1 loop 
+loop4                 7:4    0 64.8M  1 loop /snap/gtk-common-themes/1514
+loop5                 7:5    0  219M  1 loop /snap/gnome-3-34-1804/66
+loop6                 7:6    0 55.5M  1 loop /snap/core18/1997
+loop7                 7:7    0 32.3M  1 loop /snap/snapd/11588
+loop8                 7:8    0        0 loop 
+sda                   8:0    0  1.8T  0 disk 
+├─sda1                8:1    0  512M  0 part /boot/efi
+├─sda2                8:2    0    1K  0 part 
+└─sda5                8:5    0  1.8T  0 part /
+sdb                   8:16   0  3.7T  0 disk 
+└─vg--data-lv--data 253:0    0  7.3T  0 lvm  /state/partition
+sdc                   8:32   0  3.7T  0 disk 
+└─vg--data-lv--data 253:0    0  7.3T  0 lvm  /state/partition
+Sat Apr 10 00:45:57 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 460.39       Driver Version: 460.39       CUDA Version: 11.2     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  A100-PCIE-40GB      On   | 00000000:18:00.0 Off |                   On |
+| N/A   35C    P0    34W / 250W |     40MiB / 40536MiB |     N/A      Default |
+|                               |                      |              Enabled |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| MIG devices:                                                                |
++------------------+----------------------+-----------+-----------------------+
+| GPU  GI  CI  MIG |         Memory-Usage |        Vol|         Shared        |
+|      ID  ID  Dev |           BAR1-Usage | SM     Unc| CE  ENC  DEC  OFA  JPG|
+|                  |                      |        ECC|                       |
+|==================+======================+===========+=======================|
+|  0    7   0   0  |     34MiB /  4864MiB | 14      0 |  1   0    0    0    0 |
+|                  |      4MiB /  8191MiB |           |                       |
++------------------+----------------------+-----------+-----------------------+
+|  0    8   0   1  |      1MiB /  4864MiB | 14      0 |  1   0    0    0    0 |
+|                  |      0MiB /  8191MiB |           |                       |
++------------------+----------------------+-----------+-----------------------+
+|  0    9   0   2  |      1MiB /  4864MiB | 14      0 |  1   0    0    0    0 |
+|                  |      0MiB /  8191MiB |           |                       |
++------------------+----------------------+-----------+-----------------------+
+|  0   11   0   3  |      1MiB /  4864MiB | 14      0 |  1   0    0    0    0 |
+|                  |      0MiB /  8191MiB |           |                       |
++------------------+----------------------+-----------+-----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|    0    7    0    3776551      C   nvidia-cuda-mps-server             29MiB |
++-----------------------------------------------------------------------------+
+H/W path         Device      Class          Description
+=======================================================
+                             system         Computer
+/0                           bus            Motherboard
+/0/0                         memory         256GiB System memory
+/0/1                         processor      Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
+/0/2                         processor      Intel(R) Xeon(R) Silver 4210R CPU @ 2.40GHz
+/0/100                       bridge         Sky Lake-E DMI3 Registers
+/0/100/4                     generic        Sky Lake-E CBDMA Registers
+/0/100/4.1                   generic        Sky Lake-E CBDMA Registers
+/0/100/4.2                   generic        Sky Lake-E CBDMA Registers
+/0/100/4.3                   generic        Sky Lake-E CBDMA Registers
+/0/100/4.4                   generic        Sky Lake-E CBDMA Registers
+/0/100/4.5                   generic        Sky Lake-E CBDMA Registers
+/0/100/4.6                   generic        Sky Lake-E CBDMA Registers
+/0/100/4.7                   generic        Sky Lake-E CBDMA Registers
+/0/100/5                     generic        Sky Lake-E MM/Vt-d Configuration Registers
+/0/100/5.2                   generic        Sky Lake-E RAS
+/0/100/5.4                   generic        Sky Lake-E IOAPIC
+/0/100/8                     generic        Sky Lake-E Ubox Registers
+/0/100/8.1                   generic        Sky Lake-E Ubox Registers
+/0/100/8.2                   generic        Sky Lake-E Ubox Registers
+/0/100/11                    generic        C620 Series Chipset Family MROM 0
+/0/100/11.1                  generic        C620 Series Chipset Family MROM 1
+/0/100/11.5                  storage        C620 Series Chipset Family SSATA Controller [AHCI mode]
+/0/100/14                    bus            C620 Series Chipset Family USB 3.0 xHCI Controller
+/0/100/14.2                  generic        C620 Series Chipset Family Thermal Subsystem
+/0/100/16                    communication  C620 Series Chipset Family MEI Controller #1
+/0/100/16.1                  communication  C620 Series Chipset Family MEI Controller #2
+/0/100/16.4                  communication  C620 Series Chipset Family MEI Controller #3
+/0/100/17                    storage        C620 Series Chipset Family SATA Controller [AHCI mode]
+/0/100/1c                    bridge         C620 Series Chipset Family PCI Express Root Port #1
+/0/100/1c/0      eno1        network        Ethernet Controller 10G X550T
+/0/100/1c/0.1    eno2        network        Ethernet Controller 10G X550T
+/0/100/1d                    bridge         C620 Series Chipset Family PCI Express Root Port #9
+/0/100/1d.1                  bridge         C620 Series Chipset Family PCI Express Root Port #10
+/0/100/1d.1/0                bridge         AST1150 PCI-to-PCI Bridge
+/0/100/1d.1/0/0              display        ASPEED Graphics Family
+/0/100/1f                    bridge         C621 Series Chipset LPC/eSPI Controller
+/0/100/1f.2                  memory         Memory controller
+/0/100/1f.3                  multimedia     Intel Corporation
+/0/100/1f.4                  bus            C620 Series Chipset Family SMBus
+/0/100/1f.5                  bus            C620 Series Chipset Family SPI Controller
+/0/101                       bridge         Sky Lake-E PCI Express Root Port A
+/0/101/0                     display        NVIDIA Corporation
+/0/3                         generic        Sky Lake-E VT-d
+/0/6                         generic        Sky Lake-E RAS Configuration Registers
+/0/7                         generic        Sky Lake-E IOxAPIC Configuration Registers
+/0/9                         generic        Sky Lake-E CHA Registers
+/0/a                         generic        Sky Lake-E CHA Registers
+/0/b                         generic        Sky Lake-E CHA Registers
+/0/c                         generic        Sky Lake-E CHA Registers
+/0/d                         generic        Sky Lake-E CHA Registers
+/0/e                         generic        Sky Lake-E CHA Registers
+/0/f                         generic        Sky Lake-E CHA Registers
+/0/10                        generic        Sky Lake-E CHA Registers
+/0/11                        generic        Sky Lake-E CHA Registers
+/0/12                        generic        Sky Lake-E CHA Registers
+/0/13                        generic        Sky Lake-E CHA Registers
+/0/14                        generic        Sky Lake-E CHA Registers
+/0/15                        generic        Sky Lake-E CHA Registers
+/0/16                        generic        Sky Lake-E CHA Registers
+/0/17                        generic        Sky Lake-E CHA Registers
+/0/18                        generic        Sky Lake-E CHA Registers
+/0/19                        generic        Sky Lake-E CHA Registers
+/0/1a                        generic        Sky Lake-E CHA Registers
+/0/1b                        generic        Sky Lake-E CHA Registers
+/0/1c                        generic        Sky Lake-E CHA Registers
+/0/1d                        generic        Sky Lake-E CHA Registers
+/0/1e                        generic        Sky Lake-E CHA Registers
+/0/1f                        generic        Sky Lake-E CHA Registers
+/0/20                        generic        Sky Lake-E CHA Registers
+/0/21                        generic        Sky Lake-E PCU Registers
+/0/22                        generic        Sky Lake-E PCU Registers
+/0/23                        generic        Sky Lake-E PCU Registers
+/0/24                        generic        Sky Lake-E PCU Registers
+/0/25                        generic        Sky Lake-E PCU Registers
+/0/26                        generic        Sky Lake-E PCU Registers
+/0/27                        generic        Sky Lake-E PCU Registers
+/0/28                        generic        Sky Lake-E VT-d
+/0/29                        generic        Sky Lake-E RAS Configuration Registers
+/0/2a                        generic        Sky Lake-E IOxAPIC Configuration Registers
+/0/2b                        generic        Sky Lake-E Integrated Memory Controller
+/0/2c                        generic        Sky Lake-E Integrated Memory Controller
+/0/2d                        generic        Sky Lake-E Integrated Memory Controller
+/0/2e                        generic        Sky Lake-E Integrated Memory Controller
+/0/2f                        generic        Sky Lake-E Integrated Memory Controller
+/0/30                        generic        Sky Lake-E Integrated Memory Controller
+/0/31                        generic        Sky Lake-E Integrated Memory Controller
+/0/32                        generic        Sky Lake-E LM Channel 1
+/0/33                        generic        Sky Lake-E LMS Channel 1
+/0/34                        generic        Sky Lake-E LMDP Channel 1
+/0/35                        generic        Sky Lake-E DECS Channel 2
+/0/36                        generic        Sky Lake-E LM Channel 2
+/0/37                        generic        Sky Lake-E LMS Channel 2
+/0/38                        generic        Sky Lake-E LMDP Channel 2
+/0/39                        generic        Sky Lake-E Integrated Memory Controller
+/0/3a                        generic        Sky Lake-E Integrated Memory Controller
+/0/3b                        generic        Sky Lake-E Integrated Memory Controller
+/0/3c                        generic        Sky Lake-E Integrated Memory Controller
+/0/3d                        generic        Sky Lake-E Integrated Memory Controller
+/0/3e                        generic        Sky Lake-E LM Channel 1
+/0/3f                        generic        Sky Lake-E LMS Channel 1
+/0/40                        generic        Sky Lake-E LMDP Channel 1
+/0/41                        generic        Sky Lake-E DECS Channel 2
+/0/42                        generic        Sky Lake-E LM Channel 2
+/0/43                        generic        Sky Lake-E LMS Channel 2
+/0/44                        generic        Sky Lake-E LMDP Channel 2
+/0/45                        generic        Sky Lake-E VT-d
+/0/46                        generic        Sky Lake-E RAS Configuration Registers
+/0/47                        generic        Sky Lake-E IOxAPIC Configuration Registers
+/0/48                        generic        Sky Lake-E KTI 0
+/0/49                        generic        Sky Lake-E UPI Registers
+/0/4a                        generic        Sky Lake-E KTI 0
+/0/4b                        generic        Sky Lake-E UPI Registers
+/0/4c                        generic        Sky Lake-E M3KTI Registers
+/0/4d                        generic        Sky Lake-E M3KTI Registers
+/0/4e                        generic        Sky Lake-E M3KTI Registers
+/0/4f                        generic        Sky Lake-E M2PCI Registers
+/0/50                        generic        Sky Lake-E DDRIO Registers
+/0/51                        generic        Sky Lake-E M2PCI Registers
+/0/52                        generic        Sky Lake-E DDRIO Registers
+/0/53                        generic        Sky Lake-E M2PCI Registers
+/0/54                        generic        Sky Lake-E DDRIO Registers
+/0/4                         generic        Sky Lake-E CBDMA Registers
+/0/4.1                       generic        Sky Lake-E CBDMA Registers
+/0/4.2                       generic        Sky Lake-E CBDMA Registers
+/0/4.3                       generic        Sky Lake-E CBDMA Registers
+/0/4.4                       generic        Sky Lake-E CBDMA Registers
+/0/4.5                       generic        Sky Lake-E CBDMA Registers
+/0/4.6                       generic        Sky Lake-E CBDMA Registers
+/0/4.7                       generic        Sky Lake-E CBDMA Registers
+/0/55                        generic        Sky Lake-E MM/Vt-d Configuration Registers
+/0/56                        generic        Sky Lake-E RAS
+/0/57                        generic        Sky Lake-E IOAPIC
+/0/58                        generic        Sky Lake-E Ubox Registers
+/0/59                        generic        Sky Lake-E Ubox Registers
+/0/5a                        generic        Sky Lake-E Ubox Registers
+/0/5b                        generic        Sky Lake-E VT-d
+/0/5c                        generic        Sky Lake-E RAS Configuration Registers
+/0/5d                        generic        Sky Lake-E IOxAPIC Configuration Registers
+/0/5e                        generic        Sky Lake-E CHA Registers
+/0/8.1                       generic        Sky Lake-E CHA Registers
+/0/8.2                       generic        Sky Lake-E CHA Registers
+/0/5f                        generic        Sky Lake-E CHA Registers
+/0/60                        generic        Sky Lake-E CHA Registers
+/0/61                        generic        Sky Lake-E CHA Registers
+/0/62                        generic        Sky Lake-E CHA Registers
+/0/63                        generic        Sky Lake-E CHA Registers
+/0/64                        generic        Sky Lake-E CHA Registers
+/0/65                        generic        Sky Lake-E CHA Registers
+/0/66                        generic        Sky Lake-E CHA Registers
+/0/67                        generic        Sky Lake-E CHA Registers
+/0/68                        generic        Sky Lake-E CHA Registers
+/0/69                        generic        Sky Lake-E CHA Registers
+/0/6a                        generic        Sky Lake-E CHA Registers
+/0/6b                        generic        Sky Lake-E CHA Registers
+/0/6c                        generic        Sky Lake-E CHA Registers
+/0/6d                        generic        Sky Lake-E CHA Registers
+/0/6e                        generic        Sky Lake-E CHA Registers
+/0/6f                        generic        Sky Lake-E CHA Registers
+/0/70                        generic        Sky Lake-E CHA Registers
+/0/71                        generic        Sky Lake-E CHA Registers
+/0/72                        generic        Sky Lake-E CHA Registers
+/0/73                        generic        Sky Lake-E CHA Registers
+/0/74                        generic        Sky Lake-E PCU Registers
+/0/75                        generic        Sky Lake-E PCU Registers
+/0/76                        generic        Sky Lake-E PCU Registers
+/0/77                        generic        Sky Lake-E PCU Registers
+/0/78                        generic        Sky Lake-E PCU Registers
+/0/79                        generic        Sky Lake-E PCU Registers
+/0/7a                        generic        Sky Lake-E PCU Registers
+/0/7b                        generic        Sky Lake-E VT-d
+/0/7c                        generic        Sky Lake-E RAS Configuration Registers
+/0/7d                        generic        Sky Lake-E IOxAPIC Configuration Registers
+/0/8                         generic        Sky Lake-E Integrated Memory Controller
+/0/7e                        generic        Sky Lake-E Integrated Memory Controller
+/0/7f                        generic        Sky Lake-E Integrated Memory Controller
+/0/80                        generic        Sky Lake-E Integrated Memory Controller
+/0/81                        generic        Sky Lake-E Integrated Memory Controller
+/0/82                        generic        Sky Lake-E Integrated Memory Controller
+/0/83                        generic        Sky Lake-E Integrated Memory Controller
+/0/84                        generic        Sky Lake-E LM Channel 1
+/0/85                        generic        Sky Lake-E LMS Channel 1
+/0/86                        generic        Sky Lake-E LMDP Channel 1
+/0/87                        generic        Sky Lake-E DECS Channel 2
+/0/88                        generic        Sky Lake-E LM Channel 2
+/0/89                        generic        Sky Lake-E LMS Channel 2
+/0/8a                        generic        Sky Lake-E LMDP Channel 2
+/0/8b                        generic        Sky Lake-E Integrated Memory Controller
+/0/8c                        generic        Sky Lake-E Integrated Memory Controller
+/0/8d                        generic        Sky Lake-E Integrated Memory Controller
+/0/8e                        generic        Sky Lake-E Integrated Memory Controller
+/0/8f                        generic        Sky Lake-E Integrated Memory Controller
+/0/90                        generic        Sky Lake-E LM Channel 1
+/0/91                        generic        Sky Lake-E LMS Channel 1
+/0/92                        generic        Sky Lake-E LMDP Channel 1
+/0/93                        generic        Sky Lake-E DECS Channel 2
+/0/94                        generic        Sky Lake-E LM Channel 2
+/0/95                        generic        Sky Lake-E LMS Channel 2
+/0/96                        generic        Sky Lake-E LMDP Channel 2
+/0/102                       bridge         Sky Lake-E PCI Express Root Port A
+/0/102/0                     memory         Memory controller
+/0/5                         generic        Sky Lake-E VT-d
+/0/5.2                       generic        Sky Lake-E RAS Configuration Registers
+/0/5.4                       generic        Sky Lake-E IOxAPIC Configuration Registers
+/0/97                        generic        Sky Lake-E KTI 0
+/0/98                        generic        Sky Lake-E UPI Registers
+/0/99                        generic        Sky Lake-E KTI 0
+/0/9a                        generic        Sky Lake-E UPI Registers
+/0/9b                        generic        Sky Lake-E M3KTI Registers
+/0/9c                        generic        Sky Lake-E M3KTI Registers
+/0/9d                        generic        Sky Lake-E M3KTI Registers
+/0/9e                        generic        Sky Lake-E M2PCI Registers
+/0/9f                        generic        Sky Lake-E DDRIO Registers
+/0/a0                        generic        Sky Lake-E M2PCI Registers
+/0/a1                        generic        Sky Lake-E DDRIO Registers
+/0/a2                        generic        Sky Lake-E M2PCI Registers
+/0/a3                        generic        Sky Lake-E DDRIO Registers
+/0/a4                        system         PnP device PNP0b00
+/0/a5                        system         PnP device PNP0c02
+/0/a6                        system         PnP device PNP0c02
+/0/a7                        communication  PnP device PNP0501
+/0/a8                        communication  PnP device PNP0501
+/0/a9                        system         PnP device PNP0c02
+/0/aa                        system         PnP device PNP0c02
+/1               virbr0-nic  network        Ethernet interface
