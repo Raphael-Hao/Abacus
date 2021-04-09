@@ -306,6 +306,58 @@ def select_experiment_data(target, platform, model_config):
         }
 
         data_dir = "../data/server/throughput/A100/4in4/"
+    elif target == "throughput" and platform == "mig" and model_config == "4in4":
+        colo_names = [
+            "Res101+Res152+VGG19+Bert",
+        ]
+
+        file_names = [
+            "resnet101resnet152vgg19bert",
+        ]
+
+        qos_target = {
+            "resnet101resnet152vgg19bert": 130,
+        }
+
+        data_dir = "../data/server/throughput/mig/4in4/"
+
+    elif target == "throughput" and platform == "mig" and model_config == "2in4":
+        colo_names = [
+            "Res101Bert_Res152VGG19",
+            "Res101Res152_VGG19Bert",
+            "Res101VGG19_Resn152Bert",
+        ]
+
+        file_names = [
+            "resnet101bert_resnet152vgg19",
+            "resnet101resnet152_vgg19bert",
+            "resnet101vgg19_resnet152bert",
+        ]
+
+        qos_target = {
+            "resnet101bert_resnet152vgg19": 130,
+            "resnet101resnet152_vgg19bert": 130,
+            "resnet101vgg19_resnet152bert": 130,
+        }
+
+        data_dir = "../data/server/throughput/mig/2in4/"
+
+    elif target == "throughput" and platform == "mig" and model_config == "1in4":
+        colo_names = [
+            "Res101+Res152+VGG19+Bert",
+        ]
+
+        file_names = [
+            "resnet101resnet152vgg19bert",
+        ]
+
+        qos_target = {
+            "resnet101resnet152vgg19bert": 130,
+        }
+
+        data_dir = "../data/server/throughput/mig/1in4/"
+    else:
+        raise NotImplementedError
     return colo_names, file_names, qos_target, data_dir
 
 
@@ -416,14 +468,18 @@ def data_preprocess(target, platform, model_config):
 
 if __name__ == "__main__":
     # A100 qos
-    data_preprocess("qos", "A100", "2in7")
-    data_preprocess("qos", "A100", "3in4")
-    data_preprocess("qos", "A100", "4in4")
-    # A100 throughput
-    data_preprocess("throughput", "A100", "2in7")
-    data_preprocess("throughput", "A100", "3in4")
-    data_preprocess("throughput", "A100", "4in4")
-    # mig
-    data_preprocess("qos", "mig", "1in4")
-    data_preprocess("qos", "mig", "2in4")
-    data_preprocess("qos", "mig", "4in4")
+    # data_preprocess("qos", "A100", "2in7")
+    # data_preprocess("qos", "A100", "3in4")
+    # data_preprocess("qos", "A100", "4in4")
+    # # A100 throughput
+    # data_preprocess("throughput", "A100", "2in7")
+    # data_preprocess("throughput", "A100", "3in4")
+    # data_preprocess("throughput", "A100", "4in4")
+    # # mig qos
+    # data_preprocess("qos", "mig", "1in4")
+    # data_preprocess("qos", "mig", "2in4")
+    # data_preprocess("qos", "mig", "4in4")
+    # mig qos
+    data_preprocess("throughput", "mig", "1in4")
+    data_preprocess("throughput", "mig", "2in4")
+    data_preprocess("throughput", "mig", "4in4")
