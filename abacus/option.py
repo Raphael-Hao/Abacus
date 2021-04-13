@@ -329,7 +329,7 @@ class RunConfig:
                 (2, 5),
                 (2, 6),
             ]
-            self.total_test = 1000
+            self.total_test = 500
         else:
             logging.error("Not supported task, supported: server, profile, train")
             raise NotImplementedError

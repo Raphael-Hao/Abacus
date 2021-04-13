@@ -9,7 +9,7 @@ import csv
 
 from abacus.worker import BackgroundWorker
 from abacus.option import RunConfig
-from abacus.utils import gen_background_combinations, gen_partition, make_record
+from abacus.utils import gen_background_combinations
 
 
 def background(args:RunConfig):
@@ -49,7 +49,8 @@ def background(args:RunConfig):
                 barrier,
                 barrier2,
                 isBackground = False if id == 0 else True,
-                shared_flag = None if id == 0 else shared_flag
+                shared_flag = None if id == 0 else shared_flag,
+                worker_id=id,
             )
             model_worker.start()
             worker_list.append((model_worker, pipe_parent))
@@ -57,7 +58,7 @@ def background(args:RunConfig):
         barrier.wait()
 
         model_name = model_combination[0]
-        bs = args.supported_batchsize[4]
+        bs = args.supported_batchsize[3]
         print("batch size : {} sent to server".format(bs))
         seq_len = 0
         _, model_pipe = worker_list[0]

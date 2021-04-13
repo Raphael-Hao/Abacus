@@ -27,9 +27,10 @@ class BackgroundWorker(AbacusWorker):
         barrier2,
         isBackground,
         shared_flag,
+        worker_id,
     ):
         super().__init__(
-            args, model_name, supported_batchsize, supported_seqlen, recv_pipe
+            args, model_name, supported_batchsize, supported_seqlen, recv_pipe, worker_id
         )
         self._barrier = barrier
         self._barrier2 = barrier2
@@ -94,7 +95,7 @@ class BackgroundWorker(AbacusWorker):
             if self.isBackground:
                 if self._model_name == "bert":
                     while self.shared_flag.value == 1:
-                        bs = random.choice([1, 16])
+                        bs = random.choice([4, 32])
                         seq_len = random.choice([8, 64])
                         self._model.run(
                             self._inputs[bs][seq_len], self._masks[bs][seq_len], 0, 12
@@ -103,7 +104,7 @@ class BackgroundWorker(AbacusWorker):
                     return
                 else:
                     while self.shared_flag.value == 1:
-                        bs = random.choice([1, 16])
+                        bs = random.choice([4, 32])
                         self._model(self._inputs[bs])
                     print("background terminated!")
                     return
