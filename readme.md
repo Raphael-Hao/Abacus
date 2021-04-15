@@ -163,7 +163,7 @@ $ python main.py --task serve --model_num 2 --comb $model_combinations --policy 
 </center>
 
 <center>
-<img src="figure/qos_violation_ratio.png" width="400">
+<img src="figure/qos_violation_ratio.png" width="200">
 </center>
 
 ### Improving Peak Throughput
@@ -175,19 +175,19 @@ $ python main.py --task serve --model_num 2 --comb $model_combinations --policy 
 ### Beyongd Pair-wise Co-location
 
 <center class="half">
-<img src="figure/3in4_qos.png" width="400">
-<img src="figure/3in4_throughput.png" width="400">
+<img src="figure/3in4_qos.png" width="200">
+<img src="figure/3in4_throughput.png" width="200">
 </center>
 
 ### Integrating with MIGs
 
 <center class="half">
-<img src="figure/mig_qos.png" width="400">
-<img src="figure/mig_throughput.png" width="400">
+<img src="figure/mig_qos.png" width="200">
+<img src="figure/mig_throughput.png" width="200">
 </center>
 
 ### Effectiveness of Multi-way Search
 
 <center>
-<img src="figure/bs_core_latency.png" width="400">
+<img src="figure/bs_core_latency.png" width="200">
 </center>
