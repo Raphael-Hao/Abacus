@@ -53,7 +53,7 @@ MIG_4=("MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/7/0"
 
 if [ "$TASK" = "MPS" ]; then
   echo "MPS management!!!"
-  if [ "$JOB" = "start" ]; then
+  if [ "$JOB" = 1 ]; then
     echo "Starting the mps server"
     if [ "$MIG_ENABLED" = true ]; then
       if [ "$MIG_CNT" = 1 ]; then
@@ -88,7 +88,7 @@ if [ "$TASK" = "MPS" ]; then
       nvidia-cuda-mps-control -d
       echo "MPS server at  INSTANCE ${CUDA_VISIBLE_DEVICES} started"
     fi
-  elif [ "$JOB" = "stop" ]; then
+  elif [ "$JOB" = 0 ]; then
     echo "Stopping the mps server"
     if [ "$MIG_ENABLED" = true ]; then
       if [ "$MIG_CNT" = 1 ]; then
