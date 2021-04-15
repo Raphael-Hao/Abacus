@@ -109,11 +109,22 @@ $ python main.py --task serve
 | 7.6 Effectiveness of Multi-way Search | Figure 20       |                  |              |
 
 ### Ensuring QoS
-![Ensuring QoS](figure/2in7_qos.pdf)
+<figure>
+<img src="figure/2in7_qos.png">
+</figure>
 
 ### Improving Peak Throughput
 
+<figure>
+<img src="figure/2in7_throughput.png">
+</figure>
+
 ### Beyongd Pair-wise Co-location
+
+<figure class="half">
+<img src="figure/3in4_qos.png">
+<img src="figure/3in4_throughput.png">
+</figure>
 
 ### Integrating with MIGs
 
