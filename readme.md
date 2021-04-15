@@ -175,15 +175,15 @@ $ python main.py --task serve --model_num 2 --comb $model_combinations --policy 
 ### Beyongd Pair-wise Co-location
 
 <center class="half">
-<img src="figure/3in4_qos.png" width="580">
-<img src="figure/3in4_throughput.png" width="580">
+<img src="figure/3in4_qos.png" width="400">
+<img src="figure/3in4_throughput.png" width="400">
 </center>
 
 ### Integrating with MIGs
 
 <center class="half">
-<img src="figure/mig_qos.png" width="580">
-<img src="figure/mig_throughput.png" width="580">
+<img src="figure/mig_qos.png" width="400">
+<img src="figure/mig_throughput.png" width="400">
 </center>
 
 ### Effectiveness of Multi-way Search
