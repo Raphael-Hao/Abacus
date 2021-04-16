@@ -140,6 +140,7 @@ After obataining all the profiling data, we train the latency predictor for each
   ```shell
   $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
   ```
+
 ### Online Serving
 
 ```shell
@@ -148,46 +149,44 @@ $ python main.py --task serve --model_num 2 --comb $model_combinations --policy 
 
 ## Evaluation
 
-| Experiment Name/ Section/ Paragraph   | Related Figures | Scripts Location         |
-| ------------------------------------- | --------------- | ------------------------ |
-| 7.2 Ensuring QoS                      | Figure 13 & 14  | experiment/0_qos         |
-| 7.3 Improving Peak Throughput         | Figure 15       | experiment/1_throughput  |
-| 7.4 Beyongd Pair-wise Co-location     | Figure 16 & 17  | experiment/2_beyond_pair |
-| 7.5 Integrating with MIGs             | Figure 18 & 19  | experiment/3_mig         |
-| 7.6 Effectiveness of Multi-way Search | Figure 20       | experiment/3_multiway    |
+|  Experiment Name/ Section/ Paragraph  | Related Figures |     Scripts Location     |
+| :-----------------------------------: | :-------------: | :----------------------: |
+|           7.2 Ensuring QoS            | Figure 13 & 14  |     experiment/0_qos     |
+|     7.3 Improving Peak Throughput     |    Figure 15    | experiment/1_throughput  |
+|   7.4 Beyongd Pair-wise Co-location   | Figure 16 & 17  | experiment/2_beyond_pair |
+|       7.5 Integrating with MIGs       | Figure 18 & 19  |     experiment/3_mig     |
+| 7.6 Effectiveness of Multi-way Search |    Figure 20    |  experiment/3_multiway   |
 
 ### Ensuring QoS
 
-<center>
-<img src="figure/2in7_qos.png" width="1200"/>
-</center>
+|                         <img src="figure/2in7_qos.png" width="1000">                          |
+| :-------------------------------------------------------------------------------------------: |
+| **End-to-end 99%-ile latency of each pair-wise co-location with FCFS, SJF, EDF, and Abacus.** |
 
-<center>
-<img src="figure/qos_violation_ratio.png" width="200">
-</center>
+|                 <img src="figure/qos_violation_ratio.png" width="400">                 |
+| :------------------------------------------------------------------------------------: |
+| **QoS violation ratio of each pair-wise co-location with<br /> FCFS, SJF, EDF, and Abacus.** |
 
 ### Improving Peak Throughput
 
-<center>
-<img src="figure/2in7_throughput.png" width="1200"/>
-</center>
+|                             <img src="figure/2in7_throughput.png" width="1000"/>                             |
+| :----------------------------------------------------------------------------------------------------------: |
+| **The peak throughput of each co-location pair with FCFS, SJF, EDF, and Abacus while guaranteeing the QoS.** |
 
 ### Beyongd Pair-wise Co-location
 
-<center class="half">
-<img src="figure/3in4_qos.png" width="200">
-<img src="figure/3in4_throughput.png" width="200">
-</center>
+|                               <img src="figure/3in4_qos.png" width="580">                               |                          <img src="figure/3in4_throughput.png" width="580">                          |
+| :-----------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
+| **The 99%-ile latency in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** | **Peak throughputs in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** |
 
 ### Integrating with MIGs
 
-<center class="half">
-<img src="figure/mig_qos.png" width="200">
-<img src="figure/mig_throughput.png" width="200">
-</center>
+|          <img src="figure/mig_qos.png" width="580">           |       <img src="figure/mig_throughput.png" width="580">        |
+| :-----------------------------------------------------------: | :------------------------------------------------------------: |
+| **The 99%-ile latency of the co-located services with MIGs.** | **The peak throughputs of the co-located services with MIGs.** |
 
 ### Effectiveness of Multi-way Search
 
-<center>
-<img src="figure/bs_core_latency.png" width="200">
-</center>
+|                  <img src="figure/bs_core_latency.png" width="360">                   |
+| :-----------------------------------------------------------------------------------: |
+| **Duration of determining an appropriate operator<br /> group with different search ways.** |
