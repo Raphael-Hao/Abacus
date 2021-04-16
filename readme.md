@@ -24,7 +24,7 @@ This repository contains the source code for a research paper.
 
 ## What is Abacus
 
-Abacus is a runtime system that runs multiple DNN queries simultaneously with stable and predictable latency. Abacus enables deterministic operator overlap to enforce the latency predictability. Abacus is comprised of an overlap-aware latency predictor, a headroom-based query controller, and segmental model executors. The latency predictor is able to precisely predict the latencies of queries when the operator overlap is determined. The query controller determines the appropriate operator overlap to guarantee the QoS of all the DNN services on a GPU. The model executors run the operators as needed to support the deterministic operator overlap. Our evaluation using seven popular DNNs on an Nvidia A100 GPU shows that Abacus significantly reduces the QoS violation and improves the throughput compared with state-of-the-art solutions.
+**Abacus** is a runtime system that runs multiple DNN queries simultaneously with stable and predictable latency. **Abacus** enables deterministic operator overlap to enforce the latency predictability. **Abacus** is comprised of an overlap-aware latency predictor, a headroom-based query controller, and segmental model executors. The latency predictor is able to precisely predict the latencies of queries when the operator overlap is determined. The query controller determines the appropriate operator overlap to guarantee the QoS of all the DNN services on a GPU. The model executors run the operators as needed to support the deterministic operator overlap. Our evaluation using seven popular DNNs on an Nvidia A100 GPU shows that **Abacus** significantly reduces the QoS violation and improves the throughput compared with state-of-the-art solutions.
 
 ## Environment Preparation
 
@@ -84,11 +84,11 @@ Abacus is a runtime system that runs multiple DNN queries simultaneously with st
 
 ## Getting Started
 
-The following sections step through the things required to run Abacus
+The following sections step through the things required to run **Abacus**
 
 ### Profiling
 
-Abacus needs to profile the essential data for training a precise overlap-aware latency predictor.
+**Abacus** needs to profile the essential data for training a precise overlap-aware latency predictor.
 
 We first profiling the data without MPS enabled and MIG disabled.
 
@@ -136,18 +136,39 @@ After obataining all the profiling data, we train the latency predictor for each
   ```shell
   $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
   ```
-- Training the predictor for quadruplet-wise co-location on a _MIG 4g.10gb_ of A100.
+- Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100.
   ```shell
   $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
   ```
 
 ### Online Serving
 
-```shell
-$ python main.py --task serve --model_num 2 --comb $model_combinations --policy $scheduling_policy --load 50 --qos $qos_target --queries 1000 --thld 5 --ways 2 --abandon
-```
+After profiling and training, we can serve multiple DNN services with **Abacus**
+
+- Testing **Abacus** for pair-wise co-location on a dedicated A100, take the setup of `model id: 0, 1; qos_target: 50ms; total tested queries: 1000; search ways: 2` as an example.
+  ```shell
+  $ python main.py --task serve --model_num 2 --comb 0 1 --policy Abacus --load 50 --qos 50 --queries 1000 --thld 5 --ways 2 --abandon
+  ```
+- Testing **Abacus** for triplet-wise co-location on a dedicated A100, take the setup of `model id: 0, 1, 3; qos_target: 50ms; total tested queries: 1000; search ways: 2` as an example.
+  ```shell
+  $ python main.py --task serve --model_num 2 --comb 0 1 2 --policy Abacus --load 50 --qos 50 --queries 1000 --thld 5 --ways 2 --abandon
+  ```
+- Testing **Abacus** for quadruplet-wise co-location on a dedicated A100, take the setup of `model id: 0, 1, 2, 3; qos_target: 50ms; total tested queries: 1000; search ways: 2` as an example.
+  ```shell
+  $ python main.py --task serve --model_num 2 --comb 0 1 2 3 --policy Abacus --load 50 --qos 50 --queries 1000 --thld 5 --ways 2 --abandon
+  ```
+- Testing **Abacus** for pair-wise co-location on a _MIG 2g.10gb_ of A100, take the setup of `model id: 0, 1; qos_target: 50ms; total tested queries: 1000; search ways: 2` as an example.
+  ```shell
+  $ python main.py --task serve --model_num 2 --comb 0 1 --policy Abacus --load 50 --qos 50 --queries 1000 --thld 5 --ways 2 --abandon --mig 2
+  ```
+- Testing **Abacus** for pair-wise co-location on a _MIG 4g.20gb_ of A100, take the setup of `model id: 0, 1, 2, 3; qos_target: 50ms; total tested queries: 1000; search ways: 2` as an example.
+  ```shell
+  $ python main.py --task serve --model_num 2 --comb 0 1 --policy Abacus --load 50 --qos 50 --queries 1000 --thld 5 --ways 2 --abandon --mig 1
+  ```
 
 ## Evaluation
+
+All evaluations are conducted in the root directory of **Abacus**. The following table presents the detailed information of each experiments, including the corresponding figures in paper and the shell scripts for running the experiment.
 
 |  Experiment Name/ Section/ Paragraph  | Related Figures |     Scripts Location     |
 | :-----------------------------------: | :-------------: | :----------------------: |
@@ -159,27 +180,70 @@ $ python main.py --task serve --model_num 2 --comb $model_combinations --policy 
 
 ### Ensuring QoS
 
-|                         <img src="figure/2in7_qos.png" width="1000">                          |
-| :-------------------------------------------------------------------------------------------: |
-| **End-to-end 99%-ile latency of each pair-wise co-location with FCFS, SJF, EDF, and Abacus.** |
+- We first evaluate the QoS guarantee in terms of tail latency and QoS violation ratio.
 
-|                 <img src="figure/qos_violation_ratio.png" width="400">                 |
-| :------------------------------------------------------------------------------------: |
-| **QoS violation ratio of each pair-wise co-location with<br /> FCFS, SJF, EDF, and Abacus.** |
+  ```shell
+  $ ./experiments/0_qos/2in7.sh
+  ```
+
+  The following figure depicts the 99%-ile latency for each pair-wise co-location.
+
+  |                         <img src="figure/2in7_qos.png" width="1000">                          |
+  | :-------------------------------------------------------------------------------------------: |
+  | **End-to-end 99%-ile latency of each pair-wise co-location with FCFS, SJF, EDF, and Abacus.** |
+
+  The following figure depicts the QoS violation ratio for each pair-wise co-location.
+
+  |                    <img src="figure/qos_violation_ratio.png" width="400">                    |
+  | :------------------------------------------------------------------------------------------: |
+  | **QoS violation ratio of each pair-wise co-location with<br /> FCFS, SJF, EDF, and Abacus.** |
 
 ### Improving Peak Throughput
 
-|                             <img src="figure/2in7_throughput.png" width="1000"/>                             |
-| :----------------------------------------------------------------------------------------------------------: |
-| **The peak throughput of each co-location pair with FCFS, SJF, EDF, and Abacus while guaranteeing the QoS.** |
+- We then evaluate the peak throughput under the load that exceeds the hardware limit.
+
+  ```shell
+  $ ./experiments/1_throughput/2in7.sh
+  ```
+
+  The following figure depicts the peak throughput for each pair-wise co-location.
+
+  |                             <img src="figure/2in7_throughput.png" width="1000"/>                             |
+  | :----------------------------------------------------------------------------------------------------------: |
+  | **The peak throughput of each co-location pair with FCFS, SJF, EDF, and Abacus while guaranteeing the QoS.** |
 
 ### Beyongd Pair-wise Co-location
 
-|                               <img src="figure/3in4_qos.png" width="580">                               |                          <img src="figure/3in4_throughput.png" width="580">                          |
-| :-----------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
-| **The 99%-ile latency in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** | **Peak throughputs in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** |
+- We also evaluate **Abacus** beyond pair-wise co-location.
+
+  ```shell
+  $ ./experiments/2_beyond_pair/qos/3in4.sh
+  $ ./experiments/2_beyond_pair/qos/4in4.sh
+  $ ./experiments/2_beyond_pair/throughput/3in4.sh
+  $ ./experiments/2_beyond_pair/throughput/3in4.sh
+  ```
+
+  The following two figures presents the performance of **Abacus** for triplet-wise and quadruplet-wise co-location in terms of QoS guarantee and peak throughput.
+
+  |                               <img src="figure/3in4_qos.png" width="580">                               |                          <img src="figure/3in4_throughput.png" width="580">                          |
+  | :-----------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
+  | **The 99%-ile latency in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** | **Peak throughputs in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** |
 
 ### Integrating with MIGs
+
+- We also evaluate **Abacus** with MIG enabled.
+
+  ```shell
+  $ ./experiments/mig/qos/1in4.sh
+  $ ./experiments/mig/qos/2in4.sh
+  $ ./experiments/mig/qos/4in4.sh
+  $ ./experiments/mig/throughput/1in4.sh
+  $ ./experiments/mig/throughput/2in4.sh
+  $ ./experiments/mig/throughput/3in4.sh
+  ```
+
+  The following two figures presents the performance of **Abacus** for *MIG 1g.10gb* and *MIG 2g.20gb* in terms of QoS guarantee and peak throughput.
+
 
 |          <img src="figure/mig_qos.png" width="580">           |       <img src="figure/mig_throughput.png" width="580">        |
 | :-----------------------------------------------------------: | :------------------------------------------------------------: |
@@ -187,6 +251,9 @@ $ python main.py --task serve --model_num 2 --comb $model_combinations --policy 
 
 ### Effectiveness of Multi-way Search
 
-|                  <img src="figure/bs_core_latency.png" width="360">                   |
-| :-----------------------------------------------------------------------------------: |
+- We also evaluate the effectiveness of multi-way search
+
+
+|                     <img src="figure/bs_core_latency.png" width="360">                      |
+| :-----------------------------------------------------------------------------------------: |
 | **Duration of determining an appropriate operator<br /> group with different search ways.** |
