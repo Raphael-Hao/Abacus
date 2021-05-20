@@ -62,8 +62,8 @@ This repository contains the source code for a research paper.
   $ eval "$($HOME/.local/anaconda3/bin/conda shell.zsh hook)"
   $ # cd into Abacus repository
   $ conda create --name Abacus
-  $ conda install pytorch torchvision torchaudio cudatoolkit=11.1 -c pytorch -c conda-forge
-  $ pip install -r requirements.txt
+  $ pip3 install torch==1.7.1+cu110 torchvision==0.8.2+cu110 -f https://download.pytorch.org/whl/torch_stable.html
+  $ pip3 install -r requirements.txt
   ```
 
   3. Nvidia GPU related affairs: switch MIG and MPS

@@ -16,6 +16,7 @@ class RunConfig:
     def __init__(self, args) -> None:
         self.debug = args.debug
         self.task = args.task
+        self.platform = args.platform
         # general configurations
         self.total_models = args.model_num
         self.device = 0
@@ -80,7 +81,8 @@ class RunConfig:
             ],
         }
         # self.path = "/state/partition/whcui/repository/project/Abacus"
-        self.path = "/home/whcui/project/Abacus"
+        self.path = "/root/Abacus"
+        # self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
 
         self.mig = args.mig
@@ -152,9 +154,6 @@ class RunConfig:
             """
             self.serve_combination = tuple(args.comb)
             self.policy = args.policy
-            # self.policy = "SJF"
-            # self.policy = "FCFS"
-            # self.policy = "EDF"
             self.threshold = args.thld
             self.qos_target = args.qos
             self.search_ways = args.ways
@@ -205,7 +204,7 @@ class RunConfig:
                         (4, 6),
                         (5, 6),
                     ]
-                elif self.mig == 2:
+                elif self.mig == 2 or self.platform == "V100":
                     self.profiling_combinations = [
                         (1, 2),
                         (1, 5),
@@ -347,11 +346,15 @@ def parse_options():
     )
 
     parser.add_argument(
+        "--platform", type=str, default="A100", choices=["A100", "V100"]
+    )
+    parser.add_argument("--device", type=int, default=0, choices=[0, 1, 2, 3])
+    parser.add_argument(
         "--model_num",
         type=int,
         default="2",
         required=True,
-        choices=[1,2, 3, 4],
+        choices=[1, 2, 3, 4],
     )
 
     parser.add_argument("--mig", type=int, default=0, choices=[0, 1, 2, 4])
