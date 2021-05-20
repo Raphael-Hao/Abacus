@@ -8,6 +8,7 @@ import torch
 
 from abacus.profiler import profile
 from abacus.server import AbacusServer
+from abacus.client import AbacusClient
 from abacus.trainer import train_predictor
 from abacus.option import parse_options
 from abacus.background import background
@@ -23,11 +24,14 @@ if __name__ == "__main__":
     print(run_config)
     if run_config.task == "profile":
         profile(run_config=run_config)
-    elif run_config.task == "serve":
+    elif run_config.task == "server":
         abacus_server = AbacusServer(run_config=run_config)
         abacus_server.start_up()
         abacus_server.start_test()
         abacus_server.stop_test()
+    elif run_config.task == "client":
+        abacus_client = AbacusClient(run_config=run_config)
+        abacus_client.start()
     elif run_config.task == "train":
         train_predictor(run_config)
     elif run_config.task == "background":
