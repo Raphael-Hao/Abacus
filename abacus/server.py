@@ -15,8 +15,8 @@ from abacus.option import RunConfig
 from abacus.worker import ServerWorker
 from abacus.modeling.predictor.mlp import MLPregression
 
-import abacus.abacus_pb2 as abacus_pb2
-import abacus.abacus_pb2_grpc as abacus_pb2_grpc
+# import abacus.abacus_pb2 as abacus_pb2
+# import abacus.abacus_pb2_grpc as abacus_pb2_grpc
 
 class Query:
     MODELS_LEN = {

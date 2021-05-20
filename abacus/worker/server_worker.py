@@ -54,7 +54,7 @@ class ServerWorker(AbacusWorker):
             os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
             os.environ[
                 "CUDA_VISIBLE_DEVICES"
-            ] = self._device
+            ] = str(self._device)
         torch.device("cuda:{}".format(self._device))
         torch.backends.cudnn.enabled = True
         if self._model_name == "inception_v3":

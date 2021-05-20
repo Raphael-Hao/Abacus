@@ -52,7 +52,7 @@ class ProfilerWorker(AbacusWorker):
             os.environ["CUDA_MPS_LOG_DIRECTORY"] = "/tmp/nvidia-log"
             os.environ[
                 "CUDA_VISIBLE_DEVICES"
-            ] = self._device
+            ] = str(self._device)
         # print(os.environ)
         torch.device("cuda:{}".format(self._device))
         torch.backends.cudnn.enabled = True

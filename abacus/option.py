@@ -80,8 +80,8 @@ class RunConfig:
                 "/tmp/nvidia-log-3",
             ],
         }
-        # self.path = "/state/partition/whcui/repository/project/Abacus"
-        self.path = "/root/Abacus"
+        self.path = args.path
+        self.path = "/state/partition/whcui/repository/project/Abacus"
         # self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
 
@@ -180,7 +180,7 @@ class RunConfig:
                     (2, 5, 6),
                 ]
             elif self.total_models == 2:
-                if self.mig == 0:
+                if self.mig == 0 and self.platform == "A100":
                     self.profiling_combinations = [
                         (0, 1),
                         (0, 2),
@@ -336,6 +336,8 @@ class RunConfig:
 
 def parse_options():
     parser = argparse.ArgumentParser(description="Abacus")
+
+    parser.add_argument("--path", type=str, default="/root/Abacus")
 
     parser.add_argument(
         "--task",
