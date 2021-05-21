@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import abacus_pb2 as abacus__pb2
+from abacus import service_pb2 as abacus_dot_service__pb2
 
 
 class AbacusStub(object):
@@ -16,13 +16,13 @@ class AbacusStub(object):
         """
         self.SendQuery = channel.unary_unary(
                 '/Abacus/SendQuery',
-                request_serializer=abacus__pb2.Request.SerializeToString,
-                response_deserializer=abacus__pb2.Response.FromString,
+                request_serializer=abacus_dot_service__pb2.Request.SerializeToString,
+                response_deserializer=abacus_dot_service__pb2.Response.FromString,
                 )
         self.FreeNode = channel.unary_unary(
                 '/Abacus/FreeNode',
-                request_serializer=abacus__pb2.Request.SerializeToString,
-                response_deserializer=abacus__pb2.Response.FromString,
+                request_serializer=abacus_dot_service__pb2.Request.SerializeToString,
+                response_deserializer=abacus_dot_service__pb2.Response.FromString,
                 )
 
 
@@ -46,13 +46,13 @@ def add_AbacusServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SendQuery': grpc.unary_unary_rpc_method_handler(
                     servicer.SendQuery,
-                    request_deserializer=abacus__pb2.Request.FromString,
-                    response_serializer=abacus__pb2.Response.SerializeToString,
+                    request_deserializer=abacus_dot_service__pb2.Request.FromString,
+                    response_serializer=abacus_dot_service__pb2.Response.SerializeToString,
             ),
             'FreeNode': grpc.unary_unary_rpc_method_handler(
                     servicer.FreeNode,
-                    request_deserializer=abacus__pb2.Request.FromString,
-                    response_serializer=abacus__pb2.Response.SerializeToString,
+                    request_deserializer=abacus_dot_service__pb2.Request.FromString,
+                    response_serializer=abacus_dot_service__pb2.Response.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -76,8 +76,8 @@ class Abacus(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Abacus/SendQuery',
-            abacus__pb2.Request.SerializeToString,
-            abacus__pb2.Response.FromString,
+            abacus_dot_service__pb2.Request.SerializeToString,
+            abacus_dot_service__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -93,7 +93,7 @@ class Abacus(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Abacus/FreeNode',
-            abacus__pb2.Request.SerializeToString,
-            abacus__pb2.Response.FromString,
+            abacus_dot_service__pb2.Request.SerializeToString,
+            abacus_dot_service__pb2.Response.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
