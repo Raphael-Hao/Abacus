@@ -1,12 +1,17 @@
 syntax = "proto3";
-package Server;
+package DNNServer;
 
-service Server { rpc SendQuery(Request) returns (Response); }
+service DNNServer { rpc SendQuery(Request) returns (Response); }
 
 message Request {
-  string model = 1;
-  int32 bs = 2;
-  int32 len = 3;
+  int32 id = 1;
+  string model = 2;
+  int32 bs = 3;
+  int32 seq_len = 4;
+  int32 qos_target = 5;
 }
 
-message Response { bool accepted = 1; }
+message Response {
+  int32 node_id = 1;
+  bool accepted = 2;
+}

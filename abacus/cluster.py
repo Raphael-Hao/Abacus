@@ -16,9 +16,6 @@ from abacus.option import RunConfig
 from abacus.loadbalancer.abacus import AbacusLoadBalancer
 from abacus.loadbalancer.abacus import AbacusLoadBalancer
 
-import abacus.service_pb2 as service_pb2
-import abacus.service_pb2_grpc as service_pb2_grpc
-
 
 class Cluster:
     def __init__(self, run_config: RunConfig) -> None:

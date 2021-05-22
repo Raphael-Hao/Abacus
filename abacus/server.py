@@ -8,6 +8,9 @@ import numpy as np
 import random
 import torch
 import csv
+from concurrent import futures
+import grpc
+
 import torch.multiprocessing as mp
 from torch.multiprocessing import Process
 
@@ -20,7 +23,71 @@ from abacus.modeling.predictor.mlp import MLPregression
 from abacus.utils import Query
 
 
-class AbacusServer:
+class ClockServer(service_pb2_grpc.DNNServerServicer):
+    def __init__(self, run_config: RunConfig) -> None:
+        self._run_config = run_config
+        self._node_id = run_config.node_id
+        self._warmup_barrier = mp.Barrier(run_config.total_models + 1)
+        self._barrier = [mp.Barrier(2)]
+        self._stop_event = mp.Event()
+        self._workers = {}
+        self._queues = {}
+        self._pipes = {}
+        self._qos_target = run_config.qos_target
+        random.seed(0)
+        self.start_up()
+
+    def start_up(self):
+        logging.info("Starting Clockworker Workers")
+        for worker_id, model_id in enumerate(self._run_config.serve_combination):
+            model_name = self._run_config.models_name[model_id]
+            pipe_parent, pipe_child = mp.Pipe()
+            model_worker = ServerWorker(
+                self._run_config,
+                model_name,
+                self._run_config.supported_batchsize,
+                self._run_config.supported_seqlen,
+                pipe_child,
+                self._barrier,
+                self._warmup_barrier,
+                worker_id,
+            )
+            model_worker.start()
+            self._workers[model_id] = model_worker
+            self._pipes[model_id] = pipe_parent
+        self._warmup_barrier.wait()
+        logging.info("All Server Workers Initialized")
+        logging.info("Scheduler Initializing")
+        log_path = "results/Cluster/2in4/" + self._run_config.policy
+
+    def SendQuery(self, request, context):
+        query_id = request.id
+        model_id = request.model
+        bs = request.bs
+        seq_len = request.seq_len
+        qos_target = request.qos_target
+        query = Query(
+            id=query_id,
+            model_id=model_id,
+            batch_size=bs,
+            seq_len=seq_len,
+            qos_target=qos_target,
+        )
+        self._pipes[model_id].send(
+            query.id,
+            "new",
+            0,
+            query.start_pos,
+            query.end_pos,
+            query.batch_size,
+            query.seq_len,
+        )
+        self._barrier[0].wait()
+        
+        return service_pb2.Response(worker_id=self._node_id, accepted=True)
+
+
+class AbacusServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config
         self._warmup_barrier = mp.Barrier(run_config.total_models + 1)
@@ -36,6 +103,10 @@ class AbacusServer:
         self._pipes = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
+        self.start_up()
+
+    def SendQuery(self, request, context):
+        return service_pb2.Response(accepted=True)
 
     def send_query(self, id, model_id, batch_size, seq_len):
         self._queues[model_id].put(

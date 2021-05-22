@@ -152,6 +152,7 @@ class RunConfig:
             """
             [server configuration]
             """
+            self.node_id = args.node
             self.serve_combination = tuple(args.comb)
             self.policy = args.policy
             self.threshold = args.thld
@@ -364,13 +365,15 @@ def parse_options():
     """[summary]
     online serve
     """
+
+    parser.add_argument("--node", type=int, required="serve" in sys.argv)
     parser.add_argument("--comb", type=int, required="serve" in sys.argv, nargs="+")
     parser.add_argument(
         "--policy",
         type=str,
         default="Abacus",
         required="serve" in sys.argv,
-        choices=["Abacus", "SJF", "FCFS", "EDF"],
+        choices=["Abacus", "SJF", "FCFS", "EDF", "Clock"],
     )
     parser.add_argument("--load", type=int, required="serve" in sys.argv, default=50)
     parser.add_argument(

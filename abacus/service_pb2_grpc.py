@@ -5,7 +5,7 @@ import grpc
 from abacus import service_pb2 as abacus_dot_service__pb2
 
 
-class ServerStub(object):
+class DNNServerStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -15,13 +15,13 @@ class ServerStub(object):
             channel: A grpc.Channel.
         """
         self.SendQuery = channel.unary_unary(
-                '/Server.Server/SendQuery',
+                '/DNNServer.DNNServer/SendQuery',
                 request_serializer=abacus_dot_service__pb2.Request.SerializeToString,
                 response_deserializer=abacus_dot_service__pb2.Response.FromString,
                 )
 
 
-class ServerServicer(object):
+class DNNServerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def SendQuery(self, request, context):
@@ -31,7 +31,7 @@ class ServerServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ServerServicer_to_server(servicer, server):
+def add_DNNServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SendQuery': grpc.unary_unary_rpc_method_handler(
                     servicer.SendQuery,
@@ -40,12 +40,12 @@ def add_ServerServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'Server.Server', rpc_method_handlers)
+            'DNNServer.DNNServer', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Server(object):
+class DNNServer(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -59,7 +59,7 @@ class Server(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Server.Server/SendQuery',
+        return grpc.experimental.unary_unary(request, target, '/DNNServer.DNNServer/SendQuery',
             abacus_dot_service__pb2.Request.SerializeToString,
             abacus_dot_service__pb2.Response.FromString,
             options, channel_credentials,
