@@ -14,17 +14,17 @@ class DNNServerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendQuery = channel.unary_unary(
-                '/DNNServer.DNNServer/SendQuery',
-                request_serializer=abacus_dot_service__pb2.Request.SerializeToString,
-                response_deserializer=abacus_dot_service__pb2.Response.FromString,
+        self.Inference = channel.unary_unary(
+                '/DNNServer.DNNServer/Inference',
+                request_serializer=abacus_dot_service__pb2.Query.SerializeToString,
+                response_deserializer=abacus_dot_service__pb2.Result.FromString,
                 )
 
 
 class DNNServerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def SendQuery(self, request, context):
+    def Inference(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -33,10 +33,10 @@ class DNNServerServicer(object):
 
 def add_DNNServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendQuery': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendQuery,
-                    request_deserializer=abacus_dot_service__pb2.Request.FromString,
-                    response_serializer=abacus_dot_service__pb2.Response.SerializeToString,
+            'Inference': grpc.unary_unary_rpc_method_handler(
+                    servicer.Inference,
+                    request_deserializer=abacus_dot_service__pb2.Query.FromString,
+                    response_serializer=abacus_dot_service__pb2.Result.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -49,7 +49,7 @@ class DNNServer(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def SendQuery(request,
+    def Inference(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +59,8 @@ class DNNServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/DNNServer.DNNServer/SendQuery',
-            abacus_dot_service__pb2.Request.SerializeToString,
-            abacus_dot_service__pb2.Response.FromString,
+        return grpc.experimental.unary_unary(request, target, '/DNNServer.DNNServer/Inference',
+            abacus_dot_service__pb2.Query.SerializeToString,
+            abacus_dot_service__pb2.Result.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

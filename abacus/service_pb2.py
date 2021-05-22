@@ -19,37 +19,51 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14\x61\x62\x61\x63us/service.proto\x12\tDNNServer\"5\n\x07Request\x12\r\n\x05model\x18\x01 \x01(\t\x12\n\n\x02\x62s\x18\x02 \x01(\x05\x12\x0f\n\x07seq_len\x18\x03 \x01(\x05\"-\n\x08Response\x12\x0f\n\x07node_id\x18\x01 \x01(\x05\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x32\x41\n\tDNNServer\x12\x34\n\tSendQuery\x12\x12.DNNServer.Request\x1a\x13.DNNServer.Responseb\x06proto3'
+  serialized_pb=b'\n\x14\x61\x62\x61\x63us/service.proto\x12\tDNNServer\"S\n\x05Query\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05model\x18\x02 \x01(\t\x12\n\n\x02\x62s\x18\x03 \x01(\x05\x12\x0f\n\x07seq_len\x18\x04 \x01(\x05\x12\x12\n\nqos_target\x18\x05 \x01(\x05\"+\n\x06Result\x12\x0f\n\x07node_id\x18\x01 \x01(\x05\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x32=\n\tDNNServer\x12\x30\n\tInference\x12\x10.DNNServer.Query\x1a\x11.DNNServer.Resultb\x06proto3'
 )
 
 
 
 
-_REQUEST = _descriptor.Descriptor(
-  name='Request',
-  full_name='DNNServer.Request',
+_QUERY = _descriptor.Descriptor(
+  name='Query',
+  full_name='DNNServer.Query',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='model', full_name='DNNServer.Request.model', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='bs', full_name='DNNServer.Request.bs', index=1,
-      number=2, type=5, cpp_type=1, label=1,
+      name='id', full_name='DNNServer.Query.id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='seq_len', full_name='DNNServer.Request.seq_len', index=2,
+      name='model', full_name='DNNServer.Query.model', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='bs', full_name='DNNServer.Query.bs', index=2,
       number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='seq_len', full_name='DNNServer.Query.seq_len', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qos_target', full_name='DNNServer.Query.qos_target', index=4,
+      number=5, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -67,27 +81,27 @@ _REQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=35,
-  serialized_end=88,
+  serialized_end=118,
 )
 
 
-_RESPONSE = _descriptor.Descriptor(
-  name='Response',
-  full_name='DNNServer.Response',
+_RESULT = _descriptor.Descriptor(
+  name='Result',
+  full_name='DNNServer.Result',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='node_id', full_name='DNNServer.Response.node_id', index=0,
+      name='node_id', full_name='DNNServer.Result.node_id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='accepted', full_name='DNNServer.Response.accepted', index=1,
+      name='accepted', full_name='DNNServer.Result.accepted', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
@@ -105,27 +119,27 @@ _RESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=90,
-  serialized_end=135,
+  serialized_start=120,
+  serialized_end=163,
 )
 
-DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
-DESCRIPTOR.message_types_by_name['Response'] = _RESPONSE
+DESCRIPTOR.message_types_by_name['Query'] = _QUERY
+DESCRIPTOR.message_types_by_name['Result'] = _RESULT
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
-  'DESCRIPTOR' : _REQUEST,
+Query = _reflection.GeneratedProtocolMessageType('Query', (_message.Message,), {
+  'DESCRIPTOR' : _QUERY,
   '__module__' : 'abacus.service_pb2'
-  # @@protoc_insertion_point(class_scope:DNNServer.Request)
+  # @@protoc_insertion_point(class_scope:DNNServer.Query)
   })
-_sym_db.RegisterMessage(Request)
+_sym_db.RegisterMessage(Query)
 
-Response = _reflection.GeneratedProtocolMessageType('Response', (_message.Message,), {
-  'DESCRIPTOR' : _RESPONSE,
+Result = _reflection.GeneratedProtocolMessageType('Result', (_message.Message,), {
+  'DESCRIPTOR' : _RESULT,
   '__module__' : 'abacus.service_pb2'
-  # @@protoc_insertion_point(class_scope:DNNServer.Response)
+  # @@protoc_insertion_point(class_scope:DNNServer.Result)
   })
-_sym_db.RegisterMessage(Response)
+_sym_db.RegisterMessage(Result)
 
 
 
@@ -136,16 +150,16 @@ _DNNSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=137,
-  serialized_end=202,
+  serialized_start=165,
+  serialized_end=226,
   methods=[
   _descriptor.MethodDescriptor(
-    name='SendQuery',
-    full_name='DNNServer.DNNServer.SendQuery',
+    name='Inference',
+    full_name='DNNServer.DNNServer.Inference',
     index=0,
     containing_service=None,
-    input_type=_REQUEST,
-    output_type=_RESPONSE,
+    input_type=_QUERY,
+    output_type=_RESULT,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

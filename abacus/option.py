@@ -17,6 +17,7 @@ class RunConfig:
         self.debug = args.debug
         self.task = args.task
         self.platform = args.platform
+        self.GPU = args.gpu
         # general configurations
         self.total_models = args.model_num
         self.device = 0
@@ -339,7 +340,6 @@ def parse_options():
     parser = argparse.ArgumentParser(description="Abacus")
 
     parser.add_argument("--path", type=str, default="/root/Abacus")
-
     parser.add_argument(
         "--task",
         type=str,
@@ -347,9 +347,11 @@ def parse_options():
         required=True,
         choices=["profile", "train", "serve", "background"],
     )
-
     parser.add_argument(
-        "--platform", type=str, default="A100", choices=["A100", "V100"]
+        "--platform", type=str, default="A100", choices=["Single", "Cluster"]
+    )
+    parser.add_argument(
+        "--gpu", type=str, default="A100", choices=["A100", "V100"]
     )
     parser.add_argument("--device", type=int, default=0, choices=[0, 1, 2, 3])
     parser.add_argument(
@@ -359,7 +361,6 @@ def parse_options():
         required=True,
         choices=[1, 2, 3, 4],
     )
-
     parser.add_argument("--mig", type=int, default=0, choices=[0, 1, 2, 4])
 
     """[summary]

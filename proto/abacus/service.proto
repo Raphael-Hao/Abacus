@@ -1,9 +1,9 @@
 syntax = "proto3";
 package DNNServer;
 
-service DNNServer { rpc SendQuery(Request) returns (Response); }
+service DNNServer { rpc Inference(Query) returns (Result); }
 
-message Request {
+message Query {
   int32 id = 1;
   string model = 2;
   int32 bs = 3;
@@ -11,7 +11,7 @@ message Request {
   int32 qos_target = 5;
 }
 
-message Response {
+message Result {
   int32 node_id = 1;
   bool accepted = 2;
 }
