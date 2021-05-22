@@ -7,11 +7,12 @@
 
 import torch.multiprocessing as mp
 from torch.multiprocessing import Process
+from abacus.option import RunConfig
 
 
 class LoadBalancer(Process):
-    def __init__(self, queues, qos_target) -> None:
-        super().__init__()
+    def __init__(self, run_config: RunConfig, query_q, qos_target) -> None:
+        self._run_config = run_config
 
     def start_up():
         raise NotImplementedError

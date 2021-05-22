@@ -7,6 +7,7 @@
 
 import logging
 import random
+import time
 
 import torch.multiprocessing as mp
 from torch.multiprocessing import Process
@@ -14,7 +15,7 @@ from torch.multiprocessing import Process
 from abacus.utils import Query
 from abacus.option import RunConfig
 from abacus.loadbalancer.abacus import AbacusLoadBalancer
-from abacus.loadbalancer.abacus import AbacusLoadBalancer
+from abacus.loadbalancer.clock import ClockLoadBalancer
 
 
 class Cluster:
@@ -52,12 +53,13 @@ class Cluster:
         for model_id in self._run_config.serve_combination:
             self._queues[model_id] = mp.Queue()
 
+    def start_test(self):
+        self.prepare_test_queries(
+            self._run_config.total_queries, self._run_config.average_duration
+        )
+        i = 0
+        for model_id, sleep_duration, bs, seq_len in self._test_queries:
+            i += 1
+            self.send_query(id=i, model_id=model_id, batch_size=bs, seq_len=seq_len)
+            time.sleep(sleep_duration)
 
-class AbacusCluster(Cluster):
-    def start():
-        raise NotImplementedError
-
-
-class ClockCluster:
-    def start():
-        raise NotImplementedError
