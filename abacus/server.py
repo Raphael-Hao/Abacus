@@ -22,7 +22,7 @@ from abacus.worker import ServerWorker
 from abacus.modeling.predictor.mlp import MLPregression
 from abacus.utils import Query
 
-
+## ClockWork: 4 models in one node
 class ClockServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config
@@ -35,8 +35,8 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         self._pipes = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
-        log_path = "results/Cluster/2in4/" + self._run_config.policy
-        log_dir = os.path.join(self._run_config.path)
+        log_path = "results/Cluster/" + self._run_config.policy
+        log_dir = os.path.join(self._run_config.path, log_path)
         os.makedirs(log_dir, exist_ok=True)
         self._serve_combination = run_config.serve_combination
         result_fname = ""
@@ -77,14 +77,17 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         model_id = request.model
         bs = request.bs
         seq_len = request.seq_len
+        start_stamp = request.start_stamp
         qos_target = request.qos_target
         query = Query(
             id=query_id,
             model_id=model_id,
             batch_size=bs,
             seq_len=seq_len,
+            start_stamp=start_stamp,
             qos_target=qos_target,
         )
+        query.set_op_pos(-1)
         self._pipes[model_id].send(
             query.id,
             "new",
@@ -95,11 +98,24 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
             query.seq_len,
         )
         self._barrier[0].wait()
+        self._wr.writerow(
+            np.array(
+                [
+                    query.id,
+                    query.model_id,
+                    query.batch_size,
+                    query.seq_len,
+                    query.latency_ms(),
+                ]
+            )
+        )
         return service_pb2.Result(node_id=self._node_id, accepted=True)
+
 
 class AbacusServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config
+        self._node_id = run_config.node_id
         self._warmup_barrier = mp.Barrier(run_config.total_models + 1)
         if self._run_config.policy == "Abacus":
             self._barrier = []
@@ -116,7 +132,23 @@ class AbacusServer(service_pb2_grpc.DNNServerServicer):
         self.start_up()
 
     def Inference(self, request, context):
-        return service_pb2.Response(accepted=True)
+        query_id = request.id
+        model_id = request.model
+        bs = request.bs
+        seq_len = request.seq_len
+        start_stamp = request.start_stamp
+        qos_target = request.qos_target
+        self._queues[model_id].put(
+            Query(
+                id=query_id,
+                model_id=model_id,
+                batch_size=bs,
+                seq_len=seq_len,
+                start_stamp=start_stamp,
+                qos_target=qos_target,
+            )
+        )
+        return service_pb2.Result(node_id=self._node_id, accepted=True)
 
     def send_query(self, id, model_id, batch_size, seq_len):
         self._queues[model_id].put(
@@ -217,8 +249,14 @@ class Scheduler(Process):
 
         if run_config.total_models == 2:
             if run_config.mig == 0:
-                predictor_path = "model/A100/2in7/all.ckpt"
-                log_path = "results/A100/2in7/" + self._policy
+                if run_config.platform == "Single":
+                    predictor_path = "model/A100/2in7/all.ckpt"
+                    log_path = "results/A100/2in7/" + self._policy
+                elif run_config.platform == "Cluster":
+                    predictor_path = "model/V100/2in4/all.ckpt"
+                    log_path = "results/Cluster/" + self._policy
+                else:
+                    raise NotImplementedError
             elif run_config.mig == 2:
                 predictor_path = "model/mig/2in4/all.ckpt"
                 log_path = "results/mig/2in4/" + self._policy

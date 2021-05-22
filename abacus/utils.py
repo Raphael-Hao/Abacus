@@ -8,11 +8,13 @@ import random
 import numpy as np
 import numpy.ma as ma
 
+
 def gen_background_combinations(models, background_combinations):
     model_combinations = []
     for pair in background_combinations:
         model_combinations.append((models[pair[0]], models[pair[1]]))
     return model_combinations
+
 
 def gen_model_combinations(models, profiling_combinations=None):
     # id_combinations = [i for i in range(len(models)) for j in range(combination_len)]
@@ -31,6 +33,7 @@ def gen_model_combinations(models, profiling_combinations=None):
     print(model_combinations)
     return model_combinations
 
+
 def gen_partition(model_len, if_qos=False, if_new=False):
     start = 0
     end = model_len
@@ -44,6 +47,7 @@ def gen_partition(model_len, if_qos=False, if_new=False):
         return start, end
     else:
         raise ValueError
+
 
 def make_record(model_config, raw_record):
     record_max = np.max(raw_record)
@@ -60,6 +64,7 @@ def make_record(model_config, raw_record):
     record.append(var)
     return record
 
+
 class Query:
     MODELS_LEN = {
         0: 18,
@@ -71,7 +76,9 @@ class Query:
         6: 12,
     }
 
-    def __init__(self, id, model_id, batch_size, seq_len, qos_target=60) -> None:
+    def __init__(
+        self, id, model_id, batch_size, seq_len, start_stamp=None, qos_target=60
+    ) -> None:
         self.id = id
         self.model_id = model_id
         self.batch_size = batch_size
@@ -79,7 +86,10 @@ class Query:
         self.start_pos = 0
         self.end_pos = 0
         self.op_len = self.MODELS_LEN[model_id]
-        self.start_stamp = time.time()
+        if start_stamp == None:
+            self.start_stamp = time.time()
+        else:
+            self.start_stamp = start_stamp
         self.qos_targt = qos_target
         self.state = "new"
 

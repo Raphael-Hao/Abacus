@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14\x61\x62\x61\x63us/service.proto\x12\tDNNServer\"S\n\x05Query\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05model\x18\x02 \x01(\t\x12\n\n\x02\x62s\x18\x03 \x01(\x05\x12\x0f\n\x07seq_len\x18\x04 \x01(\x05\x12\x12\n\nqos_target\x18\x05 \x01(\x05\"+\n\x06Result\x12\x0f\n\x07node_id\x18\x01 \x01(\x05\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x32=\n\tDNNServer\x12\x30\n\tInference\x12\x10.DNNServer.Query\x1a\x11.DNNServer.Resultb\x06proto3'
+  serialized_pb=b'\n\x14\x61\x62\x61\x63us/service.proto\x12\tDNNServer\"h\n\x05Query\x12\n\n\x02id\x18\x01 \x01(\x05\x12\r\n\x05model\x18\x02 \x01(\t\x12\n\n\x02\x62s\x18\x03 \x01(\x05\x12\x0f\n\x07seq_len\x18\x04 \x01(\x05\x12\x13\n\x0bstart_stamp\x18\x05 \x01(\x02\x12\x12\n\nqos_target\x18\x06 \x01(\x05\"+\n\x06Result\x12\x0f\n\x07node_id\x18\x01 \x01(\x05\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x32=\n\tDNNServer\x12\x30\n\tInference\x12\x10.DNNServer.Query\x1a\x11.DNNServer.Resultb\x06proto3'
 )
 
 
@@ -62,8 +62,15 @@ _QUERY = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='qos_target', full_name='DNNServer.Query.qos_target', index=4,
-      number=5, type=5, cpp_type=1, label=1,
+      name='start_stamp', full_name='DNNServer.Query.start_stamp', index=4,
+      number=5, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='qos_target', full_name='DNNServer.Query.qos_target', index=5,
+      number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -81,7 +88,7 @@ _QUERY = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=35,
-  serialized_end=118,
+  serialized_end=139,
 )
 
 
@@ -119,8 +126,8 @@ _RESULT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=120,
-  serialized_end=163,
+  serialized_start=141,
+  serialized_end=184,
 )
 
 DESCRIPTOR.message_types_by_name['Query'] = _QUERY
@@ -150,8 +157,8 @@ _DNNSERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=165,
-  serialized_end=226,
+  serialized_start=186,
+  serialized_end=247,
   methods=[
   _descriptor.MethodDescriptor(
     name='Inference',
