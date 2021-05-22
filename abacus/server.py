@@ -97,7 +97,6 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         self._barrier[0].wait()
         return service_pb2.Result(node_id=self._node_id, accepted=True)
 
-
 class AbacusServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config
@@ -116,7 +115,7 @@ class AbacusServer(service_pb2_grpc.DNNServerServicer):
         random.seed(0)
         self.start_up()
 
-    def SendQuery(self, request, context):
+    def Inference(self, request, context):
         return service_pb2.Response(accepted=True)
 
     def send_query(self, id, model_id, batch_size, seq_len):
