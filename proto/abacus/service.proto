@@ -1,9 +1,7 @@
 syntax = "proto3";
+package Server;
 
-service Abacus {
-  rpc SendQuery(Request) returns (Response);
-  rpc FreeNode(Request) returns (Response);
-}
+service Server { rpc SendQuery(Request) returns (Response); }
 
 message Request {
   string model = 1;
@@ -11,10 +9,4 @@ message Request {
   int32 len = 3;
 }
 
-message Response { float elapsed = 1; }
-
-message Node {
-  string model = 1;
-  int32 node = 2;
-  bool idle = 3;
-}
+message Response { bool accepted = 1; }

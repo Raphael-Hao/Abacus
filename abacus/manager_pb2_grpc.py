@@ -2,10 +2,11 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from abacus import service_pb2 as abacus_dot_service__pb2
+from abacus import manager_pb2 as abacus_dot_manager__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-class ServerStub(object):
+class ManagerStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -14,42 +15,42 @@ class ServerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendQuery = channel.unary_unary(
-                '/Server.Server/SendQuery',
-                request_serializer=abacus_dot_service__pb2.Request.SerializeToString,
-                response_deserializer=abacus_dot_service__pb2.Response.FromString,
+        self.UpdateNode = channel.unary_unary(
+                '/Manager.Manager/UpdateNode',
+                request_serializer=abacus_dot_manager__pb2.Node.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
 
 
-class ServerServicer(object):
+class ManagerServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def SendQuery(self, request, context):
+    def UpdateNode(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ServerServicer_to_server(servicer, server):
+def add_ManagerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendQuery': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendQuery,
-                    request_deserializer=abacus_dot_service__pb2.Request.FromString,
-                    response_serializer=abacus_dot_service__pb2.Response.SerializeToString,
+            'UpdateNode': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateNode,
+                    request_deserializer=abacus_dot_manager__pb2.Node.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'Server.Server', rpc_method_handlers)
+            'Manager.Manager', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Server(object):
+class Manager(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def SendQuery(request,
+    def UpdateNode(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +60,8 @@ class Server(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Server.Server/SendQuery',
-            abacus_dot_service__pb2.Request.SerializeToString,
-            abacus_dot_service__pb2.Response.FromString,
+        return grpc.experimental.unary_unary(request, target, '/Manager.Manager/UpdateNode',
+            abacus_dot_manager__pb2.Node.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

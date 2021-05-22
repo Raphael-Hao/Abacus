@@ -1,0 +1,11 @@
+
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package Manager;
+service Manager { rpc UpdateNode(Node) returns (google.protobuf.Empty); }
+
+message Node {
+  string model = 1;
+  int32 node = 2;
+  bool idle = 3;
+}

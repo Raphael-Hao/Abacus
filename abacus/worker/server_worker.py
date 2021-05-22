@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 from torch.cuda.streams import Stream
 
-from abacus.worker.worker import AbacusWorker
+from abacus.worker.base import AbacusWorker
 
 
 class ServerWorker(AbacusWorker):

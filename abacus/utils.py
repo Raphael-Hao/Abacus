@@ -59,3 +59,63 @@ def make_record(model_config, raw_record):
     record.append(mean)
     record.append(var)
     return record
+
+class Query:
+    MODELS_LEN = {
+        0: 18,
+        1: 35,
+        2: 52,
+        3: 14,
+        4: 19,
+        5: 22,
+        6: 12,
+    }
+
+    def __init__(self, id, model_id, batch_size, seq_len, qos_target=60) -> None:
+        self.id = id
+        self.model_id = model_id
+        self.batch_size = batch_size
+        self.seq_len = seq_len
+        self.start_pos = 0
+        self.end_pos = 0
+        self.op_len = self.MODELS_LEN[model_id]
+        self.start_stamp = time.time()
+        self.qos_targt = qos_target
+        self.state = "new"
+
+    def remain_ops(self):
+        return self.op_len - self.end_pos
+
+    def set_op_pos(self, new_pos):
+        if self.end_pos != 0:
+            self.state = "inter"
+        self.start_pos = self.end_pos
+        if new_pos == -1:
+            self.end_pos = self.op_len
+        else:
+            self.end_pos = new_pos
+        return self.start_pos, self.end_pos
+
+    def get_op_pos(self):
+        return self.start_pos, self.end_pos
+
+    def get_headromm(self):
+        return self.qos_targt - (time.time() - self.start_stamp) * 1000
+
+    def if_processed(self):
+        return self.end_pos == self.op_len
+
+    def latency_ms(self):
+        return (time.time() - self.start_stamp) * 1000
+
+    def __str__(self) -> str:
+        return "model_id: {}, bs: {}, seq_len: {}, start: {}, end: {}, op_len: {}, qos_target: {}, state: {}".format(
+            self.model_id,
+            self.batch_size,
+            self.seq_len,
+            self.start_pos,
+            self.end_pos,
+            self.op_len,
+            self.qos_targt,
+            self.state,
+        )
