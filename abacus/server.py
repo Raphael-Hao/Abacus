@@ -35,20 +35,20 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         self._pipes = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
-        log_path = "results/Cluster/" + self._run_config.policy
-        log_dir = os.path.join(self._run_config.path, log_path)
-        os.makedirs(log_dir, exist_ok=True)
-        self._serve_combination = run_config.serve_combination
-        result_fname = ""
-        for model_id in self._serve_combination:
-            result_fname += run_config.models_name[model_id]
-        result_fname += ".csv"
-        self._result_path = os.path.join(log_dir, result_fname)
-        self._result_file = open(self._result_path, "w+")
-        self._wr = csv.writer(self._result_file, dialect="excel")
-        result_header = ["query_id", "model_id", "bs", "seq_len", "latency"]
-        self._wr.writerow(result_header)
-        self._result_file.flush()
+        # log_path = "results/Cluster/" + self._run_config.policy
+        # log_dir = os.path.join(self._run_config.path, log_path)
+        # os.makedirs(log_dir, exist_ok=True)
+        # self._serve_combination = run_config.serve_combination
+        # result_fname = ""
+        # for model_id in self._serve_combination:
+        #     result_fname += run_config.models_name[model_id]
+        # result_fname += ".csv"
+        # self._result_path = os.path.join(log_dir, result_fname)
+        # self._result_file = open(self._result_path, "w+")
+        # self._wr = csv.writer(self._result_file, dialect="excel")
+        # result_header = ["query_id", "model_id", "bs", "seq_len", "latency"]
+        # self._wr.writerow(result_header)
+        # self._result_file.flush()
         self.start_up()
 
     def start_up(self):
@@ -98,18 +98,20 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
             query.seq_len,
         )
         self._barrier[0].wait()
-        self._wr.writerow(
-            np.array(
-                [
-                    query.id,
-                    query.model_id,
-                    query.batch_size,
-                    query.seq_len,
-                    query.latency_ms(),
-                ]
-            )
+        # self._wr.writerow(
+        #     np.array(
+        #         [
+        #             query.id,
+        #             query.model_id,
+        #             query.batch_size,
+        #             query.seq_len,
+        #             query.latency_ms(),
+        #         ]
+        #     )
+        # )
+        return service_pb2.Result(
+            node_id=self._node_id, accepted=True, elapsed=query.latency_ms()
         )
-        return service_pb2.Result(node_id=self._node_id, accepted=True)
 
 
 class AbacusServer(service_pb2_grpc.DNNServerServicer):

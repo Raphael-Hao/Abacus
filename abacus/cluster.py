@@ -22,6 +22,7 @@ class Cluster:
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config
         self._queues = {}
+        self._load_balancers = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
 
@@ -37,21 +38,34 @@ class Cluster:
             )
             self._test_queries.append((model_id, sleep_duration, bs, seq_len))
 
-    def send_query(self, id, model_id, batch_size, seq_len):
-        self._queues[model_id].put(
-            Query(
-                id=id,
-                model_id=model_id,
-                batch_size=batch_size,
-                seq_len=seq_len,
-                qos_target=self._qos_target,
-            )
-        )
-
-    def start_up(self):
+    def start_load_balancer(self):
         logging.info("Cluster Initializing")
+        logging.info("Model queues Initializing")
         for model_id in self._run_config.serve_combination:
             self._queues[model_id] = mp.Queue()
+        logging.info("Loadbalancer Initializing")
+        if self._run_config.policy == "Abacus":
+            for model_id in range(self._run_config.total_models):
+                self._load_balancers[model_id] = AbacusLoadBalancer(
+                    run_config=self._run_config,
+                    query_q=self._queues[model_id],
+                    qos_target=self._run_config.qos_target,
+                )
+                self._load_balancers[model_id].start()
+        elif self._run_config.policy == "Clock":
+            self._node_q = mp.Queue()
+            for node_id in range(self._run_config.node_id):
+                self._node_q.put(node_id)
+            for model_id in range(self._run_config.total_models):
+                self._load_balancers[model_id] = ClockLoadBalancer(
+                    run_config=self._run_config,
+                    query_q=self._queues[model_id],
+                    node_q=self._node_q,
+                    qos_target=self._run_config.qos_target,
+                )
+                self._load_balancers[model_id].start()
+        else:
+            raise NotImplementedError
 
     def start_test(self):
         self.prepare_test_queries(
@@ -63,3 +77,13 @@ class Cluster:
             self.send_query(id=i, model_id=model_id, batch_size=bs, seq_len=seq_len)
             time.sleep(sleep_duration)
 
+    def send_query(self, id, model_id, batch_size, seq_len):
+        self._queues[model_id].put(
+            Query(
+                id=id,
+                model_id=model_id,
+                batch_size=batch_size,
+                seq_len=seq_len,
+                qos_target=self._qos_target,
+            )
+        )

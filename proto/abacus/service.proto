@@ -5,7 +5,7 @@ service DNNServer { rpc Inference(Query) returns (Result); }
 
 message Query {
   int32 id = 1;
-  string model = 2;
+  int32 model_id = 2;
   int32 bs = 3;
   int32 seq_len = 4;
   float start_stamp = 5;
@@ -15,4 +15,5 @@ message Query {
 message Result {
   int32 node_id = 1;
   bool accepted = 2;
+  float elapsed = 3;
 }

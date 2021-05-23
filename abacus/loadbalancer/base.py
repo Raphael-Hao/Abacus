@@ -13,6 +13,5 @@ from abacus.option import RunConfig
 class LoadBalancer(Process):
     def __init__(self, run_config: RunConfig, query_q, qos_target) -> None:
         self._run_config = run_config
-
-    def start_up():
-        raise NotImplementedError
+        self._query_q = query_q
+        self._qos_tgt = qos_target
