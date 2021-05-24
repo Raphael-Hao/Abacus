@@ -8,80 +8,116 @@ import numpy as np
 import random
 import torch
 import csv
+from concurrent import futures
+import grpc
+
 import torch.multiprocessing as mp
 from torch.multiprocessing import Process
+
+import abacus.service_pb2 as service_pb2
+import abacus.service_pb2_grpc as service_pb2_grpc
 
 from abacus.option import RunConfig
 from abacus.worker import ServerWorker
 from abacus.modeling.predictor.mlp import MLPregression
+from abacus.utils import Query
 
-# import abacus.abacus_pb2 as abacus_pb2
-# import abacus.abacus_pb2_grpc as abacus_pb2_grpc
+## ClockWork: 4 models in one node
+class ClockServer(service_pb2_grpc.DNNServerServicer):
+    def __init__(self, run_config: RunConfig) -> None:
+        self._run_config = run_config
+        self._node_id = run_config.node_id
+        self._warmup_barrier = mp.Barrier(run_config.total_models + 1)
+        self._barrier = [mp.Barrier(2)]
+        self._stop_event = mp.Event()
+        self._workers = {}
+        self._queues = {}
+        self._pipes = {}
+        self._qos_target = run_config.qos_target
+        random.seed(0)
+        # log_path = "results/Cluster/" + self._run_config.policy
+        # log_dir = os.path.join(self._run_config.path, log_path)
+        # os.makedirs(log_dir, exist_ok=True)
+        # self._serve_combination = run_config.serve_combination
+        # result_fname = ""
+        # for model_id in self._serve_combination:
+        #     result_fname += run_config.models_name[model_id]
+        # result_fname += ".csv"
+        # self._result_path = os.path.join(log_dir, result_fname)
+        # self._result_file = open(self._result_path, "w+")
+        # self._wr = csv.writer(self._result_file, dialect="excel")
+        # result_header = ["query_id", "model_id", "bs", "seq_len", "latency"]
+        # self._wr.writerow(result_header)
+        # self._result_file.flush()
+        self.start_up()
 
-class Query:
-    MODELS_LEN = {
-        0: 18,
-        1: 35,
-        2: 52,
-        3: 14,
-        4: 19,
-        5: 22,
-        6: 12,
-    }
+    def start_up(self):
+        logging.info("Starting Clockworker Workers")
+        for worker_id, model_id in enumerate(self._run_config.serve_combination):
+            model_name = self._run_config.models_name[model_id]
+            pipe_parent, pipe_child = mp.Pipe()
+            model_worker = ServerWorker(
+                self._run_config,
+                model_name,
+                self._run_config.supported_batchsize,
+                self._run_config.supported_seqlen,
+                pipe_child,
+                self._barrier,
+                self._warmup_barrier,
+                worker_id,
+            )
+            model_worker.start()
+            self._workers[model_id] = model_worker
+            self._pipes[model_id] = pipe_parent
+        self._warmup_barrier.wait()
+        logging.info("All Server Workers Initialized")
 
-    def __init__(self, id, model_id, batch_size, seq_len, qos_target=60) -> None:
-        self.id = id
-        self.model_id = model_id
-        self.batch_size = batch_size
-        self.seq_len = seq_len
-        self.start_pos = 0
-        self.end_pos = 0
-        self.op_len = self.MODELS_LEN[model_id]
-        self.start_stamp = time.time()
-        self.qos_targt = qos_target
-        self.state = "new"
-
-    def remain_ops(self):
-        return self.op_len - self.end_pos
-
-    def set_op_pos(self, new_pos):
-        if self.end_pos != 0:
-            self.state = "inter"
-        self.start_pos = self.end_pos
-        if new_pos == -1:
-            self.end_pos = self.op_len
-        else:
-            self.end_pos = new_pos
-        return self.start_pos, self.end_pos
-
-    def get_op_pos(self):
-        return self.start_pos, self.end_pos
-
-    def get_headromm(self):
-        return self.qos_targt - (time.time() - self.start_stamp) * 1000
-
-    def if_processed(self):
-        return self.end_pos == self.op_len
-
-    def latency_ms(self):
-        return (time.time() - self.start_stamp) * 1000
-
-    def __str__(self) -> str:
-        return "model_id: {}, bs: {}, seq_len: {}, start: {}, end: {}, op_len: {}, qos_target: {}, state: {}".format(
-            self.model_id,
-            self.batch_size,
-            self.seq_len,
-            self.start_pos,
-            self.end_pos,
-            self.op_len,
-            self.qos_targt,
-            self.state,
+    def Inference(self, request, context):
+        query_id = request.id
+        model_id = request.model
+        bs = request.bs
+        seq_len = request.seq_len
+        start_stamp = request.start_stamp
+        qos_target = request.qos_target
+        query = Query(
+            id=query_id,
+            model_id=model_id,
+            batch_size=bs,
+            seq_len=seq_len,
+            start_stamp=start_stamp,
+            qos_target=qos_target,
+        )
+        query.set_op_pos(-1)
+        self._pipes[model_id].send(
+            query.id,
+            "new",
+            0,
+            query.start_pos,
+            query.end_pos,
+            query.batch_size,
+            query.seq_len,
+        )
+        self._barrier[0].wait()
+        # self._wr.writerow(
+        #     np.array(
+        #         [
+        #             query.id,
+        #             query.model_id,
+        #             query.batch_size,
+        #             query.seq_len,
+        #             query.latency_ms(),
+        #         ]
+        #     )
+        # )
+        return service_pb2.Result(
+            node_id=self._node_id, accepted=True, elapsed=query.latency_ms()
         )
 
 
-class AbacusServer:
+class AbacusServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config
+        self._node_id = run_config.node_id
         self._warmup_barrier = mp.Barrier(run_config.total_models + 1)
         if self._run_config.policy == "Abacus":
             self._barrier = []
@@ -95,6 +131,26 @@ class AbacusServer:
         self._pipes = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
+        self.start_up()
+
+    def Inference(self, request, context):
+        query_id = request.id
+        model_id = request.model
+        bs = request.bs
+        seq_len = request.seq_len
+        start_stamp = request.start_stamp
+        qos_target = request.qos_target
+        self._queues[model_id].put(
+            Query(
+                id=query_id,
+                model_id=model_id,
+                batch_size=bs,
+                seq_len=seq_len,
+                start_stamp=start_stamp,
+                qos_target=qos_target,
+            )
+        )
+        return service_pb2.Result(node_id=self._node_id, accepted=True)
 
     def send_query(self, id, model_id, batch_size, seq_len):
         self._queues[model_id].put(
@@ -195,8 +251,14 @@ class Scheduler(Process):
 
         if run_config.total_models == 2:
             if run_config.mig == 0:
-                predictor_path = "model/A100/2in7/all.ckpt"
-                log_path = "results/A100/2in7/" + self._policy
+                if run_config.platform == "Single":
+                    predictor_path = "model/A100/2in7/all.ckpt"
+                    log_path = "results/A100/2in7/" + self._policy
+                elif run_config.platform == "Cluster":
+                    predictor_path = "model/V100/2in4/all.ckpt"
+                    log_path = "results/Cluster/" + self._policy
+                else:
+                    raise NotImplementedError
             elif run_config.mig == 2:
                 predictor_path = "model/mig/2in4/all.ckpt"
                 log_path = "results/mig/2in4/" + self._policy

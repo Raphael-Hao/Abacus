@@ -1,0 +1,19 @@
+syntax = "proto3";
+package DNNServer;
+
+service DNNServer { rpc Inference(Query) returns (Result); }
+
+message Query {
+  int32 id = 1;
+  int32 model_id = 2;
+  int32 bs = 3;
+  int32 seq_len = 4;
+  float start_stamp = 5;
+  int32 qos_target = 6;
+}
+
+message Result {
+  int32 node_id = 1;
+  bool accepted = 2;
+  float elapsed = 3;
+}

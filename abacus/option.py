@@ -17,6 +17,7 @@ class RunConfig:
         self.debug = args.debug
         self.task = args.task
         self.platform = args.platform
+        self.GPU = args.gpu
         # general configurations
         self.total_models = args.model_num
         self.device = 0
@@ -148,10 +149,11 @@ class RunConfig:
                 "bert": BertModel,
             }
 
-        if self.task == "serve":
+        elif self.task == "server":
             """
             [server configuration]
             """
+            self.node_id = args.node
             self.serve_combination = tuple(args.comb)
             self.policy = args.policy
             self.threshold = args.thld
@@ -160,6 +162,40 @@ class RunConfig:
             self.total_queries = args.queries
             self.average_duration = args.load
             self.abandon = args.abandon
+
+        elif self.task == "scheduler":
+            """
+            [scheduler configuration]
+            """
+            self.node_cnt = args.nodes
+            self.ip_dict = {
+                0: "localhost",
+                1: "localhost",
+                2: "localhost",
+                3: "localhost",
+                4: "localhost",
+                5: "localhost",
+                6: "localhost",
+                7: "localhost",
+                8: "localhost",
+                9: "localhost",
+                10: "localhost",
+                11: "localhost",
+            }
+            # self.ip_dict = [
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            #     "localhost",
+            # ]
 
         elif self.task == "profile":
             """
@@ -338,18 +374,17 @@ def parse_options():
     parser = argparse.ArgumentParser(description="Abacus")
 
     parser.add_argument("--path", type=str, default="/root/Abacus")
-
     parser.add_argument(
         "--task",
         type=str,
         default="profile",
         required=True,
-        choices=["profile", "train", "serve", "background"],
+        choices=["profile", "train", "background", "server", "scheduler"],
     )
-
     parser.add_argument(
-        "--platform", type=str, default="A100", choices=["A100", "V100"]
+        "--platform", type=str, default="A100", choices=["Single", "Cluster"]
     )
+    parser.add_argument("--gpu", type=str, default="A100", choices=["A100", "V100"])
     parser.add_argument("--device", type=int, default=0, choices=[0, 1, 2, 3])
     parser.add_argument(
         "--model_num",
@@ -358,33 +393,67 @@ def parse_options():
         required=True,
         choices=[1, 2, 3, 4],
     )
-
     parser.add_argument("--mig", type=int, default=0, choices=[0, 1, 2, 4])
 
     """[summary]
-    online serve
+    server or scheduler
     """
-    parser.add_argument("--comb", type=int, required="serve" in sys.argv, nargs="+")
+    parser.add_argument(
+        "--node", type=int, required=("server" in sys.argv or "scheduler" in sys.argv)
+    )
+    parser.add_argument(
+        "--comb",
+        type=int,
+        required=("server" in sys.argv or "scheduler" in sys.argv),
+        nargs="+",
+    )
     parser.add_argument(
         "--policy",
         type=str,
         default="Abacus",
-        required="serve" in sys.argv,
-        choices=["Abacus", "SJF", "FCFS", "EDF"],
+        required=("server" in sys.argv or "scheduler" in sys.argv),
+        choices=["Abacus", "SJF", "FCFS", "EDF", "Clock"],
     )
-    parser.add_argument("--load", type=int, required="serve" in sys.argv, default=50)
     parser.add_argument(
-        "--queries", type=int, required="serve" in sys.argv, default=100
+        "--load",
+        type=int,
+        required=("server" in sys.argv or "scheduler" in sys.argv),
+        default=50,
     )
-    parser.add_argument("--qos", type=int, required="serve" in sys.argv, default=60)
-    parser.add_argument("--thld", type=int, required="serve" in sys.argv, default=10)
+    parser.add_argument(
+        "--queries",
+        type=int,
+        required=("server" in sys.argv or "scheduler" in sys.argv),
+        default=100,
+    )
+    parser.add_argument(
+        "--qos",
+        type=int,
+        required=("server" in sys.argv or "scheduler" in sys.argv),
+        default=60,
+    )
+    parser.add_argument(
+        "--thld",
+        type=int,
+        required=("server" in sys.argv or "scheduler" in sys.argv),
+        default=10,
+    )
     parser.add_argument("--ways", type=int, required="Abacus" in sys.argv, default=4)
     parser.add_argument("--abandon", action="store_true")
-
-    ## profiling
+    """[summary]
+    scheduler
+    """
+    parser.add_argument(
+        "--nodes", type=int, required="scheduler" in sys.argv, default=1
+    )
+    """[summary]
+    profiling
+    """
     parser.add_argument("--test", type=int, required="profile" in sys.argv, default=200)
 
-    ## training
+    """[summary]
+    training
+    """
     parser.add_argument(
         "--mode",
         type=str,

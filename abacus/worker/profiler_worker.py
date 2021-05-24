@@ -10,7 +10,7 @@ import logging
 import numpy as np
 from torch.cuda.streams import Stream
 
-from abacus.worker.worker import AbacusWorker
+from abacus.worker.base import AbacusWorker
 
 
 class ProfilerWorker(AbacusWorker):
