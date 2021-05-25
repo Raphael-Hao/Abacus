@@ -13,7 +13,6 @@ from abacus.utils import gen_background_combinations
 
 
 def background(args:RunConfig):
-    mp.set_start_method("spawn")
     barrier = mp.Barrier(args.total_models + 1)
     barrier2 = mp.Barrier(2)
 

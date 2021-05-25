@@ -17,7 +17,6 @@ from abacus.utils import gen_model_combinations, gen_partition, make_record
 
 
 def profile(run_config: RunConfig):
-    mp.set_start_method("spawn")
     barrier = mp.Barrier(run_config.total_models + 1)
     profile_data_path = os.path.join(run_config.data_path, "profile")
     os.makedirs(profile_data_path, exist_ok=True)

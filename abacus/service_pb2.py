@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x14\x61\x62\x61\x63us/service.proto\x12\tDNNServer\"k\n\x05Query\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08model_id\x18\x02 \x01(\x05\x12\n\n\x02\x62s\x18\x03 \x01(\x05\x12\x0f\n\x07seq_len\x18\x04 \x01(\x05\x12\x13\n\x0bstart_stamp\x18\x05 \x01(\x02\x12\x12\n\nqos_target\x18\x06 \x01(\x05\"<\n\x06Result\x12\x0f\n\x07node_id\x18\x01 \x01(\x05\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x12\x0f\n\x07\x65lapsed\x18\x03 \x01(\x02\x32=\n\tDNNServer\x12\x30\n\tInference\x12\x10.DNNServer.Query\x1a\x11.DNNServer.Resultb\x06proto3'
+  serialized_pb=b'\n\x14\x61\x62\x61\x63us/service.proto\x12\tDNNServer\"k\n\x05Query\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08model_id\x18\x02 \x01(\x05\x12\n\n\x02\x62s\x18\x03 \x01(\x05\x12\x0f\n\x07seq_len\x18\x04 \x01(\x05\x12\x13\n\x0bstart_stamp\x18\x05 \x01(\x01\x12\x12\n\nqos_target\x18\x06 \x01(\x05\"<\n\x06Result\x12\x0f\n\x07node_id\x18\x01 \x01(\x05\x12\x10\n\x08\x61\x63\x63\x65pted\x18\x02 \x01(\x08\x12\x0f\n\x07\x65lapsed\x18\x03 \x01(\x01\x32=\n\tDNNServer\x12\x30\n\tInference\x12\x10.DNNServer.Query\x1a\x11.DNNServer.Resultb\x06proto3'
 )
 
 
@@ -63,7 +63,7 @@ _QUERY = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='start_stamp', full_name='DNNServer.Query.start_stamp', index=4,
-      number=5, type=2, cpp_type=6, label=1,
+      number=5, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -116,7 +116,7 @@ _RESULT = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='elapsed', full_name='DNNServer.Result.elapsed', index=2,
-      number=3, type=2, cpp_type=6, label=1,
+      number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,

@@ -45,20 +45,23 @@ class Cluster:
             self._queues[model_id] = mp.Queue()
         logging.info("Loadbalancer Initializing")
         if self._run_config.policy == "Abacus":
-            for model_id in range(self._run_config.total_models):
-                self._load_balancers[model_id] = AbacusLoadBalancer(
+            for model_id in self._run_config.serve_combination:
+                load_balancer = AbacusLoadBalancer(
                     run_config=self._run_config,
+                    model_id=model_id,
                     query_q=self._queues[model_id],
                     qos_target=self._run_config.qos_target,
                 )
-                self._load_balancers[model_id].start()
+                load_balancer.start()
+                self._load_balancers[model_id] = load_balancer
         elif self._run_config.policy == "Clock":
             self._node_q = mp.Queue()
-            for node_id in range(self._run_config.node_id):
+            for node_id in range(self._run_config.node_cnt):
                 self._node_q.put(node_id)
-            for model_id in range(self._run_config.total_models):
+            for model_id in self._run_config.serve_combination:
                 self._load_balancers[model_id] = ClockLoadBalancer(
                     run_config=self._run_config,
+                    model_id=model_id,
                     query_q=self._queues[model_id],
                     node_q=self._node_q,
                     qos_target=self._run_config.qos_target,

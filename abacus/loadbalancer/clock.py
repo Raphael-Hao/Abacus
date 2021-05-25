@@ -19,8 +19,15 @@ import abacus.service_pb2_grpc as service_pb2_grpc
 
 
 class ClockLoadBalancer(LoadBalancer):
-    def __init__(self, run_config: RunConfig, query_q, node_q, qos_target) -> None:
-        super().__init__(run_config=run_config, query_q=query_q, qos_target=qos_target)
+    def __init__(
+        self, run_config: RunConfig, model_id, query_q, node_q, qos_target
+    ) -> None:
+        super().__init__(
+            run_config=run_config,
+            model_id=model_id,
+            query_q=query_q,
+            qos_target=qos_target,
+        )
         self._node_q = node_q
 
     def run(self) -> None:
@@ -31,10 +38,10 @@ class ClockLoadBalancer(LoadBalancer):
         log_dir = os.path.join(self._run_config.path, log_path)
         os.makedirs(log_dir, exist_ok=True)
         self._serve_combination = self._run_config.serve_combination
-        result_fname = ""
-        for model_id in self._serve_combination:
-            result_fname += self._run_config.models_name[model_id]
-        result_fname += ".csv"
+        result_fname = "{}.csv".format(self._run_config.models_name[self._model_id])
+        # for model_id in self._serve_combination:
+        #     result_fname += self._run_config.models_name[model_id]
+        # result_fname += ".csv"
         self._result_path = os.path.join(log_dir, result_fname)
         self._result_file = open(self._result_path, "w+")
         self._wr = csv.writer(self._result_file, dialect="excel")
@@ -103,3 +110,4 @@ class ClockLoadBalancer(LoadBalancer):
                             ]
                         )
                     )
+                self._result_file.flush()

@@ -7,6 +7,7 @@ import time
 import random
 import numpy as np
 import numpy.ma as ma
+import logging
 
 
 def gen_background_combinations(models, background_combinations):
@@ -90,6 +91,7 @@ class Query:
             self.start_stamp = time.time()
         else:
             self.start_stamp = start_stamp
+        logging.debug("start_stamp: {:.2f}".format(self.start_stamp))
         self.qos_targt = qos_target
         self.state = "new"
 
@@ -110,7 +112,9 @@ class Query:
         return self.start_pos, self.end_pos
 
     def get_headromm(self):
-        return self.qos_targt - (time.time() - self.start_stamp) * 1000
+        head_room = self.qos_targt - (time.time() - self.start_stamp) * 1000
+        logging.debug("headroom: {:.2f}".format(head_room))
+        return head_room
 
     def if_processed(self):
         return self.end_pos == self.op_len

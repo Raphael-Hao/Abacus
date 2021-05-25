@@ -169,6 +169,12 @@ class RunConfig:
             [scheduler configuration]
             """
             self.node_cnt = args.nodes
+            # self.threshold = args.thld
+            self.qos_target = args.qos
+            self.policy = args.policy
+            self.serve_combination = tuple(args.comb)
+            self.total_queries = args.queries
+            self.average_duration = args.load
             self.ip_dict = {
                 0: "localhost",
                 1: "localhost",

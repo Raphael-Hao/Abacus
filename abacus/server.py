@@ -74,7 +74,7 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
 
     def Inference(self, request, context):
         query_id = request.id
-        model_id = request.model
+        model_id = request.model_id
         bs = request.bs
         seq_len = request.seq_len
         start_stamp = request.start_stamp
@@ -89,13 +89,15 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         )
         query.set_op_pos(-1)
         self._pipes[model_id].send(
-            query.id,
-            "new",
-            0,
-            query.start_pos,
-            query.end_pos,
-            query.batch_size,
-            query.seq_len,
+            (
+                query.id,
+                "new",
+                0,
+                query.start_pos,
+                query.end_pos,
+                query.batch_size,
+                query.seq_len,
+            )
         )
         self._barrier[0].wait()
         # self._wr.writerow(
@@ -134,8 +136,18 @@ class AbacusServer(service_pb2_grpc.DNNServerServicer):
         self.start_up()
 
     def Inference(self, request, context):
+        logging.debug("query id at abacus server accept:{}".format(request.id))
+        logging.debug("model id at abacus server accept:{}".format(request.model_id))
+        logging.debug("batch size at abacus server accept:{}".format(request.bs))
+        logging.debug("seq len at abacus server accept:{}".format(request.seq_len))
+        logging.debug(
+            "start stamp at abacus server accept:{}".format(request.start_stamp)
+        )
+        logging.debug(
+            "qos target at abacus server accept:{}".format(request.qos_target)
+        )
         query_id = request.id
-        model_id = request.model
+        model_id = request.model_id
         bs = request.bs
         seq_len = request.seq_len
         start_stamp = request.start_stamp

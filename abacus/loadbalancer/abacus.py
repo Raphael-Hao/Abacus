@@ -6,6 +6,7 @@
 # Author: raphael hao
 import grpc
 import random
+import logging
 
 from abacus.option import RunConfig
 from abacus.utils import Query
@@ -16,8 +17,13 @@ import abacus.service_pb2_grpc as service_pb2_grpc
 
 
 class AbacusLoadBalancer(LoadBalancer):
-    def __init__(self, run_config: RunConfig, query_q, qos_target) -> None:
-        super().__init__(run_config=run_config, query_q=query_q, qos_target=qos_target)
+    def __init__(self, run_config: RunConfig, model_id, query_q, qos_target) -> None:
+        super().__init__(
+            run_config=run_config,
+            model_id=model_id,
+            query_q=query_q,
+            qos_target=qos_target,
+        )
 
     def run(self) -> None:
         self._channel_dict = {}
@@ -34,6 +40,22 @@ class AbacusLoadBalancer(LoadBalancer):
             if not self._query_q.empty():
                 query: Query = self._query_q.get()
                 node_id = random.choice(self._node_list)
+                logging.debug("query id at abacus load balancer:{}".format(query.id))
+                logging.debug(
+                    "model id at abacus load balancer:{}".format(query.model_id)
+                )
+                logging.debug(
+                    "batch size at abacus load balancer:{}".format(query.batch_size)
+                )
+                logging.debug(
+                    "seq len at abacus load balancer:{}".format(query.seq_len)
+                )
+                logging.debug(
+                    "start stamp at abacus load balancer:{}".format(query.start_stamp)
+                )
+                logging.debug(
+                    "qos target at abacus load balancer:{}".format(query.qos_targt)
+                )
                 result = self._stub_dict[node_id].Inference(
                     service_pb2.Query(
                         id=query.id,
