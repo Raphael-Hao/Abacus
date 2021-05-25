@@ -251,14 +251,8 @@ class Scheduler(Process):
 
         if run_config.total_models == 2:
             if run_config.mig == 0:
-                if run_config.platform == "Single":
-                    predictor_path = "model/A100/2in7/all.ckpt"
-                    log_path = "results/A100/2in7/" + self._policy
-                elif run_config.platform == "Cluster":
-                    predictor_path = "model/V100/2in4/all.ckpt"
-                    log_path = "results/Cluster/" + self._policy
-                else:
-                    raise NotImplementedError
+                predictor_path = "model/A100/2in7/all.ckpt"
+                log_path = "results/A100/2in7/" + self._policy
             elif run_config.mig == 2:
                 predictor_path = "model/mig/2in4/all.ckpt"
                 log_path = "results/mig/2in4/" + self._policy
@@ -272,8 +266,12 @@ class Scheduler(Process):
                 raise NotImplementedError
         elif run_config.total_models == 4:
             if run_config.mig == 0:
-                predictor_path = "model/A100/4in4/all.ckpt"
-                log_path = "results/A100/4in4/" + self._policy
+                if run_config.platform == "single":
+                    predictor_path = "model/A100/4in4/all.ckpt"
+                    log_path = "results/A100/4in4/" + self._policy
+                elif run_config.platform == "cluster":
+                    predictor_path = "model/cluster/4in4/all.ckpt"
+                    log_path = "results/cluster/4in4/" + self._policy
             elif run_config.mig == 1:
                 predictor_path = "model/mig/4in4/all.ckpt"
                 log_path = "results/mig/4in4/" + self._policy

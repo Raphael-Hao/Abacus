@@ -3,11 +3,13 @@
 # Author: raphael hao
 import os
 import csv
+from abacus.option import RunConfig
 
 
-class MultiDNNPredictor:
+class LatencyPredictor:
     def __init__(
         self,
+        run_config: RunConfig,
         model_select,
         models_id,
         total_epochs,
@@ -18,6 +20,7 @@ class MultiDNNPredictor:
         total_models,
         mig,
     ):
+        self._run_config = run_config
         self._model_select = model_select
         self._total_epochs = total_epochs
         self._batch_size = batch_size
@@ -44,6 +47,10 @@ class MultiDNNPredictor:
             self._result_path = os.path.join(self._path, "result/A100/3in4")
         elif self._total_models == 4:
             if self._mig == 0:
+                if self._run_config.platform == "":
+                    self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
+                    self._save_path = os.path.join(self._path, "model/A100/4in4")
+                    self._result_path = os.path.join(self._path, "result/A100/4in4")
                 self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
                 self._save_path = os.path.join(self._path, "model/A100/4in4")
                 self._result_path = os.path.join(self._path, "result/A100/4in4")

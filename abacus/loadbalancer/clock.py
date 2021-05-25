@@ -27,7 +27,7 @@ class ClockLoadBalancer(LoadBalancer):
         self._channel_dict = {}
         self._stub_dict = {}
         self._node_list = []
-        log_path = "results/Cluster/" + self._run_config.policy
+        log_path = "results/cluster/4in4/" + self._run_config.policy
         log_dir = os.path.join(self._run_config.path, log_path)
         os.makedirs(log_dir, exist_ok=True)
         self._serve_combination = self._run_config.serve_combination

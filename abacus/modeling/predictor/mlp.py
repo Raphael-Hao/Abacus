@@ -13,9 +13,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from abacus.modeling.predictor import MultiDNNPredictor
+from abacus.modeling.predictor import LatencyPredictor
 from abacus.modeling.dataloader import load_torch_data
 from abacus.modeling.utils import AverageMeter
+from abacus.option import RunConfig
 
 
 class MLPregression(nn.Module):
@@ -34,9 +35,10 @@ class MLPregression(nn.Module):
         return output[:, 0]
 
 
-class MLPPredictor(MultiDNNPredictor):
+class MLPPredictor(LatencyPredictor):
     def __init__(
         self,
+        run_config: RunConfig,
         models_id,
         epoch=30,
         batch_size=16,
@@ -50,6 +52,7 @@ class MLPPredictor(MultiDNNPredictor):
         mig=0,
     ):
         super().__init__(
+            run_config,
             "mlp",
             models_id,
             epoch,

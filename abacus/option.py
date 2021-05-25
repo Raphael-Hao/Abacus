@@ -82,8 +82,8 @@ class RunConfig:
             ],
         }
         self.path = args.path
-        self.path = "/state/partition/whcui/repository/project/Abacus"
-        # self.path = "/home/whcui/project/Abacus"
+        # self.path = "/state/partition/whcui/repository/project/Abacus"
+        self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
 
         self.mig = args.mig
@@ -149,7 +149,7 @@ class RunConfig:
                 "bert": BertModel,
             }
 
-        elif self.task == "server":
+        if self.task == "server":
             """
             [server configuration]
             """
@@ -159,9 +159,10 @@ class RunConfig:
             self.threshold = args.thld
             self.qos_target = args.qos
             self.search_ways = args.ways
-            self.total_queries = args.queries
-            self.average_duration = args.load
             self.abandon = args.abandon
+            if self.platform == "single":
+                self.total_queries = args.queries
+                self.average_duration = args.load
 
         elif self.task == "scheduler":
             """
@@ -216,7 +217,7 @@ class RunConfig:
                     (2, 5, 6),
                 ]
             elif self.total_models == 2:
-                if self.mig == 0 and self.platform == "A100":
+                if self.mig == 0 and self.platform == "single":
                     self.profiling_combinations = [
                         (0, 1),
                         (0, 2),
@@ -240,7 +241,7 @@ class RunConfig:
                         (4, 6),
                         (5, 6),
                     ]
-                elif self.mig == 2 or self.platform == "V100":
+                elif self.mig == 2 or self.platform == "cluster":
                     self.profiling_combinations = [
                         (1, 2),
                         (1, 5),
@@ -382,10 +383,18 @@ def parse_options():
         choices=["profile", "train", "background", "server", "scheduler"],
     )
     parser.add_argument(
-        "--platform", type=str, default="A100", choices=["Single", "Cluster"]
+        "--platform",
+        type=str,
+        default="A100",
+        required=True,
+        choices=["single", "cluster"],
     )
-    parser.add_argument("--gpu", type=str, default="A100", choices=["A100", "V100"])
-    parser.add_argument("--device", type=int, default=0, choices=[0, 1, 2, 3])
+    parser.add_argument(
+        "--gpu", type=str, required=True, default="A100", choices=["A100", "V100"]
+    )
+    parser.add_argument(
+        "--device", type=int, required=True, default=0, choices=[0, 1, 2, 3]
+    )
     parser.add_argument(
         "--model_num",
         type=int,
@@ -417,13 +426,17 @@ def parse_options():
     parser.add_argument(
         "--load",
         type=int,
-        required=("server" in sys.argv or "scheduler" in sys.argv),
+        required=(
+            ("server" in sys.argv and "single" in sys.argv) or ("scheduler" in sys.argv)
+        ),
         default=50,
     )
     parser.add_argument(
         "--queries",
         type=int,
-        required=("server" in sys.argv or "scheduler" in sys.argv),
+        required=(
+            ("server" in sys.argv and "single" in sys.argv) or ("scheduler" in sys.argv)
+        ),
         default=100,
     )
     parser.add_argument(

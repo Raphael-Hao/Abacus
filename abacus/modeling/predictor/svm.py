@@ -8,12 +8,14 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from abacus.modeling.dataloader import load_data_for_sklearn
-from abacus.modeling.predictor import MultiDNNPredictor
+from abacus.modeling.predictor import LatencyPredictor
+from abacus.option import RunConfig
 
 
-class SVMPredictor(MultiDNNPredictor):
+class SVMPredictor(LatencyPredictor):
     def __init__(
         self,
+        run_config: RunConfig,
         models_id,
         epoch=30,
         batch_size=16,
@@ -24,6 +26,7 @@ class SVMPredictor(MultiDNNPredictor):
         mig=0,
     ):
         super().__init__(
+            run_config,
             "svm",
             models_id,
             epoch,
