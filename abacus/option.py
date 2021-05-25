@@ -349,6 +349,8 @@ class RunConfig:
                     "inception_v3_vgg16": [0.001, 100],
                     "resnet152_vgg16": [0.001, 100],
                 }
+                if self.platform == "cluster":
+                    self.hyper_params = {"all": [0.0001, 180, 32]}
             elif self.mig == 1:
                 self.hyper_params = {"all": [0.0001, 250, 32]}
             elif self.mig == 2:

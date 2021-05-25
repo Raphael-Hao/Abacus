@@ -315,7 +315,9 @@ class Scheduler(Process):
         self._wr = csv.writer(self._result_file, dialect="excel")
 
         if self._predictor_ckpt_path is not None:
-            logging.info("Scheduler loading predictor")
+            logging.info(
+                "Scheduler loading predictor from {}".format(self._predictor_ckpt_path)
+            )
             self._predictor = MLPregression(self._models_feature)
             self._predictor.load_state_dict(
                 torch.load(self._predictor_ckpt_path, map_location="cpu")

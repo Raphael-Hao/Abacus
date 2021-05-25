@@ -13,6 +13,7 @@ def train_predictor(args: RunConfig):
             from abacus.modeling.predictor.mlp import MLPPredictor
 
             predictor = MLPPredictor(
+                run_config=args,
                 models_id=args.models_id,
                 lr=args.hyper_params[args.mode][0],
                 epoch=args.hyper_params[args.mode][1],
@@ -28,6 +29,7 @@ def train_predictor(args: RunConfig):
             from abacus.modeling.predictor.lr import LRPredictor
 
             predictor = LRPredictor(
+                run_config=args,
                 models_id=args.models_id,
                 epoch=200,
                 batch_size=16,
@@ -40,6 +42,7 @@ def train_predictor(args: RunConfig):
             from abacus.modeling.predictor.svm import SVMPredictor
 
             predictor = SVMPredictor(
+                run_config=args,
                 models_id=args.models_id,
                 epoch=200,
                 batch_size=16,
@@ -56,6 +59,7 @@ def train_predictor(args: RunConfig):
             from abacus.modeling.predictor.mlp import MLPPredictor
 
             predictor = MLPPredictor(
+                run_config=args,
                 models_id=args.models_id,
                 epoch=args.hyper_params[args.model_combination][1],
                 batch_size=8,
@@ -71,6 +75,7 @@ def train_predictor(args: RunConfig):
             from abacus.modeling.predictor.lr import LRPredictor
 
             predictor = LRPredictor(
+                run_config=args,
                 models_id=args.models_id,
                 epoch=200,
                 batch_size=16,
@@ -83,6 +88,7 @@ def train_predictor(args: RunConfig):
             from abacus.modeling.predictor.lr import LRPredictor
 
             predictor = SVMPredictor(
+                run_config=args,
                 models_id=args.models_id,
                 epoch=200,
                 batch_size=16,
@@ -108,6 +114,7 @@ def train_predictor(args: RunConfig):
                 from abacus.modeling.predictor.mlp import MLPPredictor
 
                 predictor = MLPPredictor(
+                    run_config=args,
                     models_id=args.models_id,
                     lr=args.hyper_params[data_filename][0],
                     epoch=args.hyper_params[data_filename][1],
@@ -123,6 +130,7 @@ def train_predictor(args: RunConfig):
                 from abacus.modeling.predictor.lr import LRPredictor
 
                 predictor = LRPredictor(
+                    run_config=args,
                     models_id=args.models_id,
                     epoch=200,
                     batch_size=16,
@@ -135,6 +143,7 @@ def train_predictor(args: RunConfig):
                 from abacus.modeling.predictor.svm import SVMPredictor
 
                 predictor = SVMPredictor(
+                    run_config=args,
                     models_id=args.models_id,
                     epoch=200,
                     batch_size=16,

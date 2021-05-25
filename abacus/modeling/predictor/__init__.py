@@ -47,13 +47,18 @@ class LatencyPredictor:
             self._result_path = os.path.join(self._path, "result/A100/3in4")
         elif self._total_models == 4:
             if self._mig == 0:
-                if self._run_config.platform == "":
+                if self._run_config.platform == "single":
                     self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
                     self._save_path = os.path.join(self._path, "model/A100/4in4")
                     self._result_path = os.path.join(self._path, "result/A100/4in4")
-                self._data_path = os.path.join(self._path, "data/profile/A100/4in4")
-                self._save_path = os.path.join(self._path, "model/A100/4in4")
-                self._result_path = os.path.join(self._path, "result/A100/4in4")
+                elif self._run_config.platform == "cluster":
+                    self._data_path = os.path.join(
+                        self._path, "data/profile/cluster/4in4"
+                    )
+                    self._save_path = os.path.join(self._path, "model/cluster/4in4")
+                    self._result_path = os.path.join(self._path, "result/cluster/4in4")
+                else:
+                    raise NotImplementedError
             elif self._mig == 1:
                 self._data_path = os.path.join(self._path, "data/profile/mig/4in4")
                 self._save_path = os.path.join(self._path, "model/mig/4in4")
