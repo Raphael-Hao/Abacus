@@ -8,6 +8,7 @@
 import grpc
 import os
 import csv
+import logging
 import numpy as np
 
 from abacus.option import RunConfig
@@ -62,6 +63,7 @@ class ClockLoadBalancer(LoadBalancer):
                 if headroom > 0:
                     try:
                         node_id = self._node_q.get(block=True, timeout=headroom)
+                        logging.debug("node: {} scheduled".format(node_id))
                         result = self._stub_dict[node_id].Inference(
                             service_pb2.Query(
                                 id=query.id,
@@ -75,6 +77,8 @@ class ClockLoadBalancer(LoadBalancer):
                         elapsed = result.elapsed
                         idle_node_id = result.node_id
                         self._node_q.put(idle_node_id)
+                        print(self._node_q)
+                        logging.debug("idle node: {} push back".format(node_id))
                         self._wr.writerow(
                             np.array(
                                 [
@@ -87,6 +91,7 @@ class ClockLoadBalancer(LoadBalancer):
                             )
                         )
                     except Exception as error:
+                        logging.debug("timeout for query id: {}".format(query.id))
                         self._wr.writerow(
                             np.array(
                                 [
@@ -99,6 +104,7 @@ class ClockLoadBalancer(LoadBalancer):
                             )
                         )
                 else:
+                    logging.debug("drop for query id: {}".format(query.id))
                     self._wr.writerow(
                         np.array(
                             [

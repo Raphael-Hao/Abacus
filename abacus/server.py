@@ -115,7 +115,6 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
             node_id=self._node_id, accepted=True, elapsed=query.latency_ms()
         )
 
-
 class AbacusServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
         self._run_config = run_config

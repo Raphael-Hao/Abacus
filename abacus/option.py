@@ -83,7 +83,7 @@ class RunConfig:
         }
         self.path = args.path
         # self.path = "/state/partition/whcui/repository/project/Abacus"
-        self.path = "/home/whcui/project/Abacus"
+        self.path = "/root/abacus"
         self.data_path = os.path.join(self.path, "data")
 
         self.mig = args.mig
@@ -176,9 +176,9 @@ class RunConfig:
             self.total_queries = args.queries
             self.average_duration = args.load
             self.ip_dict = {
-                0: "localhost",
-                1: "localhost",
-                2: "localhost",
+                0: "172.16.14.75",
+                1: "172.16.14.77",
+                2: "172.16.14.78",
                 3: "localhost",
                 4: "localhost",
                 5: "localhost",

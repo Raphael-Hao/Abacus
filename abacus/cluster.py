@@ -59,6 +59,7 @@ class Cluster:
             for node_id in range(self._run_config.node_cnt):
                 self._node_q.put(node_id)
             for model_id in self._run_config.serve_combination:
+                logging.info("Initializing Clock Loadbalancer for model {}".format(model_id))
                 self._load_balancers[model_id] = ClockLoadBalancer(
                     run_config=self._run_config,
                     model_id=model_id,
@@ -69,6 +70,8 @@ class Cluster:
                 self._load_balancers[model_id].start()
         else:
             raise NotImplementedError
+        logging.info("sleep for 5 seconds and start testing")
+        time.sleep(5)
 
     def start_test(self):
         self.prepare_test_queries(
