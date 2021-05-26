@@ -53,6 +53,7 @@ class Cluster:
                 )
                 for j in range(4):
                     self._load_balancers[balancer_id] = ClockLoadBalancer(
+                        loader_id=balancer_id,
                         run_config=self._run_config,
                         model_id=model_id,
                         query_q=self._queues[model_id],

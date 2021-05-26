@@ -21,7 +21,7 @@ import abacus.service_pb2_grpc as service_pb2_grpc
 
 class ClockLoadBalancer(LoadBalancer):
     def __init__(
-        self, run_config: RunConfig, model_id, query_q, node_q, qos_target
+        loader_id, self, run_config: RunConfig, model_id, query_q, node_q, qos_target
     ) -> None:
         super().__init__(
             run_config=run_config,
@@ -30,25 +30,28 @@ class ClockLoadBalancer(LoadBalancer):
             qos_target=qos_target,
         )
         self._node_q = node_q
+        self._loader_id = loader_id
 
     def run(self) -> None:
         self._channel_dict = {}
         self._stub_dict = {}
         self._node_list = []
-        # log_path = "results/cluster/4in4/" + self._run_config.policy
-        # log_dir = os.path.join(self._run_config.path, log_path)
-        # os.makedirs(log_dir, exist_ok=True)
+        log_path = "results/cluster/" + self._run_config.policy
+        log_dir = os.path.join(self._run_config.path, log_path)
+        os.makedirs(log_dir, exist_ok=True)
         self._serve_combination = self._run_config.serve_combination
-        # result_fname = "{}.csv".format(self._run_config.models_name[self._model_id])
-        # for model_id in self._serve_combination:
-        #     result_fname += self._run_config.models_name[model_id]
-        # result_fname += ".csv"
-        # self._result_path = os.path.join(log_dir, result_fname)
-        # self._result_file = open(self._result_path, "w+")
-        # self._wr = csv.writer(self._result_file, dialect="excel")
-        # result_header = ["query_id", "model_id", "bs", "seq_len", "latency"]
-        # self._wr.writerow(result_header)
-        # self._result_file.flush()
+        result_fname = "{}_{}.csv".format(
+            self._run_config.models_name[self._model_id], self._loader_id
+        )
+        for model_id in self._serve_combination:
+            result_fname += self._run_config.models_name[model_id]
+        result_fname += ".csv"
+        self._result_path = os.path.join(log_dir, result_fname)
+        self._result_file = open(self._result_path, "w+")
+        self._wr = csv.writer(self._result_file, dialect="excel")
+        result_header = ["query_id", "model_id", "bs", "seq_len", "load_id", "latency"]
+        self._wr.writerow(result_header)
+        self._result_file.flush()
         for node_id in range(self._run_config.node_cnt):
             ip = self._run_config.ip_dict[node_id]
             channel = grpc.insecure_channel("{}:50051".format(ip))
@@ -72,48 +75,51 @@ class ClockLoadBalancer(LoadBalancer):
                                 seq_len=query.seq_len,
                                 start_stamp=query.start_stamp,
                                 qos_target=query.qos_targt,
+                                load_id=query.load_id,
                             )
                         )
                         elapsed = result.elapsed
                         idle_node_id = result.node_id
                         self._node_q.put(idle_node_id)
-                        # print(self._node_q)
                         logging.debug("idle node: {} push back".format(node_id))
-                        # self._wr.writerow(
-                        #     np.array(
-                        #         [
-                        #             query.id,
-                        #             query.model_id,
-                        #             query.batch_size,
-                        #             query.seq_len,
-                        #             result.elapsed,
-                        #         ]
-                        #     )
-                        # )
+                        self._wr.writerow(
+                            np.array(
+                                [
+                                    query.id,
+                                    query.model_id,
+                                    query.batch_size,
+                                    query.seq_len,
+                                    query.load_id,
+                                    elapsed,
+                                ]
+                            )
+                        )
                     except Exception as error:
                         logging.debug("timeout for query id: {}".format(query.id))
-                        # self._wr.writerow(
-                        #     np.array(
-                        #         [
-                        #             query.id,
-                        #             query.model_id,
-                        #             query.batch_size,
-                        #             query.seq_len,
-                        #             -1,
-                        #         ]
-                        #     )
-                        # )
+                        self._wr.writerow(
+                            np.array(
+                                [
+                                    query.id,
+                                    query.model_id,
+                                    query.batch_size,
+                                    query.seq_len,
+                                    query.load_id,
+                                    -1,
+                                ]
+                            )
+                        )
                 else:
                     logging.debug("drop for query id: {}".format(query.id))
-                #     self._wr.writerow(
-                #         np.array(
-                #             [
-                #                 query.id,
-                #                 query.model_id,
-                #                 query.batch_size,
-                #                 query.seq_len,
-                #                 -1,
-                #             ]
-                #         )
-                #     )
-                # self._result_file.flush()
+                    self._wr.writerow(
+                        np.array(
+                            [
+                                query.id,
+                                query.model_id,
+                                query.batch_size,
+                                query.seq_len,
+                                query.load_id,
+                                -1,
+                            ]
+                        )
+                    )
+                self._result_file.flush()
