@@ -176,7 +176,7 @@ class RunConfig:
             self.total_queries = args.queries
             self.average_duration = args.load
             self.ip_dict = {
-                0: "localhost",
+                0: "121.196.211.94",
                 1: "localhost",
                 2: "localhost",
                 3: "localhost",
