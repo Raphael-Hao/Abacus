@@ -116,11 +116,12 @@ class Cluster:
                 logging.info("load changed: {}".format(load_id))
                 if load_id == total_loads:
                     break
-                average_duration = self._run_config.loads[load_id] / 20
+                average_duration = self._run_config.loads[load_id] / 16
                 start_stamp = time.time()
             id += 1
             model_id = random.choice(self._run_config.serve_combination)
             sleep_duration = random.expovariate(average_duration)
+            logging.debug("{}".format(sleep_duration))
             bs = random.choice(self._run_config.supported_batchsize)
             seq_len = (
                 random.choice(self._run_config.supported_seqlen) if model_id == 6 else 0

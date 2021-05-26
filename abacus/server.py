@@ -114,6 +114,7 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
                 ]
             )
         )
+        self._result_file.flush()
         return service_pb2.Result(
             node_id=self._node_id, accepted=True, elapsed=query.latency_ms()
         )
@@ -279,7 +280,7 @@ class Scheduler(Process):
                     log_path = "results/A100/4in4/" + self._policy
                 elif run_config.platform == "cluster":
                     predictor_path = "model/cluster/4in4/all.ckpt"
-                    log_path = "results/cluster/4in4/" + self._policy
+                    log_path = "results/cluster/" + self._policy
             elif run_config.mig == 1:
                 predictor_path = "model/mig/4in4/all.ckpt"
                 log_path = "results/mig/4in4/" + self._policy
