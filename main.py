@@ -45,7 +45,7 @@ if __name__ == "__main__":
     elif run_config.task == "scheduler":
         abacus_client = Cluster(run_config=run_config)
         abacus_client.start_load_balancer()
-        abacus_client.start_test()
+        abacus_client.start_long_term_test()
     elif run_config.task == "train":
         train_predictor(run_config)
     elif run_config.task == "background":

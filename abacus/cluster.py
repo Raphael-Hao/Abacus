@@ -26,18 +26,6 @@ class Cluster:
         self._qos_target = run_config.qos_target
         random.seed(0)
 
-    def prepare_test_queries(self, total_queries=1000, average_duration=20):
-        logging.info("Preparing test queries")
-        self._test_queries = []
-        for i in range(total_queries):
-            model_id = random.choice(self._run_config.serve_combination)
-            sleep_duration = random.expovariate(average_duration)
-            bs = random.choice(self._run_config.supported_batchsize)
-            seq_len = (
-                random.choice(self._run_config.supported_seqlen) if model_id == 6 else 0
-            )
-            self._test_queries.append((model_id, sleep_duration, bs, seq_len))
-
     def start_load_balancer(self):
         logging.info("Cluster Initializing")
         logging.info("Model queues Initializing")
@@ -70,6 +58,18 @@ class Cluster:
         else:
             raise NotImplementedError
 
+    def prepare_test_queries(self, total_queries=1000, average_duration=20):
+        logging.info("Preparing test queries")
+        self._test_queries = []
+        for i in range(total_queries):
+            model_id = random.choice(self._run_config.serve_combination)
+            sleep_duration = random.expovariate(average_duration)
+            bs = random.choice(self._run_config.supported_batchsize)
+            seq_len = (
+                random.choice(self._run_config.supported_seqlen) if model_id == 6 else 0
+            )
+            self._test_queries.append((model_id, sleep_duration, bs, seq_len))
+
     def start_test(self):
         self.prepare_test_queries(
             self._run_config.total_queries, self._run_config.average_duration
@@ -78,6 +78,28 @@ class Cluster:
         for model_id, sleep_duration, bs, seq_len in self._test_queries:
             i += 1
             self.send_query(id=i, model_id=model_id, batch_size=bs, seq_len=seq_len)
+            time.sleep(sleep_duration)
+
+    def start_long_term_test(self):
+        id = 0
+        load_id = 0
+        total_loads = len(self._run_config.loads)
+        average_duration = self._run_config.loads[load_id]
+        start_stamp = time.time()
+        while True:
+            if (time.time() - start_stamp) >= self._run_config.load_change_dura:
+                load_id += 1
+                if load_id == total_loads:
+                    break
+                average_duration = self._run_config.loads[load_id]
+            id += 1
+            model_id = random.choice(self._run_config.serve_combination)
+            sleep_duration = random.expovariate(average_duration)
+            bs = random.choice(self._run_config.supported_batchsize)
+            seq_len = (
+                random.choice(self._run_config.supported_seqlen) if model_id == 6 else 0
+            )
+            self.send_query(id=id, model_id=model_id, batch_size=bs, seq_len=seq_len)
             time.sleep(sleep_duration)
 
     def send_query(self, id, model_id, batch_size, seq_len):
