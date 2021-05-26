@@ -119,14 +119,6 @@ class RunConfig:
             "bert": 12,
         }
 
-        # self.supported_batchsize = [
-        #     1,
-        #     2,
-        #     4,
-        #     8,
-        #     16,
-        #     32,
-        # ]
         # mig batch size
         self.supported_batchsize = [
             # 1,
@@ -170,11 +162,112 @@ class RunConfig:
             """
             self.node_cnt = args.nodes
             # self.threshold = args.thld
+            self.trace_file = "trace.csv"
+            self.trace_path = os.path.join(self.data_path, self.trace_file)
+            self.load_change_dura = 1 # in second
+            self.loads = [
+                11043,
+                9701,
+                9968,
+                8750,
+                10197,
+                8751,
+                9686,
+                9135,
+                10461,
+                9805,
+                10358,
+                9377,
+                11033,
+                9674,
+                9691,
+                9225,
+                10566,
+                9749,
+                11277,
+                10268,
+                11132,
+                10370,
+                10940,
+                9889,
+                10999,
+                10702,
+                10760,
+                10517,
+                11066,
+                10842,
+                10696,
+                10690,
+                12039,
+                10765,
+                10759,
+                10883,
+                12109,
+                11303,
+                11064,
+                10695,
+                11794,
+                10721,
+                11379,
+                11121,
+                12139,
+                11230,
+                11527,
+                11183,
+                12535,
+                10944,
+                11553,
+                11264,
+                13184,
+                11486,
+                12323,
+                11743,
+                12911,
+                11766,
+                12258,
+                11765,
+                13042,
+                11956,
+                12351,
+                12196,
+                13186,
+                11916,
+                12043,
+                11516,
+                12541,
+                11470,
+                12237,
+                11900,
+                12451,
+                11181,
+                12052,
+                11547,
+                12175,
+                11119,
+                11973,
+                10782,
+                12092,
+                10682,
+                11486,
+                10501,
+                11565,
+                10617,
+                11191,
+                10342,
+                11095,
+                9857,
+                10605,
+                9544,
+                10910,
+                10072,
+                10166,
+                9447,
+            ]
             self.qos_target = args.qos
             self.policy = args.policy
             self.serve_combination = tuple(args.comb)
             self.total_queries = args.queries
-            self.average_duration = args.load
+            # self.average_duration = args.load
             self.ip_dict = {
                 0: "172.16.14.75",
                 1: "172.16.14.77",
@@ -189,20 +282,6 @@ class RunConfig:
                 10: "localhost",
                 11: "localhost",
             }
-            # self.ip_dict = [
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            #     "localhost",
-            # ]
 
         elif self.task == "profile":
             """
