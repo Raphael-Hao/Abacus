@@ -10,6 +10,7 @@ message Query {
   int32 seq_len = 4;
   double start_stamp = 5;
   int32 qos_target = 6;
+  int32 load_id = 7;
 }
 
 message Result {

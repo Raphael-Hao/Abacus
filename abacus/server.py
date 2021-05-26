@@ -35,20 +35,20 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         self._pipes = {}
         self._qos_target = run_config.qos_target
         random.seed(0)
-        # log_path = "results/Cluster/" + self._run_config.policy
-        # log_dir = os.path.join(self._run_config.path, log_path)
-        # os.makedirs(log_dir, exist_ok=True)
-        # self._serve_combination = run_config.serve_combination
-        # result_fname = ""
-        # for model_id in self._serve_combination:
-        #     result_fname += run_config.models_name[model_id]
-        # result_fname += ".csv"
-        # self._result_path = os.path.join(log_dir, result_fname)
-        # self._result_file = open(self._result_path, "w+")
-        # self._wr = csv.writer(self._result_file, dialect="excel")
-        # result_header = ["query_id", "model_id", "bs", "seq_len", "latency"]
-        # self._wr.writerow(result_header)
-        # self._result_file.flush()
+        log_path = "results/cluster/" + self._run_config.policy
+        log_dir = os.path.join(self._run_config.path, log_path)
+        os.makedirs(log_dir, exist_ok=True)
+        self._serve_combination = run_config.serve_combination
+        result_fname = ""
+        for model_id in self._serve_combination:
+            result_fname += run_config.models_name[model_id]
+        result_fname += ".csv"
+        self._result_path = os.path.join(log_dir, result_fname)
+        self._result_file = open(self._result_path, "w+")
+        self._wr = csv.writer(self._result_file, dialect="excel")
+        result_header = ["query_id", "model_id", "bs", "seq_len", "load_id", "latency"]
+        self._wr.writerow(result_header)
+        self._result_file.flush()
         self.start_up()
 
     def start_up(self):
@@ -79,6 +79,7 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
         seq_len = request.seq_len
         start_stamp = request.start_stamp
         qos_target = request.qos_target
+        load_id = request.load_id
         query = Query(
             id=query_id,
             model_id=model_id,
@@ -86,6 +87,7 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
             seq_len=seq_len,
             start_stamp=start_stamp,
             qos_target=qos_target,
+            load_id=load_id,
         )
         query.set_op_pos(-1)
         self._pipes[model_id].send(
@@ -100,20 +102,22 @@ class ClockServer(service_pb2_grpc.DNNServerServicer):
             )
         )
         self._barrier[0].wait()
-        # self._wr.writerow(
-        #     np.array(
-        #         [
-        #             query.id,
-        #             query.model_id,
-        #             query.batch_size,
-        #             query.seq_len,
-        #             query.latency_ms(),
-        #         ]
-        #     )
-        # )
+        self._wr.writerow(
+            np.array(
+                [
+                    query.id,
+                    query.model_id,
+                    query.batch_size,
+                    query.seq_len,
+                    query.load_id,
+                    query.latency_ms(),
+                ]
+            )
+        )
         return service_pb2.Result(
             node_id=self._node_id, accepted=True, elapsed=query.latency_ms()
         )
+
 
 class AbacusServer(service_pb2_grpc.DNNServerServicer):
     def __init__(self, run_config: RunConfig) -> None:
@@ -135,22 +139,13 @@ class AbacusServer(service_pb2_grpc.DNNServerServicer):
         self.start_up()
 
     def Inference(self, request, context):
-        logging.debug("query id at abacus server accept:{}".format(request.id))
-        logging.debug("model id at abacus server accept:{}".format(request.model_id))
-        logging.debug("batch size at abacus server accept:{}".format(request.bs))
-        logging.debug("seq len at abacus server accept:{}".format(request.seq_len))
-        logging.debug(
-            "start stamp at abacus server accept:{}".format(request.start_stamp)
-        )
-        logging.debug(
-            "qos target at abacus server accept:{}".format(request.qos_target)
-        )
         query_id = request.id
         model_id = request.model_id
         bs = request.bs
         seq_len = request.seq_len
         start_stamp = request.start_stamp
         qos_target = request.qos_target
+        load_id = request.load_id
         self._queues[model_id].put(
             Query(
                 id=query_id,
@@ -159,6 +154,7 @@ class AbacusServer(service_pb2_grpc.DNNServerServicer):
                 seq_len=seq_len,
                 start_stamp=start_stamp,
                 qos_target=qos_target,
+                load_id=load_id,
             )
         )
         return service_pb2.Result(node_id=self._node_id, accepted=True)
@@ -171,6 +167,7 @@ class AbacusServer(service_pb2_grpc.DNNServerServicer):
                 batch_size=batch_size,
                 seq_len=seq_len,
                 qos_target=self._qos_target,
+                load_id=0,
             )
         )
 
@@ -358,6 +355,7 @@ class Scheduler(Process):
                 "bs",
                 "seq_len",
                 "search_times",
+                "load_id",
                 "latency",
             ]
         elif self._policy == "SJF":
@@ -900,7 +898,15 @@ class Scheduler(Process):
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
                 np.array(
-                    [query.id, query.model_id, query.batch_size, query.seq_len, 0, -1]
+                    [
+                        query.id,
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        0,
+                        query.load_id,
+                        -1,
+                    ]
                 )
             )
             self.clean_scheduled_queries(model_ids=model_id)
@@ -920,6 +926,7 @@ class Scheduler(Process):
                             query.batch_size,
                             query.seq_len,
                             self._search_times,
+                            query.load_id,
                             query.latency_ms(),
                         ]
                     )
@@ -968,6 +975,7 @@ class Scheduler(Process):
                         query.model_id,
                         query.batch_size,
                         query.seq_len,
+                        query.load_id,
                         query.latency_ms(),
                     ]
                 )
@@ -976,7 +984,14 @@ class Scheduler(Process):
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
                 np.array(
-                    [query.id, query.model_id, query.batch_size, query.seq_len, -1]
+                    [
+                        query.id,
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        query.load_id,
+                        -1,
+                    ]
                 )
             )
             self.clean_scheduled_queries(model_ids=model_id)
@@ -1033,6 +1048,7 @@ class Scheduler(Process):
                         query.model_id,
                         query.batch_size,
                         query.seq_len,
+                        query.load_id,
                         query.latency_ms(),
                     ]
                 )
@@ -1042,7 +1058,14 @@ class Scheduler(Process):
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
                 np.array(
-                    [query.id, query.model_id, query.batch_size, query.seq_len, -1]
+                    [
+                        query.id,
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        query.load_id,
+                        -1,
+                    ]
                 )
             )
             self.clean_scheduled_queries(model_ids=model_id)
@@ -1089,6 +1112,7 @@ class Scheduler(Process):
                         query.model_id,
                         query.batch_size,
                         query.seq_len,
+                        query.load_id,
                         query.latency_ms(),
                     ]
                 )
@@ -1098,7 +1122,14 @@ class Scheduler(Process):
             query = self._scheduling_queries[model_id]
             self._wr.writerow(
                 np.array(
-                    [query.id, query.model_id, query.batch_size, query.seq_len, -1]
+                    [
+                        query.id,
+                        query.model_id,
+                        query.batch_size,
+                        query.seq_len,
+                        query.load_id,
+                        -1,
+                    ]
                 )
             )
             self.clean_scheduled_queries(model_ids=model_id)

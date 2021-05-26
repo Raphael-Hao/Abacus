@@ -40,22 +40,22 @@ class AbacusLoadBalancer(LoadBalancer):
             if not self._query_q.empty():
                 query: Query = self._query_q.get()
                 node_id = random.choice(self._node_list)
-                logging.debug("query id at abacus load balancer:{}".format(query.id))
-                logging.debug(
-                    "model id at abacus load balancer:{}".format(query.model_id)
-                )
-                logging.debug(
-                    "batch size at abacus load balancer:{}".format(query.batch_size)
-                )
-                logging.debug(
-                    "seq len at abacus load balancer:{}".format(query.seq_len)
-                )
-                logging.debug(
-                    "start stamp at abacus load balancer:{}".format(query.start_stamp)
-                )
-                logging.debug(
-                    "qos target at abacus load balancer:{}".format(query.qos_targt)
-                )
+                # logging.debug("query id at abacus load balancer:{}".format(query.id))
+                # logging.debug(
+                #     "model id at abacus load balancer:{}".format(query.model_id)
+                # )
+                # logging.debug(
+                #     "batch size at abacus load balancer:{}".format(query.batch_size)
+                # )
+                # logging.debug(
+                #     "seq len at abacus load balancer:{}".format(query.seq_len)
+                # )
+                # logging.debug(
+                #     "start stamp at abacus load balancer:{}".format(query.start_stamp)
+                # )
+                # logging.debug(
+                #     "qos target at abacus load balancer:{}".format(query.qos_targt)
+                # )
                 result = self._stub_dict[node_id].Inference(
                     service_pb2.Query(
                         id=query.id,

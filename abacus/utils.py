@@ -78,10 +78,18 @@ class Query:
     }
 
     def __init__(
-        self, id, model_id, batch_size, seq_len, start_stamp=None, qos_target=60
+        self,
+        id,
+        model_id,
+        batch_size,
+        seq_len,
+        start_stamp=None,
+        qos_target=60,
+        load_id=0,
     ) -> None:
         self.id = id
         self.model_id = model_id
+        self.load_id = load_id
         self.batch_size = batch_size
         self.seq_len = seq_len
         self.start_pos = 0

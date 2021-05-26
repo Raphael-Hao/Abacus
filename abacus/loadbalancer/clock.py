@@ -77,7 +77,7 @@ class ClockLoadBalancer(LoadBalancer):
                         elapsed = result.elapsed
                         idle_node_id = result.node_id
                         self._node_q.put(idle_node_id)
-                        print(self._node_q)
+                        # print(self._node_q)
                         logging.debug("idle node: {} push back".format(node_id))
                         self._wr.writerow(
                             np.array(
