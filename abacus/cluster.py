@@ -51,7 +51,7 @@ class Cluster:
                 logging.info(
                     "Initializing Clock Loadbalancer for model {}".format(model_id)
                 )
-                for j in range(4):
+                for _ in range(4):
                     self._load_balancers[balancer_id] = ClockLoadBalancer(
                         loader_id=balancer_id,
                         run_config=self._run_config,
@@ -93,7 +93,7 @@ class Cluster:
 
     def start_long_term_test(self):
         logging.info("warm up all servers")
-        for i in range(10000):
+        for i in range(10):
             id = 0
             model_id = random.choice(self._run_config.serve_combination)
             sleep_duration = random.expovariate(500)
@@ -107,7 +107,7 @@ class Cluster:
             time.sleep(sleep_duration)
         logging.info("warmed up all servers")
         id = 0
-        load_id = 0
+        load_id = 1
         total_loads = len(self._run_config.loads)
         average_duration = self._run_config.loads[load_id]
         start_stamp = time.time()
