@@ -109,7 +109,7 @@ class Cluster:
         id = 0
         load_id = 0
         total_loads = len(self._run_config.loads)
-        average_duration = self._run_config.loads[load_id]
+        average_duration = self._run_config.loads[load_id]/16
         start_stamp = time.time()
         while True:
             if (time.time() - start_stamp) >= self._run_config.load_change_dura:
