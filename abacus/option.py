@@ -84,7 +84,7 @@ class RunConfig:
         self.path = args.path
         # self.path = "/state/partition/whcui/repository/project/Abacus"
         self.path = "/root/abacus"
-        self.path = "/home/whcui/project/Abacus"
+        # self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
 
         self.mig = args.mig
