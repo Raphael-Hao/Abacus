@@ -21,7 +21,7 @@ import abacus.service_pb2_grpc as service_pb2_grpc
 
 class ClockLoadBalancer(LoadBalancer):
     def __init__(
-        loader_id, self, run_config: RunConfig, model_id, query_q, node_q, qos_target
+        self, loader_id, run_config: RunConfig, model_id, query_q, node_q, qos_target
     ) -> None:
         super().__init__(
             run_config=run_config,
@@ -43,9 +43,6 @@ class ClockLoadBalancer(LoadBalancer):
         result_fname = "{}_{}.csv".format(
             self._run_config.models_name[self._model_id], self._loader_id
         )
-        for model_id in self._serve_combination:
-            result_fname += self._run_config.models_name[model_id]
-        result_fname += ".csv"
         self._result_path = os.path.join(log_dir, result_fname)
         self._result_file = open(self._result_path, "w+")
         self._wr = csv.writer(self._result_file, dialect="excel")
