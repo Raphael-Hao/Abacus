@@ -29,19 +29,26 @@ if __name__ == "__main__":
     if run_config.task == "profile":
         profile(run_config=run_config)
     elif run_config.task == "server":
-        server = grpc.server(futures.ThreadPoolExecutor(max_workers=8))
-        if run_config.policy == "Abacus":
-            ServerClass = AbacusServer
-        elif run_config.policy == "Clock":
-            ServerClass = ClockServer
+        if run_config.platform == "single":
+            server = AbacusServer(run_config=run_config)
+            server.start_test()
+            server.stop_test()
+        elif run_config.platform == "cluster":
+            server = grpc.server(futures.ThreadPoolExecutor(max_workers=8))
+            if run_config.policy == "Abacus":
+                ServerClass = AbacusServer
+            elif run_config.policy == "Clock":
+                ServerClass = ClockServer
+            else:
+                raise NotImplementedError
+            service_pb2_grpc.add_DNNServerServicer_to_server(
+                ServerClass(run_config=run_config), server
+            )
+            server.add_insecure_port("[::]:50051")
+            server.start()
+            server.wait_for_termination()
         else:
             raise NotImplementedError
-        service_pb2_grpc.add_DNNServerServicer_to_server(
-            ServerClass(run_config=run_config), server
-        )
-        server.add_insecure_port("[::]:50051")
-        server.start()
-        server.wait_for_termination()
     elif run_config.task == "scheduler":
         abacus_client = Cluster(run_config=run_config)
         abacus_client.start_load_balancer()
