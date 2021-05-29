@@ -31,7 +31,7 @@ def load_single_file(filepath):
 
 
 # %% 2in7 in A100
-def select_experiment_data(target, platform, model_config):
+def select_experiment_data(target, platform, model_config, model_size="normal"):
     if target == "qos" and platform == "A100" and model_config == "2in7":
         colo_names = [
             "Res50+Res101",
@@ -80,32 +80,59 @@ def select_experiment_data(target, platform, model_config):
             "vgg16bert",
             "vgg19bert",
         ]
+        if model_size == "normal":
+            qos_target = {
+                "resnet50resnet101": 100,
+                "resnet50resnet152": 150,
+                "resnet50inception_v3": 100,
+                "resnet50vgg16": 50,
+                "resnet50vgg19": 50,
+                "resnet50bert": 75,
+                "resnet101resnet152": 160,
+                "resnet101inception_v3": 150,
+                "resnet101vgg16": 90,
+                "resnet101vgg19": 80,
+                "resnet101bert": 130,
+                "resnet152inception_v3": 150,
+                "resnet152vgg16": 150,
+                "resnet152vgg19": 150,
+                "resnet152bert": 150,
+                "inception_v3vgg16": 80,
+                "inception_v3vgg19": 80,
+                "inception_v3bert": 80,
+                "vgg16vgg19": 30,
+                "vgg16bert": 60,
+                "vgg19bert": 60,
+            }
+            data_dir = "../data/server/qos/A100/2in7/"
+        elif model_size == "small":
+            qos_target = {
+                "resnet50resnet101": 60,
+                "resnet50resnet152": 95,
+                "resnet50inception_v3": 70,
+                "resnet50vgg16": 35,
+                "resnet50vgg19": 35,
+                "resnet50bert": 50,
+                "resnet101resnet152": 95,
+                "resnet101inception_v3": 100,
+                "resnet101vgg16": 55,
+                "resnet101vgg19": 65,
+                "resnet101bert": 90,
+                "resnet152inception_v3": 100,
+                "resnet152vgg16": 95,
+                "resnet152vgg19": 110,
+                "resnet152bert": 110,
+                "inception_v3vgg16": 50,
+                "inception_v3vgg19": 55,
+                "inception_v3bert": 60,
+                "vgg16vgg19": 15,
+                "vgg16bert": 75,
+                "vgg19bert": 70,
+            }
+            data_dir = "../data/server/qos/small/"
+        else:
+            raise NotImplementedError
 
-        qos_target = {
-            "resnet50resnet101": 100,
-            "resnet50resnet152": 150,
-            "resnet50inception_v3": 100,
-            "resnet50vgg16": 50,
-            "resnet50vgg19": 50,
-            "resnet50bert": 75,
-            "resnet101resnet152": 160,
-            "resnet101inception_v3": 150,
-            "resnet101vgg16": 90,
-            "resnet101vgg19": 80,
-            "resnet101bert": 130,
-            "resnet152inception_v3": 150,
-            "resnet152vgg16": 150,
-            "resnet152vgg19": 150,
-            "resnet152bert": 150,
-            "inception_v3vgg16": 80,
-            "inception_v3vgg19": 80,
-            "inception_v3bert": 80,
-            "vgg16vgg19": 30,
-            "vgg16bert": 60,
-            "vgg19bert": 60,
-        }
-
-        data_dir = "../data/server/qos/A100/2in7/"
     elif target == "qos" and platform == "A100" and model_config == "3in4":
         colo_names = [
             "Res101+Res152+VGG19",
@@ -361,11 +388,14 @@ def select_experiment_data(target, platform, model_config):
     return colo_names, file_names, qos_target, data_dir
 
 
-def data_preprocess(target, platform, model_config):
+def data_preprocess(target, platform, model_config, model_size="normal"):
     import csv
 
     colo_names, file_names, qos_target, data_dir = select_experiment_data(
-        target=target, platform=platform, model_config=model_config
+        target=target,
+        platform=platform,
+        model_config=model_config,
+        model_size=model_size,
     )
     result_filepath = data_dir + "result.csv"
     result_file = open(result_filepath, "w+")
@@ -466,6 +496,57 @@ def data_preprocess(target, platform, model_config):
     result_file.flush()
 
 
+def small_data_preprocess(target, platform, model_config, model_size="normal"):
+    import csv
+
+    colo_names, file_names, qos_target, data_dir = select_experiment_data(
+        target=target,
+        platform=platform,
+        model_config=model_config,
+        model_size=model_size,
+    )
+    result_filepath = data_dir + "result.csv"
+    result_file = open(result_filepath, "w+")
+    csv_writer = csv.writer(result_file, dialect="excel")
+    result_header = [
+        "colocation",
+        "Abacus_tail",
+        "Abacus_throughput",
+        "Abacus_violation",
+        # "qos_target",
+    ]
+    csv_writer.writerow(result_header)
+
+    for i in range(len(colo_names)):
+        # print("--------------{}--------------".format(file_names[i]))
+        abacus_latency = load_single_file(
+            data_dir + "/{}.csv".format(file_names[i])
+        )
+        abacus_tail = np.percentile(abacus_latency, 99)
+
+        print(
+            "Abacus 99%-ile latency: {}, {} queries satified for {}".format(
+                abacus_tail, abacus_latency.shape, colo_names[i]
+            )
+        )
+
+        abacus_vio = abacus_latency[abacus_latency < qos_target[file_names[i]]].shape[0]
+
+        abacus_load = abacus_latency.shape[0]
+
+        abacus_vio_ratio = 1 - abacus_vio / 1000
+
+        csv_writer.writerow(
+            [
+                colo_names[i],
+                abacus_tail / qos_target[file_names[i]],
+                abacus_load,
+                abacus_vio_ratio,
+            ]
+        )
+    result_file.flush()
+
+
 if __name__ == "__main__":
     # A100 qos
     # data_preprocess("qos", "A100", "2in7")
@@ -480,6 +561,8 @@ if __name__ == "__main__":
     # data_preprocess("qos", "mig", "2in4")
     # data_preprocess("qos", "mig", "4in4")
     # mig qos
-    data_preprocess("throughput", "mig", "1in4")
-    data_preprocess("throughput", "mig", "2in4")
-    data_preprocess("throughput", "mig", "4in4")
+    # data_preprocess("throughput", "mig", "1in4")
+    # data_preprocess("throughput", "mig", "2in4")
+    # data_preprocess("throughput", "mig", "4in4")
+    # small DNN
+    small_data_preprocess("qos", "A100", "2in7", "small")

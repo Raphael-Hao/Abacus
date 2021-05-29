@@ -82,8 +82,8 @@ class RunConfig:
             ],
         }
         self.path = args.path
-        # self.path = "/state/partition/whcui/repository/project/Abacus"
-        self.path = "/root/abacus"
+        self.path = "/state/partition/whcui/repository/project/Abacus"
+        # self.path = "/root/abacus"
         # self.path = "/home/whcui/project/Abacus"
         self.data_path = os.path.join(self.path, "data")
 
@@ -125,9 +125,9 @@ class RunConfig:
             # 1,
             # 2,
             4,
-            8,
-            16,
-            32,
+            # 8,
+            # 16,
+            # 32,
         ]
         self.supported_seqlen = [8, 16, 32, 64]
 
@@ -601,7 +601,7 @@ def parse_options():
         "--model_comb",
         type=str,
         default="resnet152_resnet152",
-        required="single" in sys.argv,
+        required=("single" in sys.argv and "train" in sys.argv),
     )
     parser.add_argument("--perf", action="store_true")
 
