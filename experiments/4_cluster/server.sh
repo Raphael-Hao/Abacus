@@ -12,7 +12,7 @@ qos_target=(
 # qos
 echo "working dir $(pwd)"
 
-python main.py --task server --model_num 4 --comb 1 2 5 6 --policy Clock --qos 100 --thld 5 --ways 2 --abandon --node 0 --platform cluster --gpu V100 --device 0 --debug
+python main.py --task server --model_num 4 --comb 1 2 5 6 --policy Clock --qos 100 --thld 5 --ways 2 --abandon --node 0 --platform cluster --gpu V100 --device 0
 # python main.py --task server --model_num 4 --comb 1 2 5 6 --policy SJF --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon
 
 # python main.py --task server --model_num 4 --comb 1 2 5 6 --policy FCFS --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon

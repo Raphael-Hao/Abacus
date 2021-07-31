@@ -77,8 +77,6 @@ ax.set_yticklabels(y_ticks, rotation=0, fontsize=14)
 plt.tight_layout()
 plt.savefig("../figure/prediction_error.pdf", bbox_inches="tight")
 
-
-
 # %%
 import numpy as np
 import glob
@@ -401,3 +399,4 @@ plt.tight_layout()
 plt.legend(ncol=4, loc="lower center",fontsize=16)
 plt.savefig("../figure/qos_violation_ratio.pdf",bbox_inches="tight")
 # %%
+
