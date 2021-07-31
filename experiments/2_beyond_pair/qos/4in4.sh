@@ -12,13 +12,13 @@ qos_target=(
 # qos
 echo "working dir $(pwd)"
 
-python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy SJF --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon
+python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy SJF --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon --gpu A100 --device 0 --node 0
 
-python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy FCFS --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon
+python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy FCFS --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon --gpu A100 --device 0 --node 0
 
-python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy EDF --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon
+python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy EDF --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon --gpu A100 --device 0 --node 0
 
-python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy Abacus --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon
+python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy Abacus --load 50 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon --gpu A100 --device 0 --node 0
 
 # throughput
 # for i in {0..20}; do
