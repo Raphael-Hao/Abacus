@@ -6,8 +6,7 @@ Archive.zip
 core
 !core/
 __pycache__
-.pyc
+*.pyc
 profile.log
-results/cluster
-data/server/cluster
 data.tar.gz
+*.csv
