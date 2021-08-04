@@ -8,3 +8,6 @@ core
 __pycache__
 .pyc
 profile.log
+results/cluster
+data/server/cluster
+data.tar.gz
