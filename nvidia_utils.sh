@@ -67,7 +67,7 @@ if [ "$TASK" = "MPS" ]; then
       if [ "$MIG_CNT" = 1 ]; then
         export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps-0
         export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log-0
-        export CUDA_VISIBLE_DEVICES=MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0
+        export CUDA_VISIBLE_DEVICES=MIG-000c838f-e0e0-5b6a-a1c6-1f5d79e1b447
         nvidia-cuda-mps-control -d
         echo "MPS server at INSTANCE ${CUDA_VISIBLE_DEVICES} started"
       elif [ "$MIG_CNT" = 2 ]; then
@@ -111,7 +111,7 @@ if [ "$TASK" = "MPS" ]; then
       if [ "$MIG_CNT" = 1 ]; then
         export CUDA_MPS_PIPE_DIRECTORY=/tmp/nvidia-mps-0
         export CUDA_MPS_LOG_DIRECTORY=/tmp/nvidia-log-0
-        export CUDA_VISIBLE_DEVICES=MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0
+        export CUDA_VISIBLE_DEVICES=MIG-000c838f-e0e0-5b6a-a1c6-1f5d79e1b447
         echo quit | nvidia-cuda-mps-control
         echo "MPS server at INSTANCE ${CUDA_VISIBLE_DEVICES} stopped"
       elif [ "$MIG_CNT" = 2 ]; then

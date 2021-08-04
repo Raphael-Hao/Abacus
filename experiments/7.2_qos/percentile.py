@@ -5,6 +5,8 @@
 import numpy as np
 import pandas as pd
 
+data_path = "/state/partition/whcui/repository/project/Abacus/"
+
 
 def get_latency(data):
 
@@ -85,8 +87,8 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
                 "resnet50resnet101": 100,
                 "resnet50resnet152": 150,
                 "resnet50inception_v3": 100,
-                "resnet50vgg16": 50,
-                "resnet50vgg19": 50,
+                "resnet50vgg16": 40,
+                "resnet50vgg19": 40,
                 "resnet50bert": 75,
                 "resnet101resnet152": 160,
                 "resnet101inception_v3": 150,
@@ -100,36 +102,36 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
                 "inception_v3vgg16": 80,
                 "inception_v3vgg19": 80,
                 "inception_v3bert": 80,
-                "vgg16vgg19": 30,
+                "vgg16vgg19": 20,
                 "vgg16bert": 60,
                 "vgg19bert": 60,
             }
-            data_dir = "../data/server/7.2_qos/2in7/"
+            data_dir = data_path + "data/server/7.2_qos/2in7/"
         elif model_size == "small":
             qos_target = {
-                "resnet50resnet101": 60,
+                "resnet50resnet101": 65,
                 "resnet50resnet152": 95,
                 "resnet50inception_v3": 70,
                 "resnet50vgg16": 35,
                 "resnet50vgg19": 35,
-                "resnet50bert": 50,
-                "resnet101resnet152": 95,
+                "resnet50bert": 55,
+                "resnet101resnet152": 100,
                 "resnet101inception_v3": 100,
                 "resnet101vgg16": 55,
                 "resnet101vgg19": 65,
-                "resnet101bert": 90,
-                "resnet152inception_v3": 100,
+                "resnet101bert": 95,
+                "resnet152inception_v3": 110,
                 "resnet152vgg16": 95,
                 "resnet152vgg19": 110,
                 "resnet152bert": 110,
-                "inception_v3vgg16": 50,
+                "inception_v3vgg16": 55,
                 "inception_v3vgg19": 55,
-                "inception_v3bert": 60,
+                "inception_v3bert": 65,
                 "vgg16vgg19": 15,
-                "vgg16bert": 75,
-                "vgg19bert": 70,
+                "vgg16bert": 45,
+                "vgg19bert": 50,
             }
-            data_dir = "../data/server/7.2_qos/small/"
+            data_dir = data_path + "data/server/7.2_qos/small/"
         else:
             raise NotImplementedError
 
@@ -155,7 +157,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet152vgg19bert": 80,
         }
 
-        data_dir = "../data/server/7.4_beyond_pair/qos/3in4/"
+        data_dir = data_path + "data/server/7.4_beyond_pair/qos/3in4/"
     elif target == "qos" and platform == "A100" and model_config == "4in4":
         colo_names = [
             "Res101+Res152+VGG19+Bert",
@@ -169,7 +171,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101resnet152vgg19bert": 100,
         }
 
-        data_dir = "../data/server/7.4_beyond_pair/qos/4in4/"
+        data_dir = data_path + "data/server/7.4_beyond_pair/qos/4in4/"
 
     elif target == "qos" and platform == "mig" and model_config == "4in4":
         colo_names = [
@@ -184,7 +186,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101resnet152vgg19bert": 130,
         }
 
-        data_dir = "../data/server/7.5_mig/qos/4in4"
+        data_dir = data_path + "data/server/7.5_mig/qos/4in4"
 
     elif target == "qos" and platform == "mig" and model_config == "2in4":
         colo_names = [
@@ -205,7 +207,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101vgg19_resnet152bert": 130,
         }
 
-        data_dir = "../data/server/7.5_mig/qos/2in4/"
+        data_dir = data_path + "data/server/7.5_mig/qos/2in4/"
 
     elif target == "qos" and platform == "mig" and model_config == "1in4":
         colo_names = [
@@ -220,7 +222,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101resnet152vgg19bert": 130,
         }
 
-        data_dir = "../data/server/7.5_mig/qos/1in4/"
+        data_dir = data_path + "data/server/7.5_mig/qos/1in4/"
 
     elif target == "throughput" and platform == "A100" and model_config == "2in7":
         colo_names = [
@@ -295,7 +297,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "vgg19bert": 60,
         }
 
-        data_dir = "../data/server/7.3_throughput/2in7/"
+        data_dir = data_path + "data/server/7.3_throughput/2in7/"
     elif target == "throughput" and platform == "A100" and model_config == "3in4":
         colo_names = [
             "Res101+Res152+VGG19",
@@ -318,7 +320,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet152vgg19bert": 100,
         }
 
-        data_dir = "../data/server/7.4_beyond_pair/throughput/3in4/"
+        data_dir = data_path + "data/server/7.4_beyond_pair/throughput/3in4/"
     elif target == "throughput" and platform == "A100" and model_config == "4in4":
         colo_names = [
             "Res101+Res152+VGG19+Bert",
@@ -332,7 +334,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101resnet152vgg19bert": 100,
         }
 
-        data_dir = "../data/server/7.4_beyond_pair/throughput/4in4/"
+        data_dir = data_path + "data/server/7.4_beyond_pair/throughput/4in4/"
     elif target == "throughput" and platform == "mig" and model_config == "4in4":
         colo_names = [
             "Res101+Res152+VGG19+Bert",
@@ -346,7 +348,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101resnet152vgg19bert": 130,
         }
 
-        data_dir = "../data/server/7.5_mig/throughput/4in4/"
+        data_dir = data_path + "data/server/7.5_mig/throughput/4in4/"
 
     elif target == "throughput" and platform == "mig" and model_config == "2in4":
         colo_names = [
@@ -367,7 +369,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101vgg19_resnet152bert": 130,
         }
 
-        data_dir = "../data/server/7.5_mig/throughput/2in4/"
+        data_dir = data_path + "data/server/7.5_mig/throughput/2in4/"
 
     elif target == "throughput" and platform == "mig" and model_config == "1in4":
         colo_names = [
@@ -382,7 +384,7 @@ def select_experiment_data(target, platform, model_config, model_size="normal"):
             "resnet101resnet152vgg19bert": 130,
         }
 
-        data_dir = "../data/server/7.5_mig/throughput/1in4/"
+        data_dir =data_path + "data/server/7.5_mig/throughput/1in4/"
     else:
         raise NotImplementedError
     return colo_names, file_names, qos_target, data_dir
@@ -519,9 +521,7 @@ def small_data_preprocess(target, platform, model_config, model_size="normal"):
 
     for i in range(len(colo_names)):
         # print("--------------{}--------------".format(file_names[i]))
-        abacus_latency = load_single_file(
-            data_dir + "/{}.csv".format(file_names[i])
-        )
+        abacus_latency = load_single_file(data_dir + "/{}.csv".format(file_names[i]))
         abacus_tail = np.percentile(abacus_latency, 99)
 
         print(

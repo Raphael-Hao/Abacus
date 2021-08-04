@@ -23,22 +23,22 @@ class RunConfig:
         self.device = 0
         self.mps_devices = {
             1: [
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/2/0",
+                "MIG-000c838f-e0e0-5b6a-a1c6-1f5d79e1b447",
+                "MIG-000c838f-e0e0-5b6a-a1c6-1f5d79e1b447",
+                "MIG-000c838f-e0e0-5b6a-a1c6-1f5d79e1b447",
+                "MIG-000c838f-e0e0-5b6a-a1c6-1f5d79e1b447",
             ],
             2: [
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/3/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/3/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/5/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/5/0",
+                "MIG-a143d4a9-b2f2-54d7-9f19-65508dba4a5a",
+                "MIG-a143d4a9-b2f2-54d7-9f19-65508dba4a5a",
+                "MIG-caaf0ba2-fb91-5b13-859c-e6e6e3ba3abe",
+                "MIG-caaf0ba2-fb91-5b13-859c-e6e6e3ba3abe",
             ],
             4: [
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/7/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/8/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/9/0",
-                "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/10/0",
+                "MIG-b56b9928-112d-52bd-b0a1-7c97480bfaf7",
+                "MIG-79a0f704-934e-57bc-a918-c67482112723",
+                "MIG-90f28204-3216-5270-a236-61db98e65113",
+                "MIG-83191d03-9c72-5650-8853-0188308a87df",
             ],
         }
         self.mps_pipe_dirs = {

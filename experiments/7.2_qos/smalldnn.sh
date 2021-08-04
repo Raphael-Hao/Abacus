@@ -70,7 +70,7 @@ echo "$testing combination are tested"
 for ((i = tested_comb; i < comb_len; i++)); do
   python main.py --task server --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon --platform single --gpu A100 --device 0 --node 0
 done
-
+cp -r results/A100/2in7/Abacus/* data/server/7.2_qos/small
 # throughput
 # for i in {0..20}; do
 #   python main.py --task server --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon

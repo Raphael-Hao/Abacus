@@ -71,6 +71,7 @@ for ((i = tested_comb; i < comb_len; i++)); do
   python main.py --task server --platform single --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon --gpu A100 --device 0 --node 0
 done
 
+cp -r results/A100/2in7 data/server/7.2_qos/
 # throughput
 # for i in {0..20}; do
 #   python main.py --task server --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
@@ -87,3 +88,4 @@ done
 # for i in {0..20}; do
 #   python main.py --task server --model_num 2 --comb ${combination["$i"]} --policy EDF --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon
 # done
+# cp -r scripts/server/7.2_qos/2in7 data/server/7.2_qos
