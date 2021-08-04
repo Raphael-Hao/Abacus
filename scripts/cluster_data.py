@@ -140,16 +140,16 @@ loads = [
     8905,
 ]
 
-abacus_src_path = "/Users/haohao/Research/Project/Abacus/results/cluster/Abacus"
-abacus_raw_file = "/Users/haohao/Research/Project/Abacus/results/cluster/Abacus_raw.csv"
+abacus_src_path = "../data/server/cluster/Abacus"
+abacus_raw_file = "../data/server/cluster/Abacus_raw.csv"
 abacus_clean_file = (
-    "/Users/haohao/Research/Project/Abacus/results/cluster/Abacus_clean.csv"
+    "../data/server/cluster/Abacus_clean.csv"
 )
 
-clock_src_path = "/Users/haohao/Research/Project/Abacus/results/cluster/Clock"
-clock_raw_file = "/Users/haohao/Research/Project/Abacus/results/cluster/Clock_raw.csv"
+clock_src_path = "../data/server/cluster/Clock"
+clock_raw_file = "../data/server/cluster/Clock_raw.csv"
 clock_clean_file = (
-    "/Users/haohao/Research/Project/Abacus/results/cluster/Clock_clean.csv"
+    "../data/server/cluster/Clock_clean.csv"
 )
 
 # %% merge abacus
