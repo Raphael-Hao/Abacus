@@ -14,11 +14,12 @@ This repository contains the source code for a research paper.
     - [Training Predictor](#training-predictor)
     - [Online Serving](#online-serving)
   - [Evaluation](#evaluation)
-    - [Ensuring QoS](#ensuring-qos)
-    - [Improving Peak Throughput](#improving-peak-throughput)
-    - [Beyongd Pair-wise Co-location](#beyongd-pair-wise-co-location)
-    - [Integrating with MIGs](#integrating-with-migs)
-    - [Effectiveness of Multi-way Search](#effectiveness-of-multi-way-search)
+    - [7.2 Ensuring QoS](#72-ensuring-qos)
+    - [7.3 Improving Peak Throughput](#73-improving-peak-throughput)
+    - [7.4 Beyongd Pair-wise Co-location](#74-beyongd-pair-wise-co-location)
+    - [7.5 Integrating with MIGs](#75-integrating-with-migs)
+    - [7.6 Applying in a DNN Serving Cluster](#76-applying-in-a-dnn-serving-cluster)
+    - [7.7 Effectiveness of Multi-way Search](#77-effectiveness-of-multi-way-search)
 
 <!-- /code_chunk_output -->
 
@@ -66,7 +67,7 @@ This repository contains the source code for a research paper.
   $ pip3 install -r requirements.txt
   ```
 
-  3. Nvidia GPU related affairs: switch MIG and MPS
+  3. Nvidia GPU related affairs: switch MIG and MPS ()
 
   ```shell
   $ chmod +x nvidia_utils.sh
@@ -76,10 +77,10 @@ This repository contains the source code for a research paper.
   $ ./nvidia_utils.sh --cgi 1/2/4
   $ # delete GPU instances
   $ ./nvidia_utils.sh --dgi
-  $ # switch mps with mig disabled, 0: disable, 1: enable
-  $ ./nvidia_utils.sh --mps 0/1
-  $ # switch mps with mig enabled, 0: disable, 1: enable
-  $ ./nvidia_utils.sh --mps 0/1 --mig 1/2/4
+  $ # switch mps with mig disabled, options: start/stop
+  $ ./nvidia_utils.sh --mps start/stop
+  $ # switch mps with mig enabled, options: start/stop
+  $ ./nvidia_utils.sh --mps start/stop --mig 1/2/4
   ```
 
 ## Getting Started
@@ -170,20 +171,24 @@ After profiling and training, we can serve multiple DNN services with **Abacus**
 
 All evaluations are conducted in the root directory of **Abacus**. The following table presents the detailed information of each experiments, including the corresponding figures in paper and the shell scripts for running the experiment.
 
-|  Experiment Name/ Section/ Paragraph  | Related Figures |     Scripts Location     |
-| :-----------------------------------: | :-------------: | :----------------------: |
-|           7.2 Ensuring QoS            | Figure 13 & 14  |     experiment/0_qos     |
-|     7.3 Improving Peak Throughput     |    Figure 15    | experiment/1_throughput  |
-|   7.4 Beyongd Pair-wise Co-location   | Figure 16 & 17  | experiment/2_beyond_pair |
-|       7.5 Integrating with MIGs       | Figure 18 & 19  |     experiment/3_mig     |
-| 7.6 Effectiveness of Multi-way Search |    Figure 20    |  experiment/3_multiway   |
+|  Experiment Name/ Section/ Paragraph  |  Related Figures   |      Scripts Location      |
+| :-----------------------------------: | :----------------: | :------------------------: |
+|           7.2 Ensuring QoS            | Figure 14, 15 & 16 |     experiment/7.2_qos     |
+|     7.3 Improving Peak Throughput     |     Figure 17      | experiment/7.3_throughput  |
+|   7.4 Beyongd Pair-wise Co-location   |   Figure 18 & 19   | experiment/7.4_beyond_pair |
+|       7.5 Integrating with MIGs       |   Figure 20 & 21   |     experiment/7.5_mig     |
+| 7.6 Applying in a DNN Serving Cluster |     Figure 22      |   experiment/7.6_cluster   |
+| 7.7 Effectiveness of Multi-way Search |     Figure 23      |  experiment/7.7_multiway   |
 
-### Ensuring QoS
+### 7.2 Ensuring QoS
 
 - We first evaluate the QoS guarantee in terms of tail latency and QoS violation ratio.
 
   ```shell
-  $ ./experiments/0_qos/2in7.sh
+  # Normal
+  $ ./experiments/7.2_qos/2in7.sh
+  # Small DNNs
+  $ ./experiments/7.2_qos/smalldnn.sh
   ```
 
   The following figure depicts the 99%-ile latency for each pair-wise co-location.
@@ -192,18 +197,18 @@ All evaluations are conducted in the root directory of **Abacus**. The following
   | :-------------------------------------------------------------------------------------------: |
   | **End-to-end 99%-ile latency of each pair-wise co-location with FCFS, SJF, EDF, and Abacus.** |
 
-  The following figure depicts the QoS violation ratio for each pair-wise co-location.
+  The following two figures depict the QoS violation ratio for each pair-wise co-location and the 99%-ile latency for small DNNs.
 
-  |                    <img src="figure/qos_violation_ratio.png" width="400">                    |
-  | :------------------------------------------------------------------------------------------: |
-  | **QoS violation ratio of each pair-wise co-location with<br /> FCFS, SJF, EDF, and Abacus.** |
+  |                    <img src="figure/qos_violation_ratio.png" width="400">                    |   <img src="figure/small_dnn.png" width="400">   |
+  | :------------------------------------------------------------------------------------------: | :----------------------------------------------: |
+  | **QoS violation ratio of each pair-wise co-location with<br /> FCFS, SJF, EDF, and Abacus.** | **99%-ile latencies with small co-located DNNs** |
 
-### Improving Peak Throughput
+### 7.3 Improving Peak Throughput
 
 - We then evaluate the peak throughput under the load that exceeds the hardware limit.
 
   ```shell
-  $ ./experiments/1_throughput/2in7.sh
+  $ ./experiments/7.3_throughput/2in7.sh
   ```
 
   The following figure depicts the peak throughput for each pair-wise co-location.
@@ -212,15 +217,17 @@ All evaluations are conducted in the root directory of **Abacus**. The following
   | :----------------------------------------------------------------------------------------------------------: |
   | **The peak throughput of each co-location pair with FCFS, SJF, EDF, and Abacus while guaranteeing the QoS.** |
 
-### Beyongd Pair-wise Co-location
+### 7.4 Beyongd Pair-wise Co-location
 
 - We also evaluate **Abacus** beyond pair-wise co-location.
 
   ```shell
-  $ ./experiments/2_beyond_pair/qos/3in4.sh
-  $ ./experiments/2_beyond_pair/qos/4in4.sh
-  $ ./experiments/2_beyond_pair/throughput/3in4.sh
-  $ ./experiments/2_beyond_pair/throughput/3in4.sh
+  # QoS
+  $ ./experiments/7.4_beyond_pair/qos/3in4.sh
+  $ ./experiments/7.4_beyond_pair/qos/4in4.sh
+  # Throughput
+  $ ./experiments/7.4_beyond_pair/throughput/3in4.sh
+  $ ./experiments/7.4_beyond_pair/throughput/3in4.sh
   ```
 
   The following two figures presents the performance of **Abacus** for triplet-wise and quadruplet-wise co-location in terms of QoS guarantee and peak throughput.
@@ -229,30 +236,44 @@ All evaluations are conducted in the root directory of **Abacus**. The following
   | :-----------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
   | **The 99%-ile latency in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** | **Peak throughputs in triplets- and quadruplets- wise deployments with FCFS, SJF, EDF, and Abacus.** |
 
-### Integrating with MIGs
+### 7.5 Integrating with MIGs
 
 - We also evaluate **Abacus** with MIG enabled.
 
   ```shell
-  $ ./experiments/mig/qos/1in4.sh
-  $ ./experiments/mig/qos/2in4.sh
-  $ ./experiments/mig/qos/4in4.sh
-  $ ./experiments/mig/throughput/1in4.sh
-  $ ./experiments/mig/throughput/2in4.sh
-  $ ./experiments/mig/throughput/3in4.sh
+  # QoS
+  $ ./experiments/7.5_mig/qos/1in4.sh
+  $ ./experiments/7.5_mig/qos/2in4.sh
+  $ ./experiments/7.5_mig/qos/4in4.sh
+  # Throughput
+  $ ./experiments/7.5_mig/throughput/1in4.sh
+  $ ./experiments/7.5_mig/throughput/2in4.sh
+  $ ./experiments/7.5_mig/throughput/3in4.sh
   ```
 
-  The following two figures presents the performance of **Abacus** for *MIG 1g.10gb* and *MIG 2g.20gb* in terms of QoS guarantee and peak throughput.
-
+  The following two figures presents the performance of **Abacus** for _MIG 1g.10gb_ and _MIG 2g.20gb_ in terms of QoS guarantee and peak throughput.
 
 |          <img src="figure/mig_qos.png" width="580">           |       <img src="figure/mig_throughput.png" width="580">        |
 | :-----------------------------------------------------------: | :------------------------------------------------------------: |
 | **The 99%-ile latency of the co-located services with MIGs.** | **The peak throughputs of the co-located services with MIGs.** |
 
-### Effectiveness of Multi-way Search
+### 7.6 Applying in a DNN Serving Cluster
+
+```shell
+ # Client
+ $ ./experiments/7.6_cluster/client.sh
+ # Server
+ $ ./experiments/7.6_cluster/server.sh
+```
+The following figure presents 
+
+|                     <img src="figure/large_scale.png" width="360">                      |
+| :-----------------------------------------------------------------------------------------: |
+| **The throughput, 99%-ile latency, and average la- tency of the benchmarks with Abacus and Clockwork.** |
+
+### 7.7 Effectiveness of Multi-way Search
 
 - We also evaluate the effectiveness of multi-way search
-
 
 |                     <img src="figure/bs_core_latency.png" width="360">                      |
 | :-----------------------------------------------------------------------------------------: |
