@@ -12,6 +12,7 @@ This repository contains the source code for a research paper.
   - [Getting Started](#getting-started)
     - [Profiling](#profiling)
     - [Training Predictor](#training-predictor)
+      - [Training MLP model](#training-mlp-model)
     - [Online Serving](#online-serving)
   - [Evaluation](#evaluation)
     - [7.2 Ensuring QoS](#72-ensuring-qos)
@@ -67,8 +68,11 @@ This repository contains the source code for a research paper.
   $ pip3 install -r requirements.txt
   ```
 
-  3. Nvidia GPU related affairs: switch MIG and MPS ()
-
+  3. Nvidia GPU related affairs: switch MIG and MPS
+      - MIG: The new Multi-Instance GPU (MIG) feature allows GPUs based on the NVIDIA Ampere architecture (such as NVIDIA A100) to be securely partitioned into up to seven separate GPU Instances for CUDA applications, providing multiple users with separate GPU resources for optimal GPU utilization.
+      - MPS: The MPS runtime architecture is designed to transparently enable co-operative multi-process CUDA applications
+  
+      We provide a shell scripts for configuring the MIG and MPS related features on the NVIDIA GPUs. The detailed usage is as follows:
   ```shell
   $ chmod +x nvidia_utils.sh
   $ # switch mig, 0: disable, 1: enable
@@ -120,7 +124,7 @@ We then profiling the data without MPS and MIG both enabled.
 ### Training Predictor
 
 After obataining all the profiling data, we train the latency predictor for each cases.
-
+#### Training MLP model
 - Training the predictor for pair-wise co-location on a dedicated A100.
   ```shell
   $ python main.py --task train --model_num 2 --mode all --modeling mlp
@@ -141,6 +145,11 @@ After obataining all the profiling data, we train the latency predictor for each
   ```shell
   $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
   ```
+
+- #### Training LR/SVM model
+```shell
+$ python main.py --task train --model_num 2 --mode all --modeling lr/svm
+```
 
 ### Online Serving
 
@@ -274,7 +283,10 @@ The following figure presents
 ### 7.7 Effectiveness of Multi-way Search
 
 - We also evaluate the effectiveness of multi-way search
-
+The latency is given while training the MLP model
+```shell
+$ python main.py --task train --model_num 2 --mode all --modeling mlp 
+```
 |                     <img src="figure/bs_core_latency.png" width="360">                      |
 | :-----------------------------------------------------------------------------------------: |
 | **Duration of determining an appropriate operator<br /> group with different search ways.** |
