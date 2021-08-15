@@ -69,10 +69,12 @@ This repository contains the source code for a research paper.
   ```
 
   3. Nvidia GPU related affairs: switch MIG and MPS
-      - MIG: The new Multi-Instance GPU (MIG) feature allows GPUs based on the NVIDIA Ampere architecture (such as NVIDIA A100) to be securely partitioned into up to seven separate GPU Instances for CUDA applications, providing multiple users with separate GPU resources for optimal GPU utilization.
-      - MPS: The MPS runtime architecture is designed to transparently enable co-operative multi-process CUDA applications
-  
-      We provide a shell scripts for configuring the MIG and MPS related features on the NVIDIA GPUs. The detailed usage is as follows:
+
+     - MIG: The new Multi-Instance GPU (MIG) feature allows GPUs based on the NVIDIA Ampere architecture (such as NVIDIA A100) to be securely partitioned into up to seven separate GPU Instances for CUDA applications, providing multiple users with separate GPU resources for optimal GPU utilization.
+     - MPS: The MPS runtime architecture is designed to transparently enable co-operative multi-process CUDA applications
+
+     We provide a shell scripts for configuring the MIG and MPS related features on the NVIDIA GPUs. The detailed usage is as follows:
+
   ```shell
   $ chmod +x nvidia_utils.sh
   $ # switch mig, 0: disable, 1: enable
@@ -124,7 +126,9 @@ We then profiling the data without MPS and MIG both enabled.
 ### Training Predictor
 
 After obataining all the profiling data, we train the latency predictor for each cases.
+
 #### Training MLP model
+
 - Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
   ```shell
   $ python main.py --task train --model_num 2 --mode one by one --modeling mlp
@@ -146,6 +150,7 @@ After obataining all the profiling data, we train the latency predictor for each
   $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
   ```
 - Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100 for all combinations.
+
   ```shell
   $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
   ```
@@ -157,12 +162,23 @@ After obataining all the profiling data, we train the latency predictor for each
   $ python main.py --task train --model_num 2 --mode all --modeling lr/svm
   ```
 - Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+
   ```shell
   $ python main.py --task train --model_num 2 --mode one by one --modeling lr/svm
   ```
 
-- #### Plot for Figure 10
-  We can get the prediction error from the output in terminal, after training the predictor with MLP/LR/SVM models. To get the cross-validation results, we only need to re-train the model because the random seed for generating the dataset is automatically changed. We also provide a script `` in for plot the results.
+- #### 5.5 Determining Modeling Techniques
+
+  We can get the prediction error from the output in terminal after training the predictor with MLP/LR/SVM models. To get the cross-validation results, we only need to re-train the model because the random seed for generating the dataset is automatically changed.
+
+  We organize the data of errors as shown in `data/modeling/2in7results.csv`.We also provide a script `experiments/5.5_prediction/plot.py` for plot the results.
+
+  The following figure depicts the prediction errors for all modeling methods.
+
+  |                                                <img src="figure/prediction_error.png" width="1000"/>                                                 |
+  | :--------------------------------------------------------------------------------------------------------------------------------------------------: |
+  | **Prediction errors of all the evaluated modeling techniques: Linear Regression, SVM, and MLP. We also show the cross validation accuracy of MLP..** |
+
 ### Online Serving
 
 After profiling and training, we can serve multiple DNN services with **Abacus**
@@ -286,19 +302,22 @@ All evaluations are conducted in the root directory of **Abacus**. The following
  # Server
  $ ./experiments/7.6_cluster/server.sh
 ```
-The following figure presents 
 
-|                     <img src="figure/large_scale.png" width="360">                      |
-| :-----------------------------------------------------------------------------------------: |
+The following figure presents
+
+|                             <img src="figure/large_scale.png" width="360">                              |
+| :-----------------------------------------------------------------------------------------------------: |
 | **The throughput, 99%-ile latency, and average la- tency of the benchmarks with Abacus and Clockwork.** |
 
 ### 7.7 Effectiveness of Multi-way Search
 
 - We also evaluate the effectiveness of multi-way search
-The latency is given while training the MLP model
+  The latency is given while training the MLP model
+
 ```shell
-$ python main.py --task train --model_num 2 --mode all --modeling mlp 
+$ python main.py --task train --model_num 2 --mode all --modeling mlp
 ```
+
 |                     <img src="figure/bs_core_latency.png" width="360">                      |
 | :-----------------------------------------------------------------------------------------: |
 | **Duration of determining an appropriate operator<br /> group with different search ways.** |
