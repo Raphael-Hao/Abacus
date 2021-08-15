@@ -320,6 +320,6 @@ The following figure presents
 $ python main.py --task train --model_num 2 --mode all --modeling mlp
 ```
 
-|                     <img src="figure/bs_core_latency.png" width="360">                      |
+|                     <img src="figure/bs_core_latency.png" width="800">                      |
 | :-----------------------------------------------------------------------------------------: |
-| **Duration of determining an appropriate operator<br /> group with different search ways.** |
+| **Duration of determining an appropriate operator group with different search ways.** |
