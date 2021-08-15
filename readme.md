@@ -131,55 +131,55 @@ After obataining all the profiling data, we train the latency predictor for each
 
 #### Training MLP model
 
-- Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode one by one --modeling mlp
-  ```
-- Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode all --modeling mlp
-  ```
-- Training the predictor for triplet-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 3 --mode all --modeling mlp
-  ```
-- Training the predictor for quadruplet-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 4 --mode all --modeling mlp
-  ```
-- Training the predictor for pair-wise co-location on a _MIG 2g.10gb_ of A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
-  ```
-- Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100 for all combinations.
+  - Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode one by one --modeling mlp
+    ```
+  - Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode all --modeling mlp
+    ```
+  - Training the predictor for triplet-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 3 --mode all --modeling mlp
+    ```
+  - Training the predictor for quadruplet-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 4 --mode all --modeling mlp
+    ```
+  - Training the predictor for pair-wise co-location on a _MIG 2g.10gb_ of A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
+    ```
+  - Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100 for all combinations.
 
-  ```shell
-  $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
-  ```
+    ```shell
+    $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
+    ```
 
 #### Training LR/SVM model
 
-- Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode all --modeling lr/svm
-  ```
-- Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+  - Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode all --modeling lr/svm
+    ```
+  - Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
 
-  ```shell
-  $ python main.py --task train --model_num 2 --mode one by one --modeling lr/svm
-  ```
+    ```shell
+    $ python main.py --task train --model_num 2 --mode one by one --modeling lr/svm
+    ```
 
 #### 5.5 Determining Modeling Techniques
 
-We can get the prediction error from the output in terminal after training the predictor with MLP/LR/SVM models. To get the cross-validation results, we only need to re-train the model because the random seed for generating the dataset is automatically changed.
+  We can get the prediction error from the output in terminal after training the predictor with MLP/LR/SVM models. To get the cross-validation results, we only need to re-train the model because the random seed for generating the dataset is automatically changed.
 
-We organize the data of errors as shown in `data/modeling/2in7results.csv`.We also provide a script `experiments/5.5_prediction/plot.py` for plot the results.
+  We organize the data of errors as shown in `data/modeling/2in7results.csv`.We also provide a script `experiments/5.5_prediction/plot.py` for plot the results.
 
-The following figure depicts the prediction errors for all modeling methods.
+  The following figure depicts the prediction errors for all modeling methods.
 
-|                                                <img src="figure/prediction_error.png" width="1000"/>                                                 |
-| :--------------------------------------------------------------------------------------------------------------------------------------------------: |
-| **Prediction errors of all the evaluated modeling techniques: Linear Regression, SVM, and MLP. We also show the cross validation accuracy of MLP..** |
+  |                                                <img src="figure/prediction_error.png" width="1000"/>                                                 |
+  | :--------------------------------------------------------------------------------------------------------------------------------------------------: |
+  | **Prediction errors of all the evaluated modeling techniques: Linear Regression, SVM, and MLP. We also show the cross validation accuracy of MLP..** |
 
 ### Online Serving
 
@@ -320,6 +320,6 @@ The following figure presents
 $ python main.py --task train --model_num 2 --mode all --modeling mlp
 ```
 
-|                  <img src="figure/bs_core_latency.png" width="800">                   |
-| :-----------------------------------------------------------------------------------: |
+|                     <img src="figure/bs_core_latency.png" width="360">                      |
+| :-----------------------------------------------------------------------------------------: |
 | **Duration of determining an appropriate operator group with different search ways.** |
