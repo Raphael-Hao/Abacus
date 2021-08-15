@@ -13,6 +13,8 @@ This repository contains the source code for a research paper.
     - [Profiling](#profiling)
     - [Training Predictor](#training-predictor)
       - [Training MLP model](#training-mlp-model)
+      - [Training LR/SVM model](#training-lrsvm-model)
+      - [5.5 Determining Modeling Techniques](#55-determining-modeling-techniques)
     - [Online Serving](#online-serving)
   - [Evaluation](#evaluation)
     - [7.2 Ensuring QoS](#72-ensuring-qos)
@@ -129,45 +131,45 @@ After obataining all the profiling data, we train the latency predictor for each
 
 #### Training MLP model
 
-- Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode one by one --modeling mlp
-  ```
-- Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode all --modeling mlp
-  ```
-- Training the predictor for triplet-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 3 --mode all --modeling mlp
-  ```
-- Training the predictor for quadruplet-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 4 --mode all --modeling mlp
-  ```
-- Training the predictor for pair-wise co-location on a _MIG 2g.10gb_ of A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
-  ```
-- Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100 for all combinations.
+  - Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode one by one --modeling mlp
+    ```
+  - Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode all --modeling mlp
+    ```
+  - Training the predictor for triplet-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 3 --mode all --modeling mlp
+    ```
+  - Training the predictor for quadruplet-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 4 --mode all --modeling mlp
+    ```
+  - Training the predictor for pair-wise co-location on a _MIG 2g.10gb_ of A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
+    ```
+  - Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100 for all combinations.
 
-  ```shell
-  $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
-  ```
+    ```shell
+    $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
+    ```
 
-- #### Training LR/SVM model
+#### Training LR/SVM model
 
-- Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
-  ```shell
-  $ python main.py --task train --model_num 2 --mode all --modeling lr/svm
-  ```
-- Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+  - Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
+    ```shell
+    $ python main.py --task train --model_num 2 --mode all --modeling lr/svm
+    ```
+  - Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
 
-  ```shell
-  $ python main.py --task train --model_num 2 --mode one by one --modeling lr/svm
-  ```
+    ```shell
+    $ python main.py --task train --model_num 2 --mode one by one --modeling lr/svm
+    ```
 
-- #### 5.5 Determining Modeling Techniques
+#### 5.5 Determining Modeling Techniques
 
   We can get the prediction error from the output in terminal after training the predictor with MLP/LR/SVM models. To get the cross-validation results, we only need to re-train the model because the random seed for generating the dataset is automatically changed.
 
