@@ -30,6 +30,7 @@ for ((i = tested_comb; i < comb_len; i++)); do
   python main.py --task server --platform single --model_num 1 --comb ${combination["$i"]} --policy EDF --load 13 --qos ${qos_target["$i"]} --queries 250 --thld 5 --ways 2 --abandon --mig 4 --gpu A100 --device 0 --node 0
 done
 
+cp -r results/mig/1in4 data/server/7.5_mig/qos/
 
 # throughput
 # for i in {0..20}; do

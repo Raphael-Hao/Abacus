@@ -20,6 +20,8 @@ python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --po
 
 python main.py --task server --platform single --model_num 4 --comb 1 2 5 6 --policy Abacus --load 100 --qos ${qos_target} --queries 1000 --thld 5 --ways 2 --abandon --mig 1 --gpu A100 --device 0 --node 0
 
+cp -r results/mig/4in4 data/server/7.5_mig/throughput/
+
 # throughput
 # for i in {0..20}; do
 #   python main.py --task server --model_num 2 --comb ${combination["$i"]} --policy Abacus --load 50 --qos ${qos_target["$i"]} --queries 1000 --thld 5 --ways 2 --abandon

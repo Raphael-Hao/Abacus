@@ -52,8 +52,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-MIG_2=("MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/3/0"
-  "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/5/0")
+MIG_2=("MIG-a143d4a9-b2f2-54d7-9f19-65508dba4a5a"
+  "MIG-caaf0ba2-fb91-5b13-859c-e6e6e3ba3abe")
 MIG_4=("MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/7/0"
   "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/8/0"
   "MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/9/0"
@@ -61,7 +61,7 @@ MIG_4=("MIG-GPU-95be3bb0-41c3-8f7b-47af-20c3799bcf22/7/0"
 
 if [ "$TASK" = "MPS" ]; then
   echo "MPS management!!!"
-  if [ "$JOB" = 1 ]; then
+  if [ "$JOB" = "start" ]; then
     echo "Starting the mps server"
     if [ "$MIG_ENABLED" = true ]; then
       if [ "$MIG_CNT" = 1 ]; then
@@ -105,7 +105,7 @@ if [ "$TASK" = "MPS" ]; then
       nvidia-cuda-mps-control -d
       echo "MPS server at GPU ${CUDA_VISIBLE_DEVICES} started"
     fi
-  elif [ "$JOB" = 0 ]; then
+  elif [ "$JOB" = "stop" ]; then
     echo "Stopping the mps server"
     if [ "$MIG_ENABLED" = true ]; then
       if [ "$MIG_CNT" = 1 ]; then

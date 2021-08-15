@@ -10,3 +10,4 @@ __pycache__
 profile.log
 data.tar.gz
 *.csv
+!data/modeling/2in7results.csv

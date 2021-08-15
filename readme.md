@@ -125,32 +125,44 @@ We then profiling the data without MPS and MIG both enabled.
 
 After obataining all the profiling data, we train the latency predictor for each cases.
 #### Training MLP model
-- Training the predictor for pair-wise co-location on a dedicated A100.
+- Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+  ```shell
+  $ python main.py --task train --model_num 2 --mode one by one --modeling mlp
+  ```
+- Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
   ```shell
   $ python main.py --task train --model_num 2 --mode all --modeling mlp
   ```
-- Training the predictor for triplet-wise co-location on a dedicated A100.
+- Training the predictor for triplet-wise co-location on a dedicated A100 for all combinations.
   ```shell
   $ python main.py --task train --model_num 3 --mode all --modeling mlp
   ```
-- Training the predictor for quadruplet-wise co-location on a dedicated A100.
+- Training the predictor for quadruplet-wise co-location on a dedicated A100 for all combinations.
   ```shell
   $ python main.py --task train --model_num 4 --mode all --modeling mlp
   ```
-- Training the predictor for pair-wise co-location on a _MIG 2g.10gb_ of A100.
+- Training the predictor for pair-wise co-location on a _MIG 2g.10gb_ of A100 for all combinations.
   ```shell
   $ python main.py --task train --model_num 2 --mode all --modeling mlp --mig 2
   ```
-- Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100.
+- Training the predictor for quadruplet-wise co-location on a _MIG 4g.20gb_ of A100 for all combinations.
   ```shell
   $ python main.py --task train --model_num 4 --mode all --modeling mlp --mig 1
   ```
 
 - #### Training LR/SVM model
-```shell
-$ python main.py --task train --model_num 2 --mode all --modeling lr/svm
-```
 
+- Training the predictor for pair-wise co-location on a dedicated A100 for all combinations.
+  ```shell
+  $ python main.py --task train --model_num 2 --mode all --modeling lr/svm
+  ```
+- Training the predictor for pair-wise co-location on a dedicated A100 for each combination.
+  ```shell
+  $ python main.py --task train --model_num 2 --mode one by one --modeling lr/svm
+  ```
+
+- #### Plot for Figure 10
+  We can get the prediction error from the output in terminal, after training the predictor with MLP/LR/SVM models. To get the cross-validation results, we only need to re-train the model because the random seed for generating the dataset is automatically changed. We also provide a script `` in for plot the results.
 ### Online Serving
 
 After profiling and training, we can serve multiple DNN services with **Abacus**
