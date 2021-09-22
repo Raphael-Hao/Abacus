@@ -1,30 +1,6 @@
 # Abacus
 
-This repository contains the source code for a research paper.
-
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
-- [Abacus](#abacus)
-  - [What is Abacus](#what-is-abacus)
-  - [Environment Preparation](#environment-preparation)
-  - [Getting Started](#getting-started)
-    - [Profiling](#profiling)
-    - [Training Predictor](#training-predictor)
-      - [Training MLP model](#training-mlp-model)
-      - [Training LR/SVM model](#training-lrsvm-model)
-      - [5.5 Determining Modeling Techniques](#55-determining-modeling-techniques)
-    - [Online Serving](#online-serving)
-  - [Evaluation](#evaluation)
-    - [7.2 Ensuring QoS](#72-ensuring-qos)
-    - [7.3 Improving Peak Throughput](#73-improving-peak-throughput)
-    - [7.4 Beyongd Pair-wise Co-location](#74-beyongd-pair-wise-co-location)
-    - [7.5 Integrating with MIGs](#75-integrating-with-migs)
-    - [7.6 Applying in a DNN Serving Cluster](#76-applying-in-a-dnn-serving-cluster)
-    - [7.7 Effectiveness of Multi-way Search](#77-effectiveness-of-multi-way-search)
-
-<!-- /code_chunk_output -->
+This repository contains the source code for a research paper that was submitted for publication at the [International Conference for High Performance Computing, Networking, Storage, and Analysis](https://sc21.supercomputing.org/) (SC21).
 
 ## What is Abacus
 
